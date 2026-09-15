@@ -500,10 +500,17 @@ const dataUrl = `${base}data/verification-community.json`;
 
 
   /* -------- Article-shape wrapper (overrides scoped artifact CSS above) -------- */
+  /* Override the site's default 800px container cap so the 3-column graph
+     shell (300px rail + middle canvas + 340px detail) has room to breathe.
+     Follows the same pattern as task-exposure.astro. */
+  :global(main > .container) {
+    --max-width: 1400px;
+  }
   .vc-page {
-    max-width: 1180px;
+    max-width: 1400px;
     margin: 0 auto;
   }
+  .vc-hero h1, .vc-lede { max-width: 72ch; }
   .vc-hero { margin-bottom: 1.5rem; }
   .vc-hero h1 { margin: 0 0 0.5rem; }
   .vc-lede {
