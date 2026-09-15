@@ -170,7 +170,18 @@ const dataUrl = `${base}data/verification-community.json`;
   </article>
 </BaseLayout>
 
-<style>
+<!--
+  is:global on this block is load-bearing. The graph-shell script fills
+  #stat-row, #cluster-list, #work-list, and the #detail panel via
+  innerHTML at runtime, so the elements inside them (`.stat`, `.clusterbtn`,
+  `.workbtn`, `.eyebrow`, etc.) never receive Astro's build-time
+  data-astro-cid attribute — meaning any scoped `.foo` selector fails to
+  match them at all. Symptoms are subtle (missing flex gaps between the
+  bolded stat numbers and their labels, cluster buttons rendering as
+  run-on text). Every selector here is already namespaced to `.vc-page`
+  or `.vc-graph-shell`, both unique to this page, so going global is safe.
+-->
+<style is:global>
   /* -------- Extracted from the artifact, namespaced with --vc-* and scoped to .vc-graph-shell -------- */
 .vc-graph-shell {
   --vc-ground: #eef1f4;
