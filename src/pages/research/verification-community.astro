@@ -686,6 +686,13 @@ const dataUrl = `${base}data/verification-community.json`;
 
   network.once("stabilizationIterationsDone", () => {
     network.setOptions({ physics: { enabled: false } });
+    // Fit the camera to the whole graph on first load. Without this,
+    // vis-network's default view is zoom=1 centered at (0,0), so once
+    // physics settles nodes anywhere else in coordinate space only a
+    // handful stay visible in the canvas viewport. (The .sub.md
+    // preview.html hid this by rendering at full viewport with wildly
+    // more canvas area.)
+    network.fit();
   });
 
   const state = { activeWork: null, activeCluster: null };
