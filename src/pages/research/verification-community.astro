@@ -1,0 +1,954 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const base = import.meta.env.BASE_URL;
+const dataUrl = `${base}data/verification-community.json`;
+---
+
+<BaseLayout
+  title="Verification Community | The Canary Institute"
+  description="A map of who is working on AI compute verification and how. Every node is a researcher; every edge is a shared paper. As of September 2026, this is roughly the whole field."
+>
+
+  <article class="vc-page">
+    <header class="vc-hero">
+      <h1>Verification Community &mdash; Member Bonds</h1>
+      <p class="vc-lede">
+        A map of who is working on AI compute verification, and how.
+        Every node is a person publishing research in the field; every edge
+        is a paper they've co-written with another node. Colours are
+        clusters found by grouping the co-authorship pattern.
+        As of September 2026, this is roughly the whole field.
+      </p>
+    </header>
+
+    <div class="vc-graph-shell" data-theme="light">
+      <div class="app">
+        <header class="topbar">
+          <h2 class="topbar-title">Verification Community &mdash; Member Bonds</h2>
+          <p class="subtitle">
+            Every node is a member of the verification community under the
+            <em>loose_2026</em> rule; every edge is co-authorship on a
+            verification-relevant work found by an OpenAlex sweep &mdash;
+            not the hand-curated corpus of 46 papers. Edge thickness is the
+            number of shared works. Node colour is the Leiden community of
+            this bond graph (&gamma;=1.0, Q=0.248); same-cluster edges are
+            drawn shorter so the partition separates visually.
+            Click a cluster to isolate it, a work to highlight the members
+            it links, or a node or edge for details.
+          </p>
+          <div id="stat-row" class="stat-row"></div>
+        </header>
+
+        <aside class="rail">
+          <section>
+            <h2>Who is drawn</h2>
+            <p id="who-summary" style="margin:0;font-size:12px">Loading&hellip;</p>
+            <details class="isolates">
+              <summary>Show the isolated members</summary>
+              <ul id="isolates-list"></ul>
+            </details>
+            <p class="rail-note">
+              Membership rule (<em>loose_2026</em>): &ge;1 verification-relevant work in 2026,
+              OR &ge;3 in 2023&ndash;25, applied to each person's OpenAlex record.
+              The isolated members pass that rule on their own publication record
+              but never share a verification-relevant work with another member,
+              so they have nothing to draw an edge to.
+            </p>
+          </section>
+
+          <section>
+            <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px">
+              <h2>Clusters (Leiden &gamma;=1.0)</h2>
+              <button class="clear" id="cluster-clear">clear</button>
+            </div>
+            <ul id="cluster-list" class="clusterlist"></ul>
+            <p class="rail-note">
+              Labels for the seven largest clusters are carried over from a
+              prior partition by member overlap; the rest are named for their
+              dominant organisation. Click one to isolate it.
+            </p>
+          </section>
+
+          <section class="picker">
+            <div class="picker-hd">
+              <h2>Highlight one work</h2>
+              <button class="clear" id="work-clear">clear</button>
+            </div>
+            <input type="search" id="work-search" placeholder="Filter works&hellip;" />
+            <ul id="work-list"></ul>
+            <p class="rail-note">
+              Only the works that link two or more drawn members are listed
+              &mdash; a solo-authored work draws no bond. Clicking one
+              highlights the member clique that shares it.
+            </p>
+          </section>
+        </aside>
+
+        <main class="canvas-wrap">
+          <div id="graph"></div>
+          <div class="canvas-legend">
+            <div class="item"><svg width="22" height="6"><line x1="0" y1="3" x2="22" y2="3" stroke="#5c6472" stroke-width="1.2" stroke-opacity="0.55"/></svg>same-cluster bond</div>
+            <div class="item"><svg width="22" height="6"><line x1="0" y1="3" x2="22" y2="3" stroke="#5c6472" stroke-width="1.2" stroke-opacity="0.22"/></svg>cross-cluster bond</div>
+            <div class="item"><svg width="22" height="8"><line x1="0" y1="4" x2="22" y2="4" stroke="#d97706" stroke-width="3"/></svg>highlighted work</div>
+            <div class="item">width &prop; shared works (1&ndash;10)</div>
+            <div class="item">node size &prop; &radic;(verification-relevant works)</div>
+            <div class="item">&dagger; = deceased</div>
+          </div>
+        </main>
+
+        <aside class="detail" id="detail">
+          <p class="empty">Loading&hellip;</p>
+        </aside>
+      </div>
+    </div>
+
+    <section class="vc-notes">
+      <h2>How to read the graph</h2>
+      <ul>
+        <li><strong>Nodes</strong> are researchers. Colour is the cluster their co-authorship pattern places them in. Node size grows with their number of verification-relevant works.</li>
+        <li><strong>Edges</strong> are shared work. Thickness is the number of works two people have written together. Same-cluster edges are drawn shorter so the partition separates visually.</li>
+        <li><strong>Interactions.</strong> Click a cluster in the left rail to isolate it; click a work to highlight the members who share it; click a node or edge for details on the right. Drag to pan; scroll to zoom.</li>
+      </ul>
+
+      <h2>Methodology</h2>
+      <p>
+        Membership follows the <em>loose_2026</em> rule: a person is included
+        if they have at least one verification-relevant work in 2026, or at
+        least three across 2023&ndash;2025. Author records come from an
+        OpenAlex sweep, cross-referenced with a hand-curated corpus of 46
+        papers held in the Canary Institute's verification bibliography.
+      </p>
+      <p>
+        Clusters come from Leiden community detection on the bond graph
+        (resolution &gamma;=1.0), with the resulting partition modularity
+        Q=0.248. Labels for the seven largest clusters are carried over from
+        an earlier partition by member overlap; the two smallest are named
+        for their dominant organisation.
+      </p>
+
+      <h2>Limitations</h2>
+      <ul>
+        <li>
+          <strong>Missing people.</strong> The rule counts only work that
+          shows up in OpenAlex under a person's own record. Anyone whose
+          verification-relevant contribution is entirely inside an
+          organisation without externally published output is invisible
+          here, as is anyone who publishes under a name OpenAlex has not
+          yet reconciled.
+        </li>
+        <li>
+          <strong>Missing edges.</strong> Eight members satisfy the rule on
+          their own publication record but share no verification-relevant
+          paper with any other member. They are listed in the left rail but
+          not drawn.
+        </li>
+        <li>
+          <strong>Snapshot, not stream.</strong> OpenAlex lags recent
+          preprints and grey literature. This is the September 2026 slice;
+          the field is small enough that a handful of papers materially
+          changes the picture, and this page will need refreshes.
+        </li>
+        <li>
+          <strong>Cluster labels are lossy.</strong> Nine clusters cannot
+          describe the shape of a nine-way multidimensional collaboration.
+          The labels are shorthand for orientation, not ontology.
+        </li>
+      </ul>
+
+      <h2>Citation</h2>
+      <p class="vc-citation">
+        The Canary Institute, <em>Verification Community &mdash; Member
+        Bonds</em>, <a href="https://canaryinstitute.ai/research/verification-community">canaryinstitute.ai/research/verification-community</a>,
+        September 2026 snapshot.
+      </p>
+    </section>
+
+    <p class="back-link">
+      <a href={`${base}research/`}>&larr; All research</a>
+    </p>
+  </article>
+</BaseLayout>
+
+<style>
+  /* -------- Extracted from the artifact, namespaced with --vc-* and scoped to .vc-graph-shell -------- */
+.vc-graph-shell {
+  --vc-ground: #eef1f4;
+  --vc-surface: #ffffff;
+  --vc-surface-2: #f7f9fb;
+  --vc-ink: #1a1f2e;
+  --vc-ink-muted: #5c6472;
+  --vc-ink-quiet: #8890a0;
+  --vc-rule: #d5d9df;
+  --vc-accent: #0f5b8c;
+  --vc-accent-soft: rgba(15, 91, 140, 0.10);
+  --vc-hilite: #d97706;
+  --vc-hilite-soft: rgba(217, 119, 6, 0.18);
+  --vc-shadow-soft: 0 1px 2px rgba(15, 20, 35, 0.04), 0 4px 12px rgba(15, 20, 35, 0.04);
+  /* Font stacks reuse the site's already-loaded families (see global.css) so
+     this page adds zero font network requests and reads as part of
+     canaryinstitute.ai typographically. --font-body is Source Serif 4 (editorial
+     serif, substitutes for the artifact's Instrument Serif); --font-ui is
+     Helvetica Neue (substitutes for Inter); no site equivalent for JetBrains
+     Mono so the mono stack falls back to system monos. */
+  --vc-font-display: var(--font-body, "Source Serif 4", "Iowan Old Style", "Palatino", Georgia, serif);
+  --vc-font-body: var(--font-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif);
+  --vc-font-mono: "SF Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {.vc-graph-shell:not([data-theme="light"]) {
+    --vc-ground: #0f1219;
+    --vc-surface: #181c26;
+    --vc-surface-2: #1e2330;
+    --vc-ink: #e7ebf1;
+    --vc-ink-muted: #99a1b1;
+    --vc-ink-quiet: #6a7284;
+    --vc-rule: #262a34;
+    --vc-accent: #5ba3d0;
+    --vc-accent-soft: rgba(91, 163, 208, 0.14);
+    --vc-hilite: #f59e0b;
+    --vc-hilite-soft: rgba(245, 158, 11, 0.22);
+  }
+}
+.vc-graph-shell[data-theme="dark"] {
+  --vc-ground: #0f1219;
+  --vc-surface: #181c26;
+  --vc-surface-2: #1e2330;
+  --vc-ink: #e7ebf1;
+  --vc-ink-muted: #99a1b1;
+  --vc-ink-quiet: #6a7284;
+  --vc-rule: #262a34;
+  --vc-accent: #5ba3d0;
+  --vc-accent-soft: rgba(91, 163, 208, 0.14);
+  --vc-hilite: #f59e0b;
+  --vc-hilite-soft: rgba(245, 158, 11, 0.22);
+}
+.vc-graph-shell, .vc-graph-shell { height: 100%; margin: 0; }
+.vc-graph-shell {
+  background: var(--vc-ground);
+  color: var(--vc-ink);
+  font-family: var(--vc-font-body);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+.vc-graph-shell * { box-sizing: border-box; }
+.vc-graph-shell button { font: inherit; color: inherit; }
+.vc-graph-shell .app {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  grid-template-columns: 300px 1fr 340px;
+  grid-template-areas:
+    "top  top  top"
+    "side main detail";
+  min-height: 100vh;
+}
+.vc-graph-shell .topbar {
+  grid-area: top;
+  background: var(--vc-surface);
+  border-bottom: 1px solid var(--vc-rule);
+  padding: 18px 24px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.vc-graph-shell .topbar h2.topbar-title {
+  font-family: var(--vc-font-display);
+  font-weight: 400;
+  font-size: 32px;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+.vc-graph-shell .topbar .subtitle {
+  color: var(--vc-ink-muted);
+  font-size: 13px;
+  margin: 0;
+  max-width: 92ch;
+}
+.vc-graph-shell .stat-row {
+  display: flex;
+  gap: 20px;
+  margin-top: 6px;
+  flex-wrap: wrap;
+  font-variant-numeric: tabular-nums;
+}
+.vc-graph-shell .stat { display: flex; align-items: baseline; gap: 6px; font-size: 13px; }
+.vc-graph-shell .stat b { font-family: var(--vc-font-mono); font-weight: 600; font-size: 14px; }
+.vc-graph-shell .stat span { color: var(--vc-ink-muted); letter-spacing: 0.02em; }
+.vc-graph-shell .rail {
+  grid-area: side;
+  background: var(--vc-surface);
+  border-right: 1px solid var(--vc-rule);
+  padding: 22px 20px 24px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+.vc-graph-shell .rail section { display: flex; flex-direction: column; gap: 8px; }
+.vc-graph-shell .rail h2 {
+  margin: 0;
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--vc-ink-quiet);
+}
+.vc-graph-shell .rail-note {
+  margin: 4px 0 0;
+  padding-top: 6px;
+  border-top: 1px dashed var(--vc-rule);
+  font-size: 11px;
+  color: var(--vc-ink-quiet);
+  line-height: 1.45;
+}
+.vc-graph-shell details.isolates summary {
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--vc-accent);
+  list-style: revert;
+}
+.vc-graph-shell details.isolates ul {
+  margin: 6px 0 0;
+  padding-left: 18px;
+  font-size: 12px;
+  color: var(--vc-ink-muted);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.vc-graph-shell .picker { display: flex; flex-direction: column; gap: 6px; }
+.vc-graph-shell .picker .picker-hd { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.vc-graph-shell .picker .picker-hd h2 { margin: 0; }
+.vc-graph-shell .picker button.clear {
+  border: 0; background: transparent; color: var(--vc-ink-quiet);
+  font-size: 11px; cursor: pointer;
+}
+.vc-graph-shell .picker button.clear:hover { color: var(--vc-accent); }
+.vc-graph-shell .picker input[type="search"] {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid var(--vc-rule);
+  border-radius: 4px;
+  background: var(--vc-surface-2);
+  color: var(--vc-ink);
+  font: inherit;
+  font-size: 12px;
+}
+.vc-graph-shell .picker ul {
+  list-style: none; margin: 0; padding: 0;
+  max-height: 40vh; overflow-y: auto;
+  border: 1px solid var(--vc-rule); border-radius: 4px;
+  background: var(--vc-surface-2);
+}
+.vc-graph-shell .picker li + li { border-top: 1px solid var(--vc-rule); }
+.vc-graph-shell .picker button.workbtn {
+  display: flex; flex-direction: column;
+  width: 100%; text-align: left;
+  padding: 7px 9px;
+  background: transparent; border: 0;
+  cursor: pointer;
+  gap: 2px;
+}
+.vc-graph-shell .picker button.workbtn:hover { background: var(--vc-accent-soft); color: var(--vc-accent); }
+.vc-graph-shell .picker button.workbtn.active { background: var(--vc-hilite-soft); color: var(--vc-hilite); }
+.vc-graph-shell .picker .ptitle { font-size: 12px; line-height: 1.3; }
+.vc-graph-shell .picker .pmeta { font-family: var(--vc-font-mono); font-size: 10px; color: var(--vc-ink-quiet); }
+.vc-graph-shell .clusterlist { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+.vc-graph-shell .clusterbtn {
+  display: flex; align-items: flex-start; gap: 8px;
+  width: 100%; padding: 6px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  text-align: left;
+}
+.vc-graph-shell .clusterbtn:hover { background: var(--vc-accent-soft); border-color: var(--vc-rule); }
+.vc-graph-shell .clusterbtn.active { background: var(--vc-hilite-soft); border-color: var(--vc-hilite); }
+.vc-graph-shell .cdot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-top: 4px; flex-shrink: 0; }
+.vc-graph-shell .ctext { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.vc-graph-shell .clabel { font-size: 12px; line-height: 1.25; }
+.vc-graph-shell .cmeta { font-family: var(--vc-font-mono); font-size: 10px; color: var(--vc-ink-quiet); }
+.vc-graph-shell .canvas-wrap { grid-area: main; position: relative; background: var(--vc-surface-2); min-height: 0; }
+.vc-graph-shell #graph { position: absolute; inset: 0; }
+.vc-graph-shell .canvas-legend {
+  position: absolute;
+  bottom: 12px; left: 12px;
+  background: var(--vc-surface);
+  border: 1px solid var(--vc-rule);
+  border-radius: 6px;
+  padding: 8px 12px;
+  display: flex; gap: 14px;
+  font-size: 11px;
+  color: var(--vc-ink-muted);
+  box-shadow: var(--vc-shadow-soft);
+  align-items: center;
+  flex-wrap: wrap;
+  max-width: min(80vw, 900px);
+}
+.vc-graph-shell .canvas-legend .item { display: flex; align-items: center; gap: 6px; }
+.vc-graph-shell .detail {
+  grid-area: detail;
+  background: var(--vc-surface);
+  border-left: 1px solid var(--vc-rule);
+  padding: 22px 20px 24px;
+  overflow-y: auto;
+  min-width: 0;
+}
+.vc-graph-shell .detail .empty {
+  color: var(--vc-ink-quiet);
+  font-size: 13px;
+  padding: 40px 4px;
+  text-align: center;
+  border: 1px dashed var(--vc-rule);
+  border-radius: 4px;
+}
+.vc-graph-shell .detail h2.eyebrow {
+  margin: 0 0 4px;
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--vc-ink-quiet);
+}
+.vc-graph-shell .detail h3.name {
+  margin: 0 0 14px;
+  font-family: var(--vc-font-display);
+  font-weight: 400;
+  font-size: 26px;
+  line-height: 1.15;
+  text-wrap: balance;
+}
+.vc-graph-shell .detail dl { margin: 0 0 16px; display: grid; grid-template-columns: 104px 1fr; row-gap: 6px; column-gap: 12px; }
+.vc-graph-shell .detail dt {
+  font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em;
+  color: var(--vc-ink-quiet); padding-top: 2px;
+}
+.vc-graph-shell .detail dd { margin: 0; font-size: 13px; }
+.vc-graph-shell .detail dd .venue { color: var(--vc-ink-muted); font-style: italic; }
+.vc-graph-shell .detail ul.plain { margin: 0; padding-left: 0; list-style: none; display: flex; flex-direction: column; gap: 3px; }
+.vc-graph-shell .detail ul.plain li { font-size: 13px; }
+.vc-graph-shell .detail ul.plain li button {
+  background: none; border: 0; padding: 0;
+  color: var(--vc-accent); cursor: pointer;
+  text-align: left; font: inherit;
+}
+.vc-graph-shell .detail ul.plain li button:hover { text-decoration: underline; }
+.vc-graph-shell .section-hd {
+  margin: 14px 0 6px;
+  font-weight: 600; font-size: 11px;
+  letter-spacing: 0.09em; text-transform: uppercase;
+  color: var(--vc-ink-quiet);
+  border-bottom: 1px solid var(--vc-rule);
+  padding-bottom: 3px;
+}
+.vc-graph-shell .pill {
+  display: inline-block; padding: 1px 6px; border-radius: 999px;
+  background: var(--vc-accent-soft); color: var(--vc-accent);
+  font-family: var(--vc-font-mono); font-size: 10px; font-weight: 600;
+}
+.vc-graph-shell .unknown { color: var(--vc-ink-quiet); font-style: italic; }
+.vc-graph-shell .detail details.workslist { margin: 4px 0 14px; }
+.vc-graph-shell .detail details.workslist > summary {
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--vc-accent);
+  padding: 4px 0;
+  list-style: revert;
+}
+.vc-graph-shell .detail details.workslist > summary:hover { text-decoration: underline; }
+.vc-graph-shell .detail details.workslist ul {
+  margin: 6px 0 0;
+  padding: 0;
+  list-style: none;
+  max-height: 260px;
+  overflow-y: auto;
+  border: 1px solid var(--vc-rule);
+  border-radius: 4px;
+  background: var(--vc-surface-2);
+}
+.vc-graph-shell .detail details.workslist li + li { border-top: 1px solid var(--vc-rule); }
+.vc-graph-shell .detail details.workslist li button {
+  display: flex; flex-direction: column;
+  width: 100%; text-align: left;
+  padding: 6px 8px; gap: 2px;
+  background: transparent; border: 0; cursor: pointer;
+  color: inherit;
+}
+.vc-graph-shell .detail details.workslist li button:hover { background: var(--vc-accent-soft); color: var(--vc-accent); }
+.vc-graph-shell .detail details.workslist .wtitle { font-size: 12px; line-height: 1.3; }
+.vc-graph-shell .detail details.workslist .wmeta { font-family: var(--vc-font-mono); font-size: 10px; color: var(--vc-ink-quiet); }
+.vc-graph-shell .detail ul.authors {
+  margin: 0; padding: 0; list-style: none;
+  display: flex; flex-wrap: wrap; gap: 4px 10px;
+}
+.vc-graph-shell .detail ul.authors li { font-size: 13px; line-height: 1.4; }
+.vc-graph-shell .detail ul.authors li.non-member { color: var(--vc-ink-muted); }
+.vc-graph-shell .detail ul.authors li button {
+  background: none; border: 0; padding: 0;
+  color: var(--vc-accent); cursor: pointer;
+  font: inherit;
+}
+.vc-graph-shell .detail ul.authors li button:hover { text-decoration: underline; }
+@media (max-width: 1100px) {.vc-graph-shell .app { grid-template-columns: 260px 1fr 300px; }
+}
+@media (max-width: 900px) {.vc-graph-shell .app { grid-template-columns: 1fr; grid-template-areas: "top" "main" "side" "detail"; }
+.vc-graph-shell .rail, .vc-graph-shell .detail { border: 0; border-top: 1px solid var(--vc-rule); max-height: 45vh; }
+.vc-graph-shell .canvas-wrap { min-height: 60vh; }
+}
+
+
+  /* -------- Article-shape wrapper (overrides scoped artifact CSS above) -------- */
+  .vc-page {
+    max-width: 1180px;
+    margin: 0 auto;
+  }
+  .vc-hero { margin-bottom: 1.5rem; }
+  .vc-hero h1 { margin: 0 0 0.5rem; }
+  .vc-lede {
+    font-size: 1.05rem;
+    line-height: 1.55;
+    max-width: 72ch;
+    color: var(--color-dark, #222);
+  }
+  .vc-notes {
+    margin-top: 2.5rem;
+    max-width: 72ch;
+  }
+  .vc-notes h2 {
+    font-size: 1.05rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin: 1.5rem 0 0.5rem;
+  }
+  .vc-notes ul { margin: 0.25rem 0 1rem 1.25rem; padding: 0; }
+  .vc-notes li { margin-bottom: 0.4rem; line-height: 1.55; }
+  .vc-notes p { line-height: 1.6; }
+  .vc-citation { font-size: 0.95rem; color: var(--color-muted, #555); }
+
+  .back-link {
+    margin-top: 2rem;
+    font-size: 0.88rem;
+  }
+  .back-link a {
+    color: var(--color-accent);
+  }
+
+  /* Constrain the graph shell to a fixed height inside the article and
+     nuke the artifact's `min-height: 100vh` / `height: 100%` behaviour
+     that would make it fill the viewport. */
+  .vc-graph-shell {
+    height: 720px;
+    min-height: 0;
+    margin: 0;
+    border: 1px solid var(--color-border, #d5d9df);
+    border-radius: 6px;
+    overflow: hidden;
+    background: var(--vc-ground, #eef1f4);
+  }
+  .vc-graph-shell .app {
+    min-height: 100%;
+    height: 100%;
+  }
+  @media (max-width: 900px) {
+    .vc-graph-shell { height: auto; min-height: 900px; }
+  }
+
+</style>
+
+
+<script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.9/standalone/umd/vis-network.min.js"></script>
+<script is:inline define:vars={{ dataUrl }}>
+/*
+ * Verification Community — Member Bonds
+ * Adapted from the Claude Artifact 574e0326 (2026-09-05) for canaryinstitute.ai.
+ * Changes vs. artifact:
+ *   - Loads DATA from the site's /data/verification-community.json (path threaded
+ *     in via Astro's define:vars so BASE_URL is respected on subpath deploys),
+ *     instead of the artifact's embedded <script id="payload">.
+ *   - Populates stat-row, isolates list, cluster list, and work list from the JSON
+ *     (artifact had them baked into HTML at build time; we drive them from data so
+ *     updating the JSON is enough).
+ *   - Everything else preserved.
+ */
+
+(async function() {
+  const DATA_URL = dataUrl;
+
+  let DATA;
+  try {
+    const r = await fetch(DATA_URL);
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    DATA = await r.json();
+  } catch (err) {
+    document.getElementById("graph").innerHTML =
+      '<p style="padding:24px;color:var(--vc-ink-muted);font-size:13px">Could not load verification-community data (' + err.message + '). This page needs /data/verification-community.json.</p>';
+    return;
+  }
+
+  const NODES = DATA.nodes;
+  const EDGES = DATA.edges;
+  const PEOPLE = DATA.people;
+  const WORKS = DATA.works;
+  const COMMUNITIES = DATA.communities;
+  const ISOLATED = DATA.isolated || [];
+  const nodeById = new Map(NODES.map(n => [n.id, n]));
+  const edgeById = new Map(EDGES.map(e => [e.id, e]));
+  const clusterLabel = new Map(COMMUNITIES.map(c => [c.id, c.label]));
+
+  // ---------- populate the static-looking rails from data ----------
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
+  }
+
+  // Stat row
+  const membersDrawn = NODES.length;
+  const isolatedCount = ISOLATED.length;
+  const totalMembers = membersDrawn + isolatedCount;
+  const bondsCount = EDGES.length;
+  const worksLinking = Object.values(WORKS).filter(w => (w.members || []).filter(m => nodeById.has(m)).length >= 2).length;
+  const clustersCount = COMMUNITIES.length;
+  const withAffiliation = NODES.filter(n => {
+    const p = PEOPLE[n.id];
+    return p && p.affiliation_display && p.affiliation_display !== "affiliation unknown";
+  }).length;
+
+  document.getElementById("stat-row").innerHTML = [
+    ['<b>' + membersDrawn + '</b>', 'members drawn'],
+    ['<b>' + isolatedCount + '</b>', 'isolated (not drawn)'],
+    ['<b>' + bondsCount + '</b>', 'co-authorship bonds'],
+    ['<b>' + worksLinking + '</b>', 'works linking &ge;2 members'],
+    ['<b>' + clustersCount + '</b>', 'clusters'],
+    ['<b>' + withAffiliation + '</b>', 'with a known affiliation'],
+  ].map(([b, s]) => '<span class="stat">' + b + '<span>' + s + '</span></span>').join('');
+
+  // "Who is drawn" summary + isolates list
+  document.getElementById("who-summary").textContent =
+    membersDrawn + " of " + totalMembers + " members shown · " + isolatedCount + " isolated (no member co-authorship)";
+  document.getElementById("isolates-list").innerHTML =
+    ISOLATED.map(iso => '<li>' + esc(iso.name || iso.pid) + '</li>').join('');
+
+  // Cluster list
+  document.getElementById("cluster-list").innerHTML = COMMUNITIES.map(c => {
+    const meta = c.label_source ? esc(c.label_source) : "";
+    const size = c.size_total || c.size_in_view || "";
+    const metaText = size + " member" + (size === 1 ? "" : "s") + (meta ? " · " + meta : "");
+    return '<li><button class="clusterbtn" data-cluster="' + c.id + '">' +
+      '<span class="cdot" style="background:' + esc(c.color) + '"></span>' +
+      '<span class="ctext">' +
+      '<span class="clabel">' + esc(c.label) + '</span>' +
+      '<span class="cmeta">' + metaText + '</span>' +
+      '</span></button></li>';
+  }).join('');
+
+  // Work list (only works linking >=2 drawn members)
+  const workEntries = Object.entries(WORKS)
+    .filter(([wid, w]) => (w.members || []).filter(m => nodeById.has(m)).length >= 2)
+    .map(([wid, w]) => ({wid, w, members: (w.members || []).filter(m => nodeById.has(m))}))
+    .sort((a, b) => (b.w.year || 0) - (a.w.year || 0) || (a.w.title || "").localeCompare(b.w.title || ""));
+
+  document.getElementById("work-list").innerHTML = workEntries.map(({wid, w, members}) =>
+    '<li><button class="workbtn" data-work="' + esc(wid) + '">' +
+      '<span class="ptitle">' + esc(w.title || wid) + '</span>' +
+      '<span class="pmeta">' + (w.year || "?") + ' · ' + members.length + ' members</span>' +
+    '</button></li>'
+  ).join('');
+
+  // ---------- vis-network setup ----------
+  const nodes = new vis.DataSet();
+  const edges = new vis.DataSet();
+
+  const container = document.getElementById("graph");
+  const network = new vis.Network(container, { nodes, edges }, {
+    interaction: { hover: true, tooltipDelay: 200, dragNodes: true, keyboard: true },
+    physics: {
+      enabled: true,
+      solver: "barnesHut",
+      barnesHut: {
+        gravitationalConstant: -12000,
+        centralGravity: 0.04,
+        springLength: 220,
+        springConstant: 0.02,
+        damping: 0.38,
+        avoidOverlap: 0.85
+      },
+      stabilization: { iterations: 500, updateInterval: 40 }
+    },
+    nodes: {
+      borderWidth: 2,
+      chosen: { node: function(values) { values.borderColor = "#0f5b8c"; values.borderWidth = 4; } },
+      scaling: { min: 6, max: 34, label: { enabled: true, min: 10, max: 16 } }
+    },
+    edges: { smooth: { type: "continuous", roundness: 0.35 }, selectionWidth: 2 },
+    layout: { improvedLayout: false }
+  });
+
+  network.once("stabilizationIterationsDone", () => {
+    network.setOptions({ physics: { enabled: false } });
+  });
+
+  const state = { activeWork: null, activeCluster: null };
+
+  const darkQuery = window.matchMedia("(prefers-color-scheme: dark)");
+  function labelColor() {
+    const explicit = document.documentElement.getAttribute("data-theme");
+    const dark = explicit ? explicit === "dark" : darkQuery.matches;
+    return dark ? "#e7ebf1" : "#1a1f2e";
+  }
+  darkQuery.addEventListener("change", () => rebuild());
+
+  function rebuild() {
+    const wanted = new Set();
+    for (const n of NODES) {
+      if (state.activeCluster !== null && n.community_id !== state.activeCluster) continue;
+      wanted.add(n.id);
+    }
+
+    const outEdges = [];
+    for (const e of EDGES) {
+      if (!wanted.has(e.from) || !wanted.has(e.to)) continue;
+      const isActive = state.activeWork && e.works.includes(state.activeWork);
+      outEdges.push({
+        id: e.id,
+        from: e.from,
+        to: e.to,
+        length: e.length,
+        width: isActive ? Math.max(e.width, 3) : e.width,
+        color: isActive ? { color: "#d97706", opacity: 0.95 } : e.color,
+        title: buildEdgeTitle(e)
+      });
+    }
+
+    const activeMembers = state.activeWork ? (WORKS[state.activeWork]?.members || []) : [];
+    const font = Object.assign({}, { color: labelColor() });
+    const finalNodes = [];
+    for (const id of wanted) {
+      const n = nodeById.get(id);
+      const isOnActive = activeMembers.includes(id);
+      finalNodes.push({
+        id: n.id,
+        label: n.label,
+        shape: n.shape,
+        color: isOnActive ? { background: "#d97706", border: "#f5d76e" } : n.color,
+        font: Object.assign({}, n.font, font),
+        size: isOnActive ? n.size + 3 : n.size,
+        title: n.title
+      });
+    }
+
+    nodes.clear();
+    edges.clear();
+    nodes.add(finalNodes);
+    edges.add(outEdges);
+
+    network.setOptions({ physics: { enabled: true } });
+    setTimeout(() => network.setOptions({ physics: { enabled: false } }), 1400);
+  }
+
+  function buildEdgeTitle(e) {
+    const aName = (PEOPLE[e.from] || {}).label || e.from;
+    const bName = (PEOPLE[e.to] || {}).label || e.to;
+    const lines = e.works.map(wid => {
+      const w = WORKS[wid];
+      return w ? "• " + w.title + " (" + (w.year || "?") + ")" : "• " + wid;
+    });
+    return aName + " × " + bName + " — " + e.works.length +
+      " shared work" + (e.works.length === 1 ? "" : "s") + "\n" + lines.join("\n");
+  }
+
+  const detail = document.getElementById("detail");
+  function showEmpty() {
+    detail.innerHTML = '<p class="empty">Click a member or a bond for details.<br>Or pick a work in the left rail to highlight the members who share it.<br><br>Drag to pan; scroll to zoom.</p>';
+  }
+
+  function showPerson(id) {
+    const p = PEOPLE[id];
+    if (!p) return;
+    const links = EDGES.filter(e => e.from === id || e.to === id).map(e => {
+      const other = e.from === id ? e.to : e.from;
+      return { id: other, name: (PEOPLE[other] || {}).label || other, weight: e.weight };
+    }).sort((a, b) => b.weight - a.weight || a.name.localeCompare(b.name));
+    const affUnknown = p.affiliation_display === "affiliation unknown";
+    const workIds = p.work_ids || [];
+    const worksSummary = '<span class="pill">' + p.n_works + '</span> ' +
+      '<span class="venue">verification-relevant work' + (p.n_works === 1 ? "" : "s") +
+      ' &mdash; click to expand</span>';
+    const worksItems = workIds.map(wid => {
+      const w = WORKS[wid] || {};
+      const yr = w.year || "?";
+      const venue = w.venue ? esc(w.venue) : '<span class="unknown">venue unknown</span>';
+      return '<li><button data-work-goto="' + esc(wid) + '">' +
+        '<span class="wtitle">' + esc(w.title || wid) + '</span>' +
+        '<span class="wmeta">' + yr + ' &middot; ' + venue + '</span>' +
+        '</button></li>';
+    }).join("");
+    const worksBlock = workIds.length
+      ? '<details class="workslist"><summary>' + worksSummary + '</summary>' +
+        '<ul>' + worksItems + '</ul></details>'
+      : '<div style="margin:4px 0 14px"><span class="pill">' + p.n_works +
+        '</span> <span class="venue">verification-relevant</span></div>';
+    const parts = [
+      '<h2 class="eyebrow">Member</h2>',
+      '<h3 class="name">' + esc(p.label) + '</h3>',
+      "<dl>",
+      '<dt>Affiliation</dt><dd>' + (affUnknown
+        ? '<span class="unknown">' + esc(p.affiliation_display) + '</span>'
+        : esc(p.affiliation_display)) + '</dd>',
+      '<dt>Cluster</dt><dd>' + esc(clusterLabel.get(p.community_id) || ("c" + p.community_id)) + '</dd>',
+      '<dt>Rule</dt><dd class="venue">' + esc(p.membership_why || "") + '</dd>',
+      p.deceased ? '<dt>Deceased</dt><dd>' + esc(p.deceased.date) + '</dd>' : "",
+      "</dl>",
+      '<h4 class="section-hd">Works</h4>',
+      worksBlock
+    ];
+    if ((p.aliases || []).length) {
+      parts.push('<h4 class="section-hd">Also known as</h4>');
+      parts.push('<ul class="plain">' + p.aliases.map(a => '<li class="venue">' + esc(a) + '</li>').join("") + '</ul>');
+    }
+    if ((p.affiliation_history || []).length) {
+      parts.push('<h4 class="section-hd">Affiliation history</h4>');
+      parts.push('<ul class="plain">' + p.affiliation_history.map(h => '<li class="venue">' + esc(h) + '</li>').join("") + '</ul>');
+    }
+    parts.push('<h4 class="section-hd">Bonds (' + links.length + ')</h4>');
+    parts.push('<ul class="plain">' +
+      links.map(l => '<li><button data-node-goto="' + l.id + '">' + esc(l.name) +
+        '</button> <span class="pill">' + l.weight + '</span></li>').join("") + '</ul>');
+    detail.innerHTML = parts.join("\n");
+    wireDetailButtons();
+  }
+
+  function showEdge(edgeId) {
+    const e = edgeById.get(edgeId);
+    if (!e) return;
+    const a = (PEOPLE[e.from] || {}).label || e.from;
+    const b = (PEOPLE[e.to] || {}).label || e.to;
+    const parts = [
+      '<h2 class="eyebrow">Bond</h2>',
+      '<h3 class="name">' + esc(a) + ' <span style="color:var(--vc-ink-quiet);font-size:20px">&times;</span> ' + esc(b) + '</h3>',
+      "<dl>",
+      '<dt>Shared</dt><dd><span class="pill">' + e.weight + ' work' + (e.weight === 1 ? "" : "s") + '</span></dd>',
+      '<dt>Span</dt><dd class="venue">' + (e.same_cluster ? "within one cluster" : "across clusters") + '</dd>',
+      "</dl>",
+      '<h4 class="section-hd">Works connecting them</h4>',
+      '<ul class="plain">' + e.works.map(wid => {
+        const w = WORKS[wid];
+        if (!w) return '<li>' + esc(wid) + '</li>';
+        return '<li><button data-work-goto="' + esc(wid) + '">' + esc(w.title) +
+          '</button> <span class="venue">— ' + (w.year || "?") + '</span></li>';
+      }).join("") + '</ul>'
+    ];
+    detail.innerHTML = parts.join("\n");
+    wireDetailButtons();
+  }
+
+  function showWork(wid) {
+    const w = WORKS[wid];
+    if (!w) return;
+    const authors = w.authors || [];
+    const drawnMembers = w.members.filter(pid => nodeById.get(pid));
+    const highlightNote = drawnMembers.length >= 2
+      ? '<p style="margin:6px 0 10px;font-size:12px;color:var(--vc-ink-muted)">Highlighted on the canvas: the members who share this work turn orange and their bonds thicken.</p>'
+      : '<p style="margin:6px 0 10px;font-size:12px;color:var(--vc-ink-muted)">This work has fewer than two drawn members, so it produces no bond on the canvas.</p>';
+    const authorItems = authors.map(a => {
+      if (a.pid && PEOPLE[a.pid]) {
+        return '<li><button data-node-goto="' + esc(a.pid) + '">' +
+          esc(PEOPLE[a.pid].label || a.name) + '</button></li>';
+      }
+      return '<li class="non-member">' + esc(a.name) + '</li>';
+    }).join("");
+    const parts = [
+      '<h2 class="eyebrow">Work</h2>',
+      '<h3 class="name">' + esc(w.title || wid) + '</h3>',
+      "<dl>",
+      '<dt>Year</dt><dd>' + (w.year || "?") + '</dd>',
+      '<dt>Venue</dt><dd class="venue">' + (w.venue ? esc(w.venue) : '<span class="unknown">unknown</span>') + '</dd>',
+      '<dt>DOI</dt><dd class="venue">' + esc(w.doi || "—") + '</dd>',
+      "</dl>",
+      highlightNote,
+      '<h4 class="section-hd">Authors (' + authors.length + ')</h4>',
+      '<ul class="authors">' + authorItems + '</ul>'
+    ];
+    detail.innerHTML = parts.join("\n");
+    wireDetailButtons();
+  }
+
+  function wireDetailButtons() {
+    detail.querySelectorAll("[data-node-goto]").forEach(btn =>
+      btn.addEventListener("click", () => selectNode(btn.dataset.nodeGoto)));
+    detail.querySelectorAll("[data-work-goto]").forEach(btn =>
+      btn.addEventListener("click", () => selectWork(btn.dataset.workGoto)));
+  }
+
+  function selectNode(id) {
+    if (!nodeById.get(id)) return;
+    if (!nodes.get(id)) { clearCluster(); }
+    network.selectNodes([id]);
+    network.focus(id, { scale: 1.2, animation: { duration: 400, easingFunction: "easeInOutQuad" } });
+    showPerson(id);
+  }
+
+  function selectWork(wid) {
+    state.activeWork = wid;
+    document.querySelectorAll(".workbtn").forEach(b => b.classList.toggle("active", b.dataset.work === wid));
+    rebuild();
+    showWork(wid);
+    const members = (WORKS[wid]?.members || []).filter(m => nodes.get(m));
+    if (members.length) {
+      network.fit({ nodes: members, animation: { duration: 500, easingFunction: "easeInOutQuad" } });
+    }
+  }
+
+  function clearWork() {
+    state.activeWork = null;
+    document.querySelectorAll(".workbtn").forEach(b => b.classList.remove("active"));
+    rebuild();
+    showEmpty();
+  }
+
+  function selectCluster(cid) {
+    state.activeCluster = cid;
+    document.querySelectorAll(".clusterbtn").forEach(b =>
+      b.classList.toggle("active", parseInt(b.dataset.cluster, 10) === cid));
+    rebuild();
+    setTimeout(() => network.fit({ animation: { duration: 500, easingFunction: "easeInOutQuad" } }), 250);
+  }
+  function clearCluster() {
+    state.activeCluster = null;
+    document.querySelectorAll(".clusterbtn").forEach(b => b.classList.remove("active"));
+    rebuild();
+    setTimeout(() => network.fit({ animation: { duration: 500, easingFunction: "easeInOutQuad" } }), 250);
+  }
+
+  network.on("click", params => {
+    if (params.nodes && params.nodes.length) showPerson(params.nodes[0]);
+    else if (params.edges && params.edges.length) showEdge(params.edges[0]);
+    else showEmpty();
+  });
+
+  document.querySelectorAll(".clusterbtn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const cid = parseInt(btn.dataset.cluster, 10);
+      if (state.activeCluster === cid) clearCluster();
+      else selectCluster(cid);
+    });
+  });
+  document.getElementById("cluster-clear").addEventListener("click", clearCluster);
+
+  document.getElementById("work-clear").addEventListener("click", clearWork);
+  document.querySelectorAll(".workbtn").forEach(btn => {
+    btn.addEventListener("click", () => selectWork(btn.dataset.work));
+  });
+
+  const search = document.getElementById("work-search");
+  search.addEventListener("input", () => {
+    const q = search.value.trim().toLowerCase();
+    document.querySelectorAll("#work-list li").forEach(li => {
+      li.hidden = q && !li.textContent.toLowerCase().includes(q);
+    });
+  });
+
+  rebuild();
+  showEmpty();
+})();
+</script>
