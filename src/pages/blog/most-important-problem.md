@@ -20,7 +20,7 @@ When you first read about AI risk, it sounds like science fiction, and I'm used 
 - Anthropic pledged [unilateral commitment to external auditors](https://darioamodei.com/post/we-must-pace-the-frontier)
 - OpenAI [agreed to follow suit](https://x.com/sama/status/2098811563415150910)
 
-The profile and commitment to "pacing the frontier" has dramatically risen in the past few days! But note that we only **can** make a deal if we can **verify** that the deal is being kept.  Which, to me, makes it obvious that "compute verification" is the most important problem on Earth, even if you've never heard of it.
+The profile and commitment to "pacing the frontier" has dramatically risen in the past few days! But note that we only **can** make a deal if we can **verify** that the deal is being kept.  Which, to me, makes it obvious that "compute verification" is the most important problem on Earth, even if you've never heard of it[^trust].
 
 Don't feel bad; hardly anyone has. I dug through [all of the research papers that I could find on it](https://canaryinstitute.ai/research/verification-community/), amounting to ~60 papers total (i.e. you could read literally all accumulated knowledge of the field in a week or so).  Depending on how you slice the numbers, there are about 72 researchers actively working on the problem, and most aren't full-time; I estimate that the global population of folks answering the Most Important Question On Earth is around 25 FTE (well, I got serious about it last month, now it's up to 26).  
 
@@ -123,6 +123,8 @@ The technology decides what's provable. The treaty decides what to prove. Both n
 - **Thresholds that decay with algorithmic progress.** Compute efficiency doubles every 5–14 months (Epoch), or much faster once you count catch-up progress. Any static compute threshold hits a moving-target problem, and nobody has treated it with inspection-game math. ([Ho et al. / Epoch](https://arxiv.org/abs/2403.05812))
 
 I'm currently working on that final problem, regarding the game theory analysis in the scenario where algorithmic progress makes the total amount of compute required lower over time.  If you're interested in discussing, please reach out to me!
+
+[^trust]: For a more detailed walkthrough of what looks like the strongest near-term proposal, see my earlier ["If you can't trust, then verify!"](https://canaryinstitute.substack.com/p/if-you-cant-trust-then-verify) on Substack.
 
 ---
 
