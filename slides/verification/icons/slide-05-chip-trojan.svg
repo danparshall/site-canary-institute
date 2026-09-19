@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none" stroke="#1A4A44" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+  <!-- chip body -->
+  <rect x="46" y="46" width="108" height="108" rx="10"/>
+  <!-- pins: top / bottom -->
+  <path d="M70 46 V26 M100 46 V26 M130 46 V26"/>
+  <path d="M70 154 V174 M100 154 V174 M130 154 V174"/>
+  <!-- pins: left / right -->
+  <path d="M46 70 H26 M46 100 H26 M46 130 H26"/>
+  <path d="M154 70 H174 M154 100 H174 M154 130 H174"/>
+  <!-- hidden trojan horse (dashed = concealed) -->
+  <g stroke-width="4" stroke-dasharray="5 5">
+    <!-- body -->
+    <rect x="76" y="94" width="44" height="22" rx="6"/>
+    <!-- neck + head -->
+    <path d="M116 96 L128 76 L142 78 L138 90 L126 92"/>
+    <!-- legs -->
+    <path d="M82 116 V132 M96 116 V132 M104 116 V132 M116 116 V132"/>
+    <!-- wheels -->
+    <circle cx="84" cy="136" r="4"/>
+    <circle cx="114" cy="136" r="4"/>
+  </g>
+</svg>

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none" stroke="#1A4A44" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+  <!-- prism -->
+  <path d="M62 152 L138 152 L100 48 Z"/>
+  <!-- incoming beam -->
+  <path d="M6 100 L78 100"/>
+  <path d="M60 88 L78 100 L60 112" stroke-width="5"/>
+  <!-- two outgoing beams -->
+  <path d="M124 100 L194 62"/>
+  <path d="M124 100 L194 138"/>
+  <!-- inner refraction line -->
+  <path d="M78 100 L124 100" stroke-width="4" stroke-dasharray="6 7" opacity="0.6"/>
+</svg>

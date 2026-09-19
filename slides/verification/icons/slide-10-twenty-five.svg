@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="#1A4A44">
+  <defs>
+    <g id="p">
+      <circle cx="0" cy="-11" r="6"/>
+      <path d="M-9 14 V2 a9 9 0 0 1 18 0 V14 Z"/>
+    </g>
+  </defs>
+  <g transform="translate(26 26)">
+    <use href="#p" x="0"   y="0"/><use href="#p" x="37" y="0"/><use href="#p" x="74" y="0"/><use href="#p" x="111" y="0"/><use href="#p" x="148" y="0"/>
+    <use href="#p" x="0"   y="37"/><use href="#p" x="37" y="37"/><use href="#p" x="74" y="37"/><use href="#p" x="111" y="37"/><use href="#p" x="148" y="37"/>
+    <use href="#p" x="0"   y="74"/><use href="#p" x="37" y="74"/><use href="#p" x="74" y="74"/><use href="#p" x="111" y="74"/><use href="#p" x="148" y="74"/>
+    <use href="#p" x="0"   y="111"/><use href="#p" x="37" y="111"/><use href="#p" x="74" y="111"/><use href="#p" x="111" y="111"/><use href="#p" x="148" y="111"/>
+    <use href="#p" x="0"   y="148"/><use href="#p" x="37" y="148"/><use href="#p" x="74" y="148"/><use href="#p" x="111" y="148"/><use href="#p" x="148" y="148"/>
+  </g>
+</svg>

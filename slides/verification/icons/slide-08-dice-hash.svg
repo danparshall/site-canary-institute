@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none" stroke="#1A4A44" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+  <!-- die -->
+  <rect x="18" y="66" width="76" height="76" rx="12"/>
+  <g fill="#1A4A44" stroke="none">
+    <circle cx="38" cy="86" r="6"/>
+    <circle cx="74" cy="86" r="6"/>
+    <circle cx="56" cy="104" r="6"/>
+    <circle cx="38" cy="122" r="6"/>
+    <circle cx="74" cy="122" r="6"/>
+  </g>
+  <!-- arrow -->
+  <path d="M104 104 L128 104"/>
+  <path d="M120 96 L128 104 L120 112" stroke-width="5"/>
+  <!-- hash symbol drawn as four strokes -->
+  <path d="M150 76 L142 132"/>
+  <path d="M172 76 L164 132"/>
+  <path d="M136 92 L184 92"/>
+  <path d="M132 116 L180 116"/>
+</svg>
