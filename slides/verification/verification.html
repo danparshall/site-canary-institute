@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Compute Verification — Canary Institute</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=Helvetica+Neue&display=swap" rel="stylesheet">
+<style>
+  @page {
+    size: 13.333in 7.5in;
+    margin: 0;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --color-dark: #1A2A28;
+    --color-accent: #1A4A44;
+    --color-grey: #363636;
+    --color-light-grey: #436058;
+    --color-muted: #527872;
+    --color-bg: #FAFAF8;
+    --color-border: #e5e5e3;
+    --color-cartouche: #1A4A44;
+
+    --font-heading: 'Cinzel', 'Times New Roman', serif;
+    --font-body: 'Source Serif 4', 'Georgia', 'Times New Roman', serif;
+    --font-ui: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  }
+
+  body {
+    font-family: var(--font-body);
+    color: var(--color-grey);
+    background: #e5e5e3;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .slide {
+    width: 13.333in;
+    height: 7.5in;
+    padding: 0.6in 1in;
+    page-break-after: always;
+    page-break-inside: avoid;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    background: var(--color-bg);
+    margin: 0.5in auto;
+    box-shadow: 0 4px 24px rgba(26, 42, 40, 0.08);
+  }
+
+  .slide:last-child { page-break-after: auto; }
+
+  .deck-topic {
+    font-family: var(--font-ui);
+    font-size: 13px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+    margin-bottom: 6px;
+  }
+
+  .cluster-name {
+    font-family: var(--font-heading);
+    font-size: 36px;
+    font-weight: 500;
+    color: var(--color-dark);
+    letter-spacing: -0.01em;
+    line-height: 1.15;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--color-border);
+    margin-bottom: 28px;
+  }
+
+  .content {
+    flex: 1;
+    overflow: hidden;
+  }
+
+  /* === One-concept layout === */
+  .one-concept {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    height: 100%;
+    padding: 0 1in;
+  }
+
+  .icon-placeholder {
+    width: 140px;
+    height: 140px;
+    border: 2px dashed var(--color-muted);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-muted);
+    font-family: var(--font-ui);
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    text-align: center;
+    padding: 8px;
+    margin-bottom: 24px;
+    line-height: 1.4;
+    background: rgba(26, 74, 68, 0.02);
+  }
+
+  .icon-row {
+    display: flex;
+    gap: 56px;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 18px;
+  }
+  .icon-row .icon-placeholder {
+    width: 130px;
+    height: 130px;
+    margin-bottom: 0;
+  }
+  .icon-row .flow-arrow {
+    font-family: var(--font-ui);
+    font-size: 28px;
+    color: var(--color-muted);
+    line-height: 1;
+  }
+
+  .concept-title {
+    font-family: var(--font-heading);
+    font-size: 26px;
+    font-weight: 600;
+    color: var(--color-dark);
+    margin-bottom: 22px;
+    letter-spacing: 0.01em;
+  }
+
+  .beats {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    max-width: 8.5in;
+  }
+  .beats li {
+    font-family: var(--font-body);
+    font-size: 19px;
+    line-height: 1.55;
+    color: var(--color-grey);
+    margin-bottom: 12px;
+    padding-left: 22px;
+    position: relative;
+    text-align: left;
+  }
+  .beats li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.75em;
+    width: 10px;
+    height: 1px;
+    background: var(--color-accent);
+  }
+  .beats li:last-child { margin-bottom: 0; }
+  .beats li strong {
+    color: var(--color-dark);
+    font-weight: 600;
+  }
+
+  /* === Title cover (slide 1) === */
+  .title-cover {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    height: 100%;
+    padding: 0 0.5in;
+  }
+  .title-cover .icon-placeholder {
+    width: 180px;
+    height: 180px;
+    margin-bottom: 36px;
+  }
+  .title-cover h1 {
+    font-family: var(--font-heading);
+    font-size: 62px;
+    font-weight: 500;
+    color: var(--color-dark);
+    letter-spacing: 0.01em;
+    line-height: 1.1;
+    margin-bottom: 22px;
+    text-transform: uppercase;
+  }
+  .title-cover .subtitle {
+    font-family: var(--font-body);
+    font-size: 22px;
+    font-style: italic;
+    color: var(--color-light-grey);
+    margin-bottom: 32px;
+    max-width: 10in;
+  }
+  .title-cover .venue {
+    font-family: var(--font-ui);
+    font-size: 13px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+  }
+
+  /* === Closing slide (slide 12) === */
+  .closing {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    height: 100%;
+    padding: 0 0.5in;
+  }
+  .closing .soundbite {
+    font-family: var(--font-heading);
+    font-size: 38px;
+    font-weight: 500;
+    color: var(--color-dark);
+    letter-spacing: 0.01em;
+    line-height: 1.25;
+    margin-bottom: 32px;
+    max-width: 11in;
+    text-transform: uppercase;
+  }
+  .closing .contact {
+    font-family: var(--font-ui);
+    font-size: 14px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+    margin-top: 16px;
+    margin-bottom: 24px;
+  }
+  .closing .contact a {
+    color: var(--color-accent);
+    text-decoration: none;
+  }
+  .closing .qr-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 8px;
+  }
+  .closing .qr-label {
+    font-family: var(--font-ui);
+    font-size: 12px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+    margin-bottom: 10px;
+  }
+  .closing .qr-placeholder {
+    width: 160px;
+    height: 160px;
+    border: 2px dashed var(--color-muted);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-muted);
+    font-family: var(--font-ui);
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    text-align: center;
+    line-height: 1.4;
+    background: rgba(26, 74, 68, 0.02);
+  }
+
+  /* === Areas grid (slide 11) === */
+  .areas-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: 18px;
+    width: 100%;
+    max-width: 10in;
+    margin: 0 auto 24px auto;
+  }
+  .area-tile {
+    border: 1px solid var(--color-border);
+    border-left: 3px solid var(--color-accent);
+    border-radius: 6px;
+    padding: 18px 22px;
+    background: rgba(26, 74, 68, 0.02);
+    text-align: left;
+  }
+  .area-tile .area-title {
+    font-family: var(--font-heading);
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--color-dark);
+    margin-bottom: 6px;
+    letter-spacing: 0.01em;
+  }
+  .area-tile .area-desc {
+    font-family: var(--font-body);
+    font-size: 14px;
+    line-height: 1.45;
+    color: var(--color-grey);
+  }
+
+  .project-callout {
+    font-family: var(--font-ui);
+    font-size: 13px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+    text-align: center;
+    padding: 10px 0;
+    border-top: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
+    margin-bottom: 18px;
+  }
+  .project-callout strong {
+    color: var(--color-accent);
+    font-weight: 600;
+  }
+
+  .punchline {
+    font-family: var(--font-body);
+    font-size: 20px;
+    line-height: 1.5;
+    color: var(--color-dark);
+    font-weight: 600;
+    text-align: center;
+    max-width: 10in;
+    margin: 0 auto;
+  }
+
+  /* Footer lockup — bottom-left */
+  .footer-lockup {
+    position: absolute;
+    bottom: 0.5in;
+    left: 0.5in;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .footer-lockup svg {
+    height: 84px;
+    width: auto;
+  }
+  .footer-bird {
+    height: 63px;
+    width: auto;
+    display: block;
+  }
+
+  .slide-num {
+    position: absolute;
+    bottom: 0.45in;
+    right: 1in;
+    font-family: var(--font-ui);
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: var(--color-border);
+  }
+
+  /* Voice notes — present in markup, hidden on screen and in print */
+  aside.voice-notes {
+    display: none;
+  }
+
+  @media print {
+    body { background: var(--color-bg); }
+    .slide {
+      margin: 0;
+      box-shadow: none;
+      break-after: page;
+      break-inside: avoid;
+    }
+    .slide:last-child { break-after: auto; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     SLIDE 1: Title cover
+============================================================ -->
+<div class="slide">
+  <div class="content">
+    <div class="title-cover">
+      <div class="icon-placeholder">[ ICON ]<br>optical<br>splitter /<br>prism</div>
+      <h1>If you can&rsquo;t trust,<br>then verify</h1>
+      <div class="subtitle">How the Glass Perimeter could enable AI treaties</div>
+      <div class="venue">The Overhang &middot; Washington DC &middot; September 19, 2026</div>
+    </div>
+  </div>
+
+  <aside class="voice-notes">
+    Thanks. I'm Dan Parshall from the Canary Institute. What I want to do in this session is convince you that compute verification is the load-bearing problem for pacing the AI frontier, walk you through the strongest near-term proposal we have, and end by asking you to help. <<pause>> Something changed in the past two weeks, and I don't think we've fully absorbed it yet. Let me show you.
+  </aside>
+
+  <div class="footer-lockup">
+    <img src="../../logos/canary_X_bird.png" class="footer-bird" alt="Canary mark">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 335" aria-label="Canary Institute">
+      <defs><style>
+        .wm-l { font-family: "Trajan Pro","Cinzel","Times New Roman",serif; font-weight:400; fill:#1A2A28; font-size:88px; }
+        .cl-l { font-family: "Trajan Pro","Cinzel","Times New Roman",serif; font-weight:400; fill:#FFFFFF; font-size:88px; }
+        .tl-l { font-family: "Helvetica Neue","Helvetica","Arial",sans-serif; fill:#527872; font-size:33px; letter-spacing:7px; font-weight:400; }
+      </style></defs>
+      <rect x="113" y="52" width="72" height="162" rx="14" fill="#1A4A44"/>
+      <text x="82" y="122" text-anchor="middle" class="wm-l">C</text>
+      <text x="150" y="122" text-anchor="middle" class="cl-l">A</text>
+      <text x="192" y="122" class="wm-l" letter-spacing="4">NARY</text>
+      <text x="150" y="205" text-anchor="middle" class="cl-l">I</text>
+      <text x="192" y="205" class="wm-l" letter-spacing="4">NSTITUTE</text>
+      <line x1="50" y1="237" x2="650" y2="237" stroke="#1A4A44" stroke-width="3"/>
+      <text x="364" y="277" text-anchor="middle" class="tl-l">FOR AI POLICY</text>
+    </svg>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     SLIDE 2: The frame has moved
+============================================================ -->
+<div class="slide">
+  <div class="deck-topic">Compute Verification</div>
+  <div class="cluster-name">The frame has moved</div>
+
+  <div class="content">
+    <div class="one-concept">
+      <div class="icon-row">
+        <div class="icon-placeholder">[ ICON 1 ]<br>Coxon<br>post</div>
+        <div class="icon-placeholder">[ ICON 2 ]<br>UN mark</div>
+        <div class="icon-placeholder">[ ICON 3 ]<br>Anthropic<br>mark</div>
+        <div class="icon-placeholder">[ ICON 4 ]<br>OpenAI<br>mark</div>
+      </div>
+      <div class="concept-title">Two weeks that shifted the conversation</div>
+      <ul class="beats">
+        <li>Coxon triggered a preference cascade on existential risk</li>
+        <li>UN: &ldquo;the last generation able to set the terms&rdquo;</li>
+        <li>Anthropic pledged unilateral external audits &mdash; OpenAI agreed to follow</li>
+        <li><strong>A deal you can&rsquo;t verify is a deal you can&rsquo;t keep.</strong></li>
+      </ul>
+    </div>
+  </div>
+
+  <aside class="voice-notes">
+    Two weeks ago, three things happened that would've been unthinkable in July. <<land Coxon here>> Coxon posted on x-risk and it triggered what The Zvi called a preference cascade — a lot of people suddenly saying out loud what they'd been thinking quietly. <<point to UN>> The UN tweeted — the UN — that we may be the last generation able to set the terms of coexistence with machines. Then Anthropic went first, unilaterally committing to external audits of their frontier models. Within hours, Sam Altman said OpenAI would follow. <<pause>> So the frame has moved. "Pacing the frontier" is now something serious people say without embarrassment. But — <<gesture down to punchline>> — a deal you can't verify is a deal you can't keep. That's the problem we're not talking about enough.
+  </aside>
+
+  <div class="footer-lockup">
+    <img src="../../logos/canary_X_bird.png" class="footer-bird" alt="Canary mark">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 335" aria-label="Canary Institute">
+      <defs><style>
+        .wm-l { font-family: "Trajan Pro","Cinzel","Times New Roman",serif; font-weight:400; fill:#1A2A28; font-size:88px; }
+        .cl-l { font-family: "Trajan Pro","Cinzel","Times New Roman",serif; font-weight:400; fill:#FFFFFF; font-size:88px; }
+        .tl-l { font-family: "Helvetica Neue","Helvetica","Arial",sans-serif; fill:#527872; font-size:33px; letter-spacing:7px; font-weight:400; }
+      </style></defs>
+      <rect x="113" y="52" width="72" height="162" rx="14" fill="#1A4A44"/>
+      <text x="82" y="122" text-anchor="middle" class="wm-l">C</text>
+      <text x="150" y="122" text-anchor="middle" class="cl-l">A</text>
+      <text x="192" y="122" class="wm-l" letter-spacing="4">NARY</text>
+      <text x="150" y="205" text-anchor="middle" class="cl-l">I</text>
+      <text x="192" y="205" class="wm-l" letter-spacing="4">NSTITUTE</text>
+      <line x1="50" y1="237" x2="650" y2="237" stroke="#1A4A44" stroke-width="3"/>
+      <text x="364" y="277" text-anchor="middle" class="tl-l">FOR AI POLICY</text>
+    </svg>
+  </div>
+  <div class="slide-num">2 / 12</div>
+</div>
+
+
+<!-- ============================================================
+     SLIDE 3: We've done this without trust before
+============================================================ -->
+<div class="slide">
+  <div class="deck-topic">Compute Verification</div>
+  <div class="cluster-name">American inspectors, Soviet gates</div>
+
+  <div class="content">
+    <div class="one-concept">
+      <div class="icon-placeholder">[ ICON ]<br>X-ray of<br>shipping<br>container</div>
+      <div class="concept-title">Two decades of cooperation, zero trust</div>
+      <ul class="beats">
+        <li>American inspectors stood at Soviet missile factories for twenty years</li>
+        <li>Every container big enough to hide a banned missile got x-rayed</li>
+        <li>Russian inspectors did the same in Utah</li>
+        <li>Nobody trusted anybody &mdash; the treaty held anyway</li>
+        <li><strong>Verification is what makes cooperation possible in the absence of trust.</strong></li>
+      </ul>
+    </div>
+  </div>
+
+  <aside class="voice-notes">
+    So how do you make a deal with an adversary you don't trust? Turns out we've done this before. <<gesture>> For most of my parents' adult lives, American inspectors stood at the gates of Soviet missile factories. Every container leaving those factories big enough to hide a banned missile got x-rayed. Same in Utah, Russians x-raying our containers. Two decades of this. <<pause>> Nobody trusted anybody. Nobody had to. What made cooperation possible wasn't good faith — it was the ability to check. That's the frame I want you to hold: verification is what makes cooperation possible in the absence of trust. Everything I'm about to describe is a version of that same move, applied to computers instead of missiles.
+  </aside>
+
+  <div class="footer-lockup">
+    <img src="../../logos/canary_X_bird.png" class="footer-bird" alt="Canary mark">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 335" aria-label="Canary Institute">
+      <defs><style>
+        .wm-l { font-family: "Trajan Pro","Cinzel","Times New Roman",serif; font-weight:400; fill:#1A2A28; font-size:88px; }
+        .cl-l { font-family: "Trajan Pro","Cinzel","Times New Roman",serif; font-weight:400; fill:#FFFFFF; font-size:88px; }
+        .tl-l { font-family: "Helvetica Neue","Helvetica","Arial",sans-serif; fill:#527872; font-size:33px; letter-spacing:7px; font-weight:400; }
+      </style></defs>
+      <rect x="113" y="52" width="72" height="162" rx="14" fill="#1A4A44"/>
+      <text x="82" y="122" text-anchor="middle" class="wm-l">C</text>
+      <text x="150" y="122" text-anchor="middle" class="cl-l">A</text>
+      <text x="192" y="122" class="wm-l" letter-spacing="4">NARY</text>
+      <text x="150" y="205" text-anchor="middle" class="cl-l">I</text>
+      <text x="192" y="205" class="wm-l" letter-spacing="4">NSTITUTE</text>
+      <line x1="50" y1="237" x2="650" y2="237" stroke="#1A4A44" stroke-width="3"/>
+      <text x="364" y="277" text-anchor="middle" class="tl-l">FOR AI POLICY</text>
+    </svg>
+  </div>
+  <div class="slide-num">3 / 12</div>
+</div>
+
+
+<!-- ============================================================
+     SLIDE 4: Compute has the same shape
+============================================================ -->
+<div class="slide">
+  <div class="deck-topic">Compute Verification</div>
+  <div class="cluster-name">One chokepoint, one field</div>
+
+  <div class="content">
+    <div class="one-concept">
+      <div class="icon-placeholder">[ ICON ]<br>ASML +<br>TSMC<br>chokepoint</div>
+      <div class="concept-title">The tracking machinery is half-built</div>
+      <ul class="beats">
+        <li>Fissile material &harr; leading-edge chips: one scarce physical resource, one field</li>
+        <li>EUV lithography = ASML, one company on Earth</li>
+        <li>Leading-edge fabrication = TSMC and a handful of others</li>
+        <li>Dual-use technology &rarr; aim at verification, not seizure</li>
+        <li><strong>The chokepoints are already there. Export controls half-built the machinery.</strong></li>
+      </ul>
+    </div>
+  </div>
+
+  <aside class="voice-notes">
+    Here's why the analogy has grip. Nuclear weapons and frontier AI have this weird property: the whole capability funnels through a scarce physical resource. For nukes it's fissile material — you can inventory the world's enrichment plants on a napkin. For AI it's leading-edge chips — every single one is patterned by EUV lithography machines, and only one company on Earth can build those machines. That's ASML, in the Netherlands. Almost all leading-edge fabrication happens at TSMC and a handful of others. <<gesture>> These are absurdly narrow chokepoints. Export controls already exploit them, which means the tracking machinery is half-built before any treaty is signed. And unlike nukes, we don't want to eliminate AI — it's dual-use. So we're aiming at verification, not seizure. Some uses allowed, some not.
+  </aside>
+
+  <div class="footer-lockup">
+    <img src="../../logos/canary_X_bird.png" class="footer-bird" alt="Canary mark">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 335" aria-label="Canary Institute">
+      <defs><style>
+        .wm-l { font-family: "Trajan Pro","Cinzel","Times New Roman",serif; font-weight:400; fill:#1A2A28; font-size:88px; }
+        .cl-l { font-family: "Trajan Pro","Cinzel","Times New Roman",serif; font-weight:400; fill:#FFFFFF; font-size:88px; }
+        .tl-l { font-family: "Helvetica Neue","Helvetica","Arial",sans-serif; fill:#527872; font-size:33px; letter-spacing:7px; font-weight:400; }
+      </style></defs>
+      <rect x="113" y="52" width="72" height="162" rx="14" fill="#1A4A44"/>
+      <text x="82" y="122" text-anchor="middle" class="wm-l">C</text>
+      <text x="150" y="122" text-anchor="middle" class="cl-l">A</text>
+      <text x="192" y="122" class="wm-l" letter-spacing="4">NARY</text>
+      <text x="150" y="205" text-anchor="middle" class="cl-l">I</text>
+      <text x="192" y="205" class="wm-l" letter-spacing="4">NSTITUTE</text>
+      <line x1="50" y1="237" x2="650" y2="237" stroke="#1A4A44" stroke-width="3"/>
+      <text x="364" y="277" text-anchor="middle" class="tl-l">FOR AI POLICY</text>
+    </svg>
+  </div>
+  <div class="slide-num">4 / 12</div>
+</div>
+
+
+<!-- ============================================================
+     SLIDE 5: The one thing we could never agree on
+============================================================ -->
+<div class="slide">
+  <div class="deck-topic">Compute Verification</div>
+  <div class="cluster-name">Silicon we both trust doesn&rsquo;t exist</div>
+
+  <div class="content">
+    <div class="one-concept">
+      <div class="icon-placeholder">[ ICON ]<br>chip with<br>red X /<br>hidden trojan</div>
+      <div class="concept-title">Forty years of arms talks, no shared chip</div>
+      <ul class="beats">
+        <li>Hardware trojans in dopants: invisible to optical inspection</li>
+        <li>Rowhammer: reading memory rows in rhythm flips bits in others &mdash; pure physics</li>
+        <li>No accepted method for proving a chip free of hidden functionality</li>
+        <li>Each side trusts its own silicon; neither trusts the other&rsquo;s</li>
+        <li><strong>Any verification regime has to work without mutually-trusted chips.</strong></li>
+      </ul>
+    </div>
+  </div>
+
+  <aside class="voice-notes">
+    There's a wall we hit if we try to run the nuclear playbook straight. In arms control, both sides spent decades trying to agree on a chip design they could jointly trust. They never got there. <<pause>> A chip can hide things. Researchers have shown you can plant a hardware trojan by tweaking dopant concentrations during fabrication — no added circuitry, no changed layout, nothing that shows up in optical inspection. And then there's Rowhammer — just reading memory rows in the right rhythm flips bits in other rows. Pure physics, no software bug required. <<gesture>> After forty years of this, we have no accepted method for proving an electronic system is free of hidden functionality. Both sides trust their own domestic silicon; neither will trust the other's. Any verification regime that requires mutually-trusted chips is dead on arrival. It has to work anyway.
+  </aside>
+
+  <div class="footer-lockup">
+    <img src="../../logos/canary_X_bird.png" class="footer-bird" alt="Canary mark">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 335" aria-label="Canary Institute">
+      <defs><style>
+        .wm-l { font-family: "Trajan Pro","Cinzel","Times New Roman",serif; font-weight:400; fill:#1A2A28; font-size:88px; }
+        .cl-l { font-family: "Trajan Pro","Cinzel","Times New Roman",serif; font-weight:400; fill:#FFFFFF; font-size:88px; }
+        .tl-l { font-family: "Helvetica Neue","Helvetica","Arial",sans-serif; fill:#527872; font-size:33px; letter-spacing:7px; font-weight:400; }
+      </style></defs>
+      <rect x="113" y="52" width="72" height="162" rx="14" fill="#1A4A44"/>
+      <text x="82" y="122" text-anchor="middle" class="wm-l">C</text>
+      <text x="150" y="122" text-anchor="middle" class="cl-l">A</text>
+      <text x="192" y="122" class="wm-l" letter-spacing="4">NARY</text>
+      <text x="150" y="205" text-anchor="middle" class="cl-l">I</text>
+      <text x="192" y="205" class="wm-l" letter-spacing="4">NSTITUTE</text>
+      <line x1="50" y1="237" x2="650" y2="237" stroke="#1A4A44" stroke-width="3"/>
+      <text x="364" y="277" text-anchor="middle" class="tl-l">FOR AI POLICY</text>
+    </svg>
+  </div>
+  <div class="slide-num">5 / 12</div>
+</div>
+
+
+<!-- ============================================================
+     SLIDE 6: The Glass Perimeter
+============================================================ -->
+<div class="slide">
+  <div class="deck-topic">Compute Verification</div>
+  <div class="cluster-name">Photons can&rsquo;t be programmed</div>
+
+  <div class="content">
+    <div class="one-concept">
+      <div class="icon-placeholder">[ ICON ]<br>optical<br>splitter<br>diagram</div>
+      <div class="concept-title">The Glass Perimeter &nbsp;&middot;&nbsp; <span style="font-size:16px; color:var(--color-muted); font-family:var(--font-ui); letter-spacing:0.1em;">AFTER CANKAYA, 2026</span></div>
+      <ul class="beats">
+        <li>Optical splitter: passive glass, no electronics, physically can&rsquo;t lie</li>
+        <li>Every prompt in, every response out &mdash; both parties see the same photons</li>
+        <li>Each side processes on its own hardware, on its own soil</li>
+        <li><strong>The boundary between adversaries is literally glass. Their electronics never touch yours.</strong></li>
+      </ul>
+    </div>
+  </div>
+
+  <aside class="voice-notes">
+    Here's the move that unlocks the problem — Naci Cankaya's proposal, published in June. He noticed that we don't need trusted chips if we can build a boundary that no chip can lie across. <<gesture to splitter>> That boundary is an optical splitter. Passive glass, basically a prism, no electronics, no firmware. If a photon enters, an exact copy exits both output ports. There's no compute inside. It literally cannot be programmed to do anything except split light. <<pause>> Every prompt entering the datacenter goes through one. Every response leaving does too. Both parties see the same photons. And critically: the Operator's electronics never touch the Verifier's electronics. Each side processes the same data on its own hardware, on its own soil. The boundary between adversaries is literally glass. That's the Glass Perimeter.
+  </aside>
+
+  <div class="footer-lockup">
+    <img src="../../logos/canary_X_bird.png" class="footer-bird" alt="Canary mark">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 335" aria-label="Canary Institute">
+      <defs><style>
+        .wm-l { font-family: "Trajan Pro","Cinzel","Times New Roman",serif; font-weight:400; fill:#1A2A28; font-size:88px; }
+        .cl-l { font-family: "Trajan Pro","Cinzel","Times New Roman",serif; font-weight:400; fill:#FFFFFF; font-size:88px; }
+        .tl-l { font-family: "Helvetica Neue","Helvetica","Arial",sans-serif; fill:#527872; font-size:33px; letter-spacing:7px; font-weight:400; }
+      </style></defs>
+      <rect x="113" y="52" width="72" height="162" rx="14" fill="#1A4A44"/>
+      <text x="82" y="122" text-anchor="middle" class="wm-l">C</text>
+      <text x="150" y="122" text-anchor="middle" class="cl-l">A</text>
+      <text x="192" y="122" class="wm-l" letter-spacing="4">NARY</text>
+      <text x="150" y="205" text-anchor="middle" class="cl-l">I</text>
+      <text x="192" y="205" class="wm-l" letter-spacing="4">NSTITUTE</text>
+      <line x1="50" y1="237" x2="650" y2="237" stroke="#1A4A44" stroke-width="3"/>
+      <text x="364" y="277" text-anchor="middle" class="tl-l">FOR AI POLICY</text>
+    </svg>
+  </div>
+  <div class="slide-num">6 / 12</div>
+</div>
+
+
+<!-- ============================================================
+     SLIDE 7: The audit loop
+============================================================ -->
+<div class="slide">
+  <div class="deck-topic">Compute Verification</div>
+  <div class="cluster-name">Enter the sealed room</div>
+
+  <div class="content">
+    <div class="one-concept">
+      <div class="icon-placeholder">[ ICON ]<br>two-computer<br>air-gap /<br>audit chamber</div>
+      <div class="concept-title">Random spot-checks, matched replays</div>
+      <ul class="beats">
+        <li>Verifier picks an output at random &mdash; a coin flip is fine</li>
+        <li>Weights, input, and manifest enter an air-gapped Audit Environment</li>
+        <li>Both sides replay the calculation; both compute the hash</li>
+        <li>Auditor emits one signed message: within-treaty, hashes match, done</li>
+        <li><strong>Model weights go in. Only a signed verdict comes out.</strong></li>
+      </ul>
+    </div>
+  </div>
+
+  <aside class="voice-notes">
+    So what actually happens when the Verifier wants to check something? <<gesture>> They pick a response — could be by coin flip, could be by scanning the Operator's manifest for anything suspicious. Doesn't matter. They send in a request: audit output number one-twenty-three, its hash was zero-x-D-3-4-D-B-E-3-F. The Operator loads the model weights, the input prompt, and the manifest into a sealed room inside the datacenter — the Audit Environment. Both sides have a computer in there. Both replay the calculation. Both compute the hash. If the hashes match and the content is within-treaty, the auditor emits one signed message: within-treaty, hashes match, done. <<pause>> The Operator sees exactly what the auditor sends out — no secrets exfiltrated. The Verifier sees exactly what the auditor computed — no fake proofs accepted. Model weights go in. Only a signed verdict comes out.
+  </aside>
+
+  <div class="footer-lockup">
+    <img src="../../logos/canary_X_bird.png" class="footer-bird" alt="Canary mark">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 335" aria-label="Canary Institute">
+      <defs><style>
+        .wm-l { font-family: "Trajan Pro","Cinzel","Times New Roman",serif; font-weight:400; fill:#1A2A28; font-size:88px; }
+        .cl-l { font-family: "Trajan Pro","Cinzel","Times New Roman",serif; font-weight:400; fill:#FFFFFF; font-size:88px; }
+        .tl-l { font-family: "Helvetica Neue","Helvetica","Arial",sans-serif; fill:#527872; font-size:33px; letter-spacing:7px; font-weight:400; }
+      </style></defs>
+      <rect x="113" y="52" width="72" height="162" rx="14" fill="#1A4A44"/>
+      <text x="82" y="122" text-anchor="middle" class="wm-l">C</text>
+      <text x="150" y="122" text-anchor="middle" class="cl-l">A</text>
+      <text x="192" y="122" class="wm-l" letter-spacing="4">NARY</text>
+      <text x="150" y="205" text-anchor="middle" class="cl-l">I</text>
+      <text x="192" y="205" class="wm-l" letter-spacing="4">NSTITUTE</text>
+      <line x1="50" y1="237" x2="650" y2="237" stroke="#1A4A44" stroke-width="3"/>
+      <text x="364" y="277" text-anchor="middle" class="tl-l">FOR AI POLICY</text>
+    </svg>
+  </div>
+  <div class="slide-num">7 / 12</div>
+</div>
+
+
+<!-- ============================================================
+     SLIDE 8: The statistics that make it work
+============================================================ -->
+<div class="slide">
+  <div class="deck-topic">Compute Verification</div>
+  <div class="cluster-name">Random beats exhaustive</div>
+
+  <div class="content">
+    <div class="one-concept">
+      <div class="icon-placeholder">[ ICON ]<br>dice /<br>lottery ball<br>+ hash symbol</div>
+      <div class="concept-title">You do not have to audit everything</div>
+      <ul class="beats">
+        <li>Zero failures in <em>n</em> random audits &rarr; 95% confidence &lt;<strong>3/<em>n</em></strong> of traffic is dirty</li>
+        <li>300 audits/day &rarr; cheating bounded below <strong>1%</strong> of workload</li>
+        <li>10,000 audits/day &rarr; cheating bounded below <strong>0.03%</strong></li>
+        <li>The bound doesn&rsquo;t depend on datacenter size</li>
+        <li><strong>Cheating becomes almost impossible to hide.</strong></li>
+      </ul>
+    </div>
+  </div>
+
+  <aside class="voice-notes">
+    Here's the part that made me a believer. <<gesture>> You do not have to audit every response. You audit at random. And there's a beautiful stats fact — call it Cankaya's Lemma — that says: if you do <em>n</em> random spot-checks and every one comes back clean, you can be ninety-five percent sure that under three-over-<em>n</em> of all traffic is dirty. <<pause>> Three hundred audits a day — fewer than a dozen an hour — bounds cheating below one percent of the workload. Ten thousand audits a day gets you below three hundredths of a percent. And here's the kicker: this doesn't depend on the size of the datacenter. Whether it's a hundred chips or a hundred thousand, three hundred spot-checks buys you the same guarantee. Audit cost stays bounded even as compute grows. Cheating becomes almost impossible to hide.
+  </aside>
+
+  <div class="footer-lockup">
+    <img src="../../logos/canary_X_bird.png" class="footer-bird" alt="Canary mark">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 335" aria-label="Canary Institute">
+      <defs><style>
+        .wm-l { font-family: "Trajan Pro","Cinzel","Times New Roman",serif; font-weight:400; fill:#1A2A28; font-size:88px; }
+        .cl-l { font-family: "Trajan Pro","Cinzel","Times New Roman",serif; font-weight:400; fill:#FFFFFF; font-size:88px; }
+        .tl-l { font-family: "Helvetica Neue","Helvetica","Arial",sans-serif; fill:#527872; font-size:33px; letter-spacing:7px; font-weight:400; }
+      </style></defs>
+      <rect x="113" y="52" width="72" height="162" rx="14" fill="#1A4A44"/>
+      <text x="82" y="122" text-anchor="middle" class="wm-l">C</text>
+      <text x="150" y="122" text-anchor="middle" class="cl-l">A</text>
+      <text x="192" y="122" class="wm-l" letter-spacing="4">NARY</text>
+      <text x="150" y="205" text-anchor="middle" class="cl-l">I</text>
+      <text x="192" y="205" class="wm-l" letter-spacing="4">NSTITUTE</text>
+      <line x1="50" y1="237" x2="650" y2="237" stroke="#1A4A44" stroke-width="3"/>
+      <text x="364" y="277" text-anchor="middle" class="tl-l">FOR AI POLICY</text>
+    </svg>
+  </div>
+  <div class="slide-num">8 / 12</div>
+</div>
+
+
+<!-- ============================================================
+     SLIDE 9: The hard part — training
+============================================================ -->
+<div class="slide">
+  <div class="deck-topic">Compute Verification</div>
+  <div class="cluster-name">Inference is easy. Training is the frontier.</div>
+
+  <div class="content">
+    <div class="one-concept">
+      <div class="icon-placeholder">[ ICON ]<br>cluster<br>mesh /<br>island diagram</div>
+      <div class="concept-title">Where the work still is</div>
+      <ul class="beats">
+        <li>Training: every chip talks to every chip &mdash; no clean I/O boundary</li>
+        <li>DiLoCo / Streaming DiLoCo: islands sync occasionally, deterministically</li>
+        <li>Bit-exact replay across GPU generations: ~85% today, needs 100%</li>
+        <li><strong>The engineering is hard. None of it requires a fundamental breakthrough.</strong></li>
+      </ul>
+    </div>
+  </div>
+
+  <aside class="voice-notes">
+    This all sounds great — for inference. Answering user queries, one at a time, clean input-output pairs. But most of the risk isn't inference; it's training. And training is genuinely hard here. <<gesture>> During training, every chip in the cluster talks to every other chip. There aren't clean input-output boundaries. You'd have to turn the whole datacenter over to audit mode and re-run from a checkpoint. <<pause>> But there's a way through. New distributed-training methods — Streaming DiLoCo, out of DeepMind — let separate "islands" of chips train mostly independently and sync only occasionally. Which means you could audit one island at a time, from one shard of data. Bit-exact reproduction across GPU generations is still only about eighty-five percent — needs to be a hundred. That's an engineering problem, not a physics problem. Nothing here requires a fundamental breakthrough. Just a lot of hard, focused work.
+  </aside>
+
+  <div class="footer-lockup">
+    <img src="../../logos/canary_X_bird.png" class="footer-bird" alt="Canary mark">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 335" aria-label="Canary Institute">
+      <defs><style>
+        .wm-l { font-family: "Trajan Pro","Cinzel","Times New Roman",serif; font-weight:400; fill:#1A2A28; font-size:88px; }
+        .cl-l { font-family: "Trajan Pro","Cinzel","Times New Roman",serif; font-weight:400; fill:#FFFFFF; font-size:88px; }
+        .tl-l { font-family: "Helvetica Neue","Helvetica","Arial",sans-serif; fill:#527872; font-size:33px; letter-spacing:7px; font-weight:400; }
+      </style></defs>
+      <rect x="113" y="52" width="72" height="162" rx="14" fill="#1A4A44"/>
+      <text x="82" y="122" text-anchor="middle" class="wm-l">C</text>
+      <text x="150" y="122" text-anchor="middle" class="cl-l">A</text>
+      <text x="192" y="122" class="wm-l" letter-spacing="4">NARY</text>
+      <text x="150" y="205" text-anchor="middle" class="cl-l">I</text>
+      <text x="192" y="205" class="wm-l" letter-spacing="4">NSTITUTE</text>
+      <line x1="50" y1="237" x2="650" y2="237" stroke="#1A4A44" stroke-width="3"/>
+      <text x="364" y="277" text-anchor="middle" class="tl-l">FOR AI POLICY</text>
+    </svg>
+  </div>
+  <div class="slide-num">9 / 12</div>
+</div>
+
+
+<!-- ============================================================
+     SLIDE 10: The state of the field
+============================================================ -->
+<div class="slide">
+  <div class="deck-topic">Compute Verification</div>
+  <div class="cluster-name">Twenty-five people</div>
+
+  <div class="content">
+    <div class="one-concept">
+      <div class="icon-placeholder">[ ICON ]<br>silhouettes<br>of ~25<br>figures</div>
+      <div class="concept-title">The load-bearing field, and how few are in it</div>
+      <ul class="beats">
+        <li>~60 papers total in the entire field</li>
+        <li>~72 researchers who&rsquo;ve published; most are part-time</li>
+        <li>~25 full-time equivalents worldwide</li>
+        <li>All accumulated knowledge = one week of reading</li>
+        <li><strong>Twenty-five people stand between us and enforceable AI treaties.</strong></li>
+      </ul>
+    </div>
+  </div>
+
+  <aside class="voice-notes">
+    Which brings me to the part I want you all to sit with. <<pause>> I spent the last month cataloguing the entire compute-verification research literature. All of it. It's sixty papers. You could read the entire accumulated knowledge of this field in a week. <<pause>> There are about seventy-two people who have published in the space; most of them part-time. If you count full-time equivalents, we are twenty-five. Twenty-five people, working on the load-bearing technical problem for whether the world stops racing toward the abyss. <<pause>> I'm not being cute — this is a real number, and it should horrify you. This is not a saturated field. This is not a crowded space. Twenty-five people stand between us and enforceable AI treaties. If you decide, next month, to become the twenty-sixth, you will materially change the odds.
+  </aside>
+
+  <div class="footer-lockup">
+    <img src="../../logos/canary_X_bird.png" class="footer-bird" alt="Canary mark">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 335" aria-label="Canary Institute">
+      <defs><style>
+        .wm-l { font-family: "Trajan Pro","Cinzel","Times New Roman",serif; font-weight:400; fill:#1A2A28; font-size:88px; }
+        .cl-l { font-family: "Trajan Pro","Cinzel","Times New Roman",serif; font-weight:400; fill:#FFFFFF; font-size:88px; }
+        .tl-l { font-family: "Helvetica Neue","Helvetica","Arial",sans-serif; fill:#527872; font-size:33px; letter-spacing:7px; font-weight:400; }
+      </style></defs>
+      <rect x="113" y="52" width="72" height="162" rx="14" fill="#1A4A44"/>
+      <text x="82" y="122" text-anchor="middle" class="wm-l">C</text>
+      <text x="150" y="122" text-anchor="middle" class="cl-l">A</text>
+      <text x="192" y="122" class="wm-l" letter-spacing="4">NARY</text>
+      <text x="150" y="205" text-anchor="middle" class="cl-l">I</text>
+      <text x="192" y="205" class="wm-l" letter-spacing="4">NSTITUTE</text>
+      <line x1="50" y1="237" x2="650" y2="237" stroke="#1A4A44" stroke-width="3"/>
+      <text x="364" y="277" text-anchor="middle" class="tl-l">FOR AI POLICY</text>
+    </svg>
+  </div>
+  <div class="slide-num">10 / 12</div>
+</div>
+
+
+<!-- ============================================================
+     SLIDE 11: Where you could help
+============================================================ -->
+<div class="slide">
+  <div class="deck-topic">Compute Verification</div>
+  <div class="cluster-name">Six problem areas, all open</div>
+
+  <div class="content">
+    <div class="areas-grid">
+      <div class="area-tile">
+        <div class="area-title">Hardware &amp; optics</div>
+        <div class="area-desc">800G passive taps, tamper-evident enclosures, fast memory wiping</div>
+      </div>
+      <div class="area-tile">
+        <div class="area-title">Networking &amp; systems</div>
+        <div class="area-desc">Line-rate packet hashing, detecting distributed training on the wire</div>
+      </div>
+      <div class="area-tile">
+        <div class="area-title">Cryptography</div>
+        <div class="area-desc">ZK proofs of inference/training at frontier scale, bit-exact replay</div>
+      </div>
+      <div class="area-tile">
+        <div class="area-title">Red-teaming</div>
+        <div class="area-desc">Nobody is red-teaming the whole regime yet &mdash; TEE, HEM, spoofing</div>
+      </div>
+      <div class="area-tile">
+        <div class="area-title">Physical evidence</div>
+        <div class="area-desc">Power traces, thermal signatures, satellite imagery, grid accounting</div>
+      </div>
+      <div class="area-tile">
+        <div class="area-title">Policy &amp; institutions</div>
+        <div class="area-desc">Attribution ladders, deal-stability, the international body itself</div>
+      </div>
+    </div>
+
+    <div class="project-callout">
+      Living project lists: <strong>Proofworks</strong> &nbsp;&middot;&nbsp; <strong>AI-2040</strong> &nbsp;&middot;&nbsp; <strong>Amodo</strong> &nbsp;&middot;&nbsp; <strong>Compute Verification Project</strong>
+    </div>
+
+    <div class="punchline">
+      Six months of your work = a couple percentage points of the field. <strong>That&rsquo;s HUGE.</strong>
+    </div>
+  </div>
+
+  <aside class="voice-notes">
+    So where do you actually help? <<gesture to grid>> Six areas, every one wide open. Hardware and optics — passive taps at eight hundred gigabits, tamper-evident enclosures. Networking and systems — reading a cluster from the wire, catching distributed training that's hiding as ordinary internet. Cryptography — zero-knowledge proofs of inference and training that scale past thirty billion parameters. Red-teaming — nobody is red-teaming this whole regime yet. Physical-world evidence — power signatures, thermal signatures, satellite imagery. And game theory and institutions — attribution ladders, deal stability, the international body that would actually run any of this. <<pause>> The living project lists are up there — Proofworks, AI-2040, Amodo, the Compute Verification Project. Every one names specific open problems with specific dollar figures. Six months of your work, in any of these, and you would materially move the field. That's HUGE.
+  </aside>
+
+  <div class="footer-lockup">
+    <img src="../../logos/canary_X_bird.png" class="footer-bird" alt="Canary mark">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 335" aria-label="Canary Institute">
+      <defs><style>
+        .wm-l { font-family: "Trajan Pro","Cinzel","Times New Roman",serif; font-weight:400; fill:#1A2A28; font-size:88px; }
+        .cl-l { font-family: "Trajan Pro","Cinzel","Times New Roman",serif; font-weight:400; fill:#FFFFFF; font-size:88px; }
+        .tl-l { font-family: "Helvetica Neue","Helvetica","Arial",sans-serif; fill:#527872; font-size:33px; letter-spacing:7px; font-weight:400; }
+      </style></defs>
+      <rect x="113" y="52" width="72" height="162" rx="14" fill="#1A4A44"/>
+      <text x="82" y="122" text-anchor="middle" class="wm-l">C</text>
+      <text x="150" y="122" text-anchor="middle" class="cl-l">A</text>
+      <text x="192" y="122" class="wm-l" letter-spacing="4">NARY</text>
+      <text x="150" y="205" text-anchor="middle" class="cl-l">I</text>
+      <text x="192" y="205" class="wm-l" letter-spacing="4">NSTITUTE</text>
+      <line x1="50" y1="237" x2="650" y2="237" stroke="#1A4A44" stroke-width="3"/>
+      <text x="364" y="277" text-anchor="middle" class="tl-l">FOR AI POLICY</text>
+    </svg>
+  </div>
+  <div class="slide-num">11 / 12</div>
+</div>
+
+
+<!-- ============================================================
+     SLIDE 12: Closing
+============================================================ -->
+<div class="slide">
+  <div class="deck-topic">Compute Verification</div>
+  <div class="cluster-name">If we want to, we can</div>
+
+  <div class="content">
+    <div class="closing">
+      <div class="soundbite">
+        Whether we pace the frontier isn&rsquo;t a technology question.<br>
+        It&rsquo;s a question of whether we want to.
+      </div>
+      <div class="contact">
+        <a href="mailto:dan@canaryinstitute.ai">dan@canaryinstitute.ai</a>
+      </div>
+      <div class="qr-block">
+        <div class="qr-label">Scan &rarr; canaryinstitute.ai</div>
+        <div class="qr-placeholder">[ QR ]<br>canaryinstitute.ai<br>~160&times;160 px</div>
+      </div>
+    </div>
+  </div>
+
+  <aside class="voice-notes">
+    I want to close where I started. <<pause>> We paced nuclear weapons for four decades — not because we trusted our adversaries, but because we built the tools to verify without trust. The tools worked, and both sides could see they worked, and so the deals stuck. <<gesture>> The tools for AI verification are eighty percent engineering and twenty percent politics. Nothing on this deck requires a scientific breakthrough. It requires people. <<pause>> If we want to stop the race dynamics, we can. Whether we pace the frontier isn't a technology question. It's a question of whether we want to. <<pause, end>> I'm Dan Parshall — dan at canaryinstitute dot ai. If any of this hits, please come find me during the breakouts. Thank you.
+  </aside>
+
+  <div class="footer-lockup">
+    <img src="../../logos/canary_X_bird.png" class="footer-bird" alt="Canary mark">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 335" aria-label="Canary Institute">
+      <defs><style>
+        .wm-l { font-family: "Trajan Pro","Cinzel","Times New Roman",serif; font-weight:400; fill:#1A2A28; font-size:88px; }
+        .cl-l { font-family: "Trajan Pro","Cinzel","Times New Roman",serif; font-weight:400; fill:#FFFFFF; font-size:88px; }
+        .tl-l { font-family: "Helvetica Neue","Helvetica","Arial",sans-serif; fill:#527872; font-size:33px; letter-spacing:7px; font-weight:400; }
+      </style></defs>
+      <rect x="113" y="52" width="72" height="162" rx="14" fill="#1A4A44"/>
+      <text x="82" y="122" text-anchor="middle" class="wm-l">C</text>
+      <text x="150" y="122" text-anchor="middle" class="cl-l">A</text>
+      <text x="192" y="122" class="wm-l" letter-spacing="4">NARY</text>
+      <text x="150" y="205" text-anchor="middle" class="cl-l">I</text>
+      <text x="192" y="205" class="wm-l" letter-spacing="4">NSTITUTE</text>
+      <line x1="50" y1="237" x2="650" y2="237" stroke="#1A4A44" stroke-width="3"/>
+      <text x="364" y="277" text-anchor="middle" class="tl-l">FOR AI POLICY</text>
+    </svg>
+  </div>
+  <div class="slide-num">12 / 12</div>
+</div>
+
+</body>
+</html>
