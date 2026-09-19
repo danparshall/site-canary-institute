@@ -54,7 +54,10 @@ const formatDate = (d: string) =>
       <slot />
     </div>
 
-    <hr />
+    <aside class="follow-substack" aria-label="Follow Canary on Substack">
+      <p class="follow-pitch">Get new Canary essays by email on Substack.</p>
+      <a class="follow-cta" href="https://canaryinstitute.substack.com">Follow on Substack &rarr;</a>
+    </aside>
 
     <footer class="post-footer">
       <p class="post-dates">
@@ -209,6 +212,47 @@ const formatDate = (d: string) =>
     padding-left: 1.25rem;
     margin: 1.5rem 0;
     font-style: italic;
+  }
+
+  .follow-substack {
+    border-top: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
+    margin: 2rem 0;
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .follow-pitch {
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: var(--color-grey);
+    margin: 0;
+    max-width: 40ch;
+  }
+
+  .follow-cta {
+    font-family: var(--font-ui);
+    font-size: 0.85rem;
+    letter-spacing: 0.03em;
+    color: var(--color-white);
+    background: var(--color-accent);
+    border: 1px solid var(--color-accent);
+    padding: 0.6rem 1rem;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+  }
+
+  .follow-cta:hover,
+  .follow-cta:focus-visible {
+    background: var(--color-dark);
+    border-color: var(--color-dark);
+    color: var(--color-white);
   }
 
   .post-footer {
