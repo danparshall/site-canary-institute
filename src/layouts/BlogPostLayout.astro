@@ -70,6 +70,22 @@ const formatDate = (d: string) =>
       </p>
       <a href={`${base}blog/`}>&larr; Back to all posts</a>
     </footer>
+    <script is:inline>
+      // Move the Follow-on-Substack aside to sit ABOVE the auto-rendered
+      // footnotes section, so the reading order is:
+      //   essay body -> bio -> follow block -> footnotes -> post-footer
+      // Runs inline during parse (before first paint) so there's no flash.
+      // If there are no footnotes on the page, the aside stays where it is.
+      (function () {
+        var post = document.currentScript && document.currentScript.closest('.blog-post');
+        if (!post) return;
+        var follow = post.querySelector('.follow-substack');
+        var footnotes = post.querySelector('.post-body section[data-footnotes], .post-body section.footnotes');
+        if (follow && footnotes && footnotes.parentNode) {
+          footnotes.parentNode.insertBefore(follow, footnotes);
+        }
+      })();
+    </script>
   </article>
 </BaseLayout>
 
