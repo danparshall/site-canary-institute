@@ -124,7 +124,7 @@ The technology decides what's provable. The treaty decides what to prove. Both n
 
 I'm currently working on that final problem, regarding the game theory analysis in the scenario where algorithmic progress makes the total amount of compute required lower over time.  If you're interested in discussing, please reach out to me!
 
-[^trust]: For a more detailed walkthrough of what looks like the strongest near-term proposal, see my earlier ["If you can't trust, then verify!"](https://canaryinstitute.substack.com/p/if-you-cant-trust-then-verify) on Substack.
+[^trust]: For a more detailed walkthrough of what looks like the strongest near-term proposal, see my earlier ["If you can't trust, then verify!"](https://canaryinstitute.ai/blog/cant-trust-then-verify).
 
 ---
 
