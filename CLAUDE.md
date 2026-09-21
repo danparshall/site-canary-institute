@@ -19,7 +19,7 @@ If you genuinely need a private working copy (e.g., to stage sensitive content b
 
 ## Private working material lives elsewhere
 
-Private working material lives in **danparshall/site-canary-institute-drafts** (private repo, cloned at `~/code/websites/canary-drafts`). **THIS REPO IS PUBLIC — never commit drafts, plans, session summaries, or convo docs here.** The paths `drafts/`, `plans/`, and `crossposts/` are gitignored; do not un-ignore them. (`slides/` is deliberately public.)
+Private working material lives in **danparshall/site-canary-institute-drafts** (private repo, cloned at `~/code/websites/site-canary-institute-drafts`). **THIS REPO IS PUBLIC — never commit drafts, plans, session summaries, or convo docs here.** The paths `drafts/`, `plans/`, and `crossposts/` are gitignored; do not un-ignore them. (`slides/` is deliberately public.)
 
 ## Environment (overrides global Python policy)
 
