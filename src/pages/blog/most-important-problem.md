@@ -70,7 +70,7 @@ Sign up for the [Lens Academy course](https://lensacademy.org/courses/compute-ve
 
 The physical layer has to exist for anything else to work. Right now it doesn't.
 
-- **Passive optical taps at 800G and up** (53–106 GBaud). Existing taps stop at 26 GBaud, and AI-2040 calls this "probably the most time-sensitive hardware problem in the field." ([Amodo](https://amododesign.com/notes/2026-05-03-network-tapping/); [AI-2040 Get Involved](https://ai-2040.com/supplements/verification-plan/get-involved))
+- **Passive optical taps at 800G and up** (53–106 GBaud per lane). Taps are demonstrated at 400G (26 GBaud lanes); the 53 GBaud lanes of 800G-DR8 are believed feasible but undemonstrated, and AI-2040 calls this "probably the most time-sensitive hardware problem in the field." ([Amodo](https://amododesign.com/notes/2026-05-03-network-tapping/); [AI-2040 Get Involved](https://ai-2040.com/supplements/verification-plan/get-involved))
 - **Tamper-evident, retrofittable enclosures for existing racks.** FlexHEG estimates 2–10 person-years; some IAEA seals in the nuclear world "have reportedly been compromised." ([FlexHEG II](https://arxiv.org/abs/2506.03409))
 - **Fast, provable memory wiping.** HBM takes minutes; NVMe takes hours; one demo left more than 100TB of memory unwiped. ([Amodo](https://amododesign.com/notes/2026-07-01-memory-wiping/))
 - **Hardware design attestation** — matching a scanned chip to its HDL, verifiable fabrication, vetted open-source secure boot. RAND: "no single technique provides sufficient protection." ([Ilhan et al., Apr 2026](https://aigi.ox.ac.uk/publications/verifiable-semiconductor-manufacturing/))
