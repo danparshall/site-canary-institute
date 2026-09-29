@@ -11,6 +11,7 @@ const posts = allPosts
 const alignmentPosts = posts.filter(p => p.frontmatter.area === 'alignment');
 const econPosts = posts.filter(p => p.frontmatter.area === 'economic-impacts');
 const governancePosts = posts.filter(p => p.frontmatter.area === 'ai-governance');
+const verificationPosts = posts.filter(p => p.frontmatter.area === 'compute-verification');
 const generalPosts = posts.filter(p => !p.frontmatter.area);
 ---
 
@@ -69,6 +70,23 @@ const generalPosts = posts.filter(p => !p.frontmatter.area);
         <h2 class="toc-heading">AI Governance</h2>
         <ul class="toc">
           {governancePosts.map((post) => (
+            <li class="toc-entry">
+              <time datetime={post.frontmatter.date}>
+                {new Date(post.frontmatter.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+              </time>
+              <a href={post.url}>{post.frontmatter.title}</a>
+              {post.frontmatter.paper && <span class="paper-badge">paper</span>}
+            </li>
+          ))}
+        </ul>
+      </div>
+    )}
+
+    {verificationPosts.length > 0 && (
+      <div class="toc-group">
+        <h2 class="toc-heading">Compute Verification</h2>
+        <ul class="toc">
+          {verificationPosts.map((post) => (
             <li class="toc-entry">
               <time datetime={post.frontmatter.date}>
                 {new Date(post.frontmatter.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}

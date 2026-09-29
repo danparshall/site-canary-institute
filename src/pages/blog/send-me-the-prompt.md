@@ -4,7 +4,6 @@ title: "Send me the prompt"
 description: "If you want people to actually read what you are posting, you should send the costly signal showing it isn't slop."
 date: "2026-08-31"
 author: "Daniel Parshall, Ph.D."
-area: "ai-governance"
 ---
 
 If you want people to *actually read* what you are posting, you should send the costly signal showing it isn't slop.

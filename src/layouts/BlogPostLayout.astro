@@ -10,7 +10,7 @@ interface Props {
     author?: string;
     paper?: string;
     abstract?: string;
-    area?: 'alignment' | 'economic-impacts' | 'ai-governance';
+    area?: 'alignment' | 'economic-impacts' | 'ai-governance' | 'compute-verification';
   };
 }
 
@@ -21,6 +21,7 @@ const areaLabels: Record<string, string> = {
   'alignment': 'Alignment & Control',
   'economic-impacts': 'Economic Impacts',
   'ai-governance': 'AI Governance',
+  'compute-verification': 'Compute Verification',
 };
 
 const areaLabel = frontmatter.area ? areaLabels[frontmatter.area] : null;

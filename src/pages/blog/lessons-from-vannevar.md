@@ -4,7 +4,7 @@ title: "Industrializing a small field: Lessons from Vannevar"
 description: "AI Safety needs to quickly transform from a \"community\" to an \"industry\"; the Manhattan Project is a good example!"
 date: "2026-08-02"
 author: "Daniel Parshall, Ph.D."
-area: "ai-governance"
+area: "compute-verification"
 ---
 
 *AI Safety needs to quickly transform from a "community" to an "industry"; the Manhattan Project is a good example!*

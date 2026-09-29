@@ -4,7 +4,7 @@ title: "If you can't trust, then verify!"
 description: "How the \"Glass Perimeter\" could enable AI treaties"
 date: "2026-08-28"
 author: "Daniel Parshall, Ph.D."
-area: "ai-governance"
+area: "compute-verification"
 ---
 
 *How the "Glass Perimeter" could enable AI treaties*

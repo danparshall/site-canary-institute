@@ -4,7 +4,7 @@ title: "The most important problem you've never heard of"
 description: "Compute verification is the linchpin of pacing agreements... and only around 25 people are working on it full-time."
 date: "2026-09-15"
 author: "Daniel Parshall, Ph.D."
-area: "ai-governance"
+area: "compute-verification"
 ---
 
 *Compute verification is the linchpin of pacing agreements... and only around 25 people are working on it full-time.*
