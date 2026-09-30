@@ -153,6 +153,16 @@ const formatDate = (d: string) =>
     margin-top: 2rem;
   }
 
+  .post-body :global(ul),
+  .post-body :global(ol) {
+    margin-bottom: 1rem;
+  }
+
+  .post-body :global(li > ul),
+  .post-body :global(li > ol) {
+    margin-bottom: 0;
+  }
+
   .post-body :global(img) {
     max-width: 100%;
     height: auto;
