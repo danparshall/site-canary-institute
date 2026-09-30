@@ -71,10 +71,17 @@ a:hover {
   color: var(--color-accent);
 }
 
-/* Links inside body text must be distinguishable without relying on color
-   (WCAG 1.4.1 / axe link-in-text-block). */
-main p a {
+/* Links in page content must be distinguishable at rest, without relying on
+   color or hover (WCAG 1.4.1 / axe link-in-text-block; touch devices have no
+   hover). Card- and button-style links opt out in their own component styles. */
+main a {
+  color: var(--color-accent);
   text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+main a:hover {
+  color: var(--color-dark);
 }
 
 /* Layout */
