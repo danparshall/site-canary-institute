@@ -9,9 +9,11 @@ area: "compute-verification"
 
 *How the "Glass Perimeter" could enable AI treaties*
 
+*In alignment with our [AI Usage policy](https://canaryinstitute.ai/about#ai-usage), the Pangram score of [this piece](https://www.pangram.com/history/6277c68f-4b60-474b-87b3-e43277acdc77): **93% human**.*
+
 ---
 
-*Thanks to Naci Cankaya for reviewing an earlier draft of this post; I'm deliberately simplifying many aspects for conceptual clarity, and any mistakes are mine.  He also asked me to emphasize that this is a proposal, and many pieces still need extensive work.  If you're interested in helping, see [proofworks.cc/living-docs](https://proofworks.cc/living-docs/) and the AI-2040 [Get Involved in Verification](https://ai-2040.com/supplements/verification-plan/get-involved) page.*
+*Thanks to Naci Cankaya for reviewing an earlier draft of this post; I'm deliberately simplifying many aspects for conceptual clarity, and any mistakes are mine.  He also asked me to emphasize that this is a proposal, and many pieces still need extensive work.  If you're interested in helping, see [proofworks.cc/living-docs](https://proofworks.cc/living-docs/) and the AI-2040 [Get Involved in Verification](https://ai-2040.com/supplements/verification-plan/get-involved) page, or my collection at [canaryinstitute.ai/blog/most-important-problem](https://canaryinstitute.ai/blog/most-important-problem).*
 
 Imagine that you would like to make a deal with a powerful adversary; maybe China, maybe Russia, whomever. And imagine further that they also would like to make a deal with you.  But if you absolutely don't trust each other, is it even _possible_ to make a deal?
 
@@ -91,6 +93,18 @@ Using the Glass Perimeter Audit step under typical conditions would require turn
 Overall I think this says that we *can* do it, if we want to!  We wanted it badly enough for nuclear weapons, and our adversaries wanted the same. So even though we didn't trust each other, we found a way to work together *anyway* for something that was mutually beneficial.  We now have the same option for AI development, and the primary question is: do we think it's worth it?
 
 If we want to stop the "AI race" dynamics, we can.
+
+## Addendum (October 2026)
+
+*Addendum written by Claude Opus 5.5 on 2026-10-19, from Dan's notes and sources.*
+
+Since this post went up, I've learned something important.  Bit-exact replay was already known to work for *inference*, which is what Cankaya's proposal was built around.  Whether *training* could be replayed exactly was an open question.  I've since confirmed that industry already replays training steps at frontier scale and checks that they match.
+
+- **Google** describes "lightweight deterministic replay" in production in its [Gemini 2.5 technical report](https://arxiv.org/abs/2507.06261) (§2.3).  Any training step with suspicious metrics is immediately re-run, and per-device checksums are compared to find the faulty chip within minutes.  About 0.25% of steps were replayed, and 94% of those replays came back clean.  The report doesn't use the word "bit-exact," but comparing checksums only works if a healthy chip reproduces the step exactly.
+- **AWS** researchers (with Harvard) trained identical models side by side on fifteen pairs of machines, and confirmed that "the computation results are exactly the same on any two healthy nodes" ([Ma et al., ACL 2025](https://arxiv.org/abs/2502.12340)).
+- An industry whitepaper on silent data corruption, with co-authors from Meta, Google, NVIDIA, AMD, Intel, ARM and Microsoft ([Open Compute Project, 2025](https://www.opencompute.org/documents/sdc-in-ai-ocp-whitepaper-final-pdf)), lists deterministic replay and shadow-node comparison among the tools hyperscalers already use.
+
+So exact replay of training is no longer hypothetical.  And because the labs do it for their own reasons (hunting down faulty chips), an audit would be asking for access to machinery that already exists, rather than for new equipment.  Two caveats: both demonstrations run on XLA-compiled stacks (Google's TPUs, and an unnamed accelerator in the AWS study), and bit-exact training replay at scale on NVIDIA GPUs has not yet been shown.  Neither tested the island-of-computers case I speculate about above.
 
 ----
 
