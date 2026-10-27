@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>P056 Secure boot and firmware integrity</title>
+<style>
+:root { --bg:#fbfaf7; --fg:#1c1c1a; --muted:#66655f; --rule:#e3e1d9; --panel:#f3f1ea; --link:#7a4f00;
+  --Posed:#e6e4de; --Analyzed:#d5e1fa; --Started:#fbe9ad; --Done:#c9ecd6; --Failed:#f6cfc8; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg:#151513; --fg:#e7e5de; --muted:#9c9a91;
+  --rule:#34332e; --panel:#1f1e1b; --link:#e2a94a; --Posed:#3b3a36; --Analyzed:#22385f; --Started:#4f3f0c;
+  --Done:#174428; --Failed:#5c241c; } }
+:root[data-theme="dark"] { --bg:#151513; --fg:#e7e5de; --muted:#9c9a91; --rule:#34332e; --panel:#1f1e1b; --link:#e2a94a;
+  --Posed:#3b3a36; --Analyzed:#22385f; --Started:#4f3f0c; --Done:#174428; --Failed:#5c241c; }
+* { box-sizing:border-box; }
+html { background:var(--bg); }
+body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
+main { max-width:68rem; margin:0 auto; padding:2rem 16px 5rem; }
+h1 { font-size:1.9rem; line-height:1.2; margin:0 0 1rem; }
+h2 { font-size:1.3rem; margin:2.6rem 0 .8rem; padding-top:1.2rem; border-top:2px solid var(--rule); }
+h2 .count { font-size:.85rem; font-weight:400; color:var(--muted); margin-left:.4rem; }
+h4 { font-size:.8rem; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin:1.1rem 0 .4rem; }
+header p { max-width:46rem; }
+a { color:var(--link); }
+code { font-size:.85em; background:var(--panel); padding:0 .25em; border-radius:3px; }
+.note, .flag, .top, .permalink { color:var(--muted); font-size:.88rem; }
+.scroll { overflow-x:auto; }
+table { border-collapse:collapse; width:100%; }
+th, td { text-align:left; vertical-align:top; padding:.45rem .55rem; border-bottom:1px solid var(--rule); }
+th { font-size:.78rem; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); font-weight:600; }
+td.num, th.num { text-align:right; font-variant-numeric:tabular-nums; }
+td.zero { color:var(--muted); opacity:.55; }
+.tag { display:inline-block; font-size:.78rem; font-weight:650; padding:.15em .6em; border-radius:4px;
+  white-space:nowrap; }
+.s-Posed { background:var(--Posed); } .s-Analyzed { background:var(--Analyzed); }
+.s-Started { background:var(--Started); } .s-Done { background:var(--Done); } .s-Failed { background:var(--Failed); }
+td.st { font-weight:650; font-size:.85rem; white-space:nowrap; }
+.overview th[class^="s-"] { color:var(--fg); text-align:right; }
+.legend { background:var(--panel); border-radius:8px; padding:.9rem 1.1rem; margin:1.4rem 0; }
+.legend ul { list-style:none; padding:0; margin:.6rem 0 0; display:grid; gap:.35rem; }
+.legend .disclaimer { margin:0; font-size:.93rem; }
+.overview td:first-child { min-width:14rem; }
+.overview tfoot td { font-weight:650; border-bottom:none; }
+.barcell { width:22%; min-width:8rem; }
+.bar { display:flex; height:.8rem; border-radius:4px; overflow:hidden; background:var(--rule); }
+.params { margin:1.2rem 0; } .params summary { cursor:pointer; font-weight:600; }
+.controls { display:flex; gap:.5rem; margin:1.5rem 0 0; }
+button { font:inherit; font-size:.85rem; padding:.3rem .8rem; border:1px solid var(--rule); border-radius:6px;
+  background:var(--panel); color:var(--fg); cursor:pointer; }
+table.problems td.pid, td.sqid { white-space:nowrap; font-variant-numeric:tabular-nums; font-weight:600; }
+td.sqid { font-weight:400; font-size:.8rem; color:var(--muted); }
+.ptitle { display:block; font-weight:600; }
+tr.summary { cursor:pointer; }
+tr.summary:hover td, tbody.open tr.summary td { background:var(--panel); }
+tr.summary td.pid::before { content:"▸ "; color:var(--muted); }
+tbody.open tr.summary td.pid::before { content:"▾ "; }
+html.js tr.detail { display:none; }
+html.js tbody.open tr.detail { display:table-row; }
+tr.detail > td { background:var(--panel); padding:.2rem 1rem 1rem 2rem; }
+.detail-body { max-width:52rem; }
+.statement { margin:.8rem 0 .4rem; }
+.scope { margin:.3rem 0; }
+blockquote.evidence { margin:.4rem 0 .6rem; padding:.3rem .9rem; border-left:3px solid var(--rule); font-style:italic; }
+blockquote.evidence footer { font-style:normal; font-size:.85rem; color:var(--muted); margin-top:.25rem; }
+ul.posed { padding-left:1.1rem; margin:.2rem 0; }
+table.subq { font-size:.92rem; background:var(--bg); }
+td.report { color:var(--muted); font-size:.85rem; min-width:9rem; }
+ul.docs li { margin:.2rem 0; }
+footer.gen { margin-top:3rem; color:var(--muted); font-size:.85rem; }
+main.detail-page { max-width:52rem; }
+.crumb { font-size:.9rem; margin-bottom:1rem; }
+h1 .pid { color:var(--muted); font-variant-numeric:tabular-nums; }
+.question { font-size:1.1rem; font-weight:600; }
+main.detail-page h2 { font-size:1.1rem; margin:2rem 0 .6rem; padding-top:.8rem; }
+h3.for { font-size:.95rem; font-weight:600; margin:1.2rem 0 .3rem; }
+.label { background:var(--panel); border-radius:8px; padding:.7rem 1rem; font-size:.9rem; }
+ul.related { padding-left:1.1rem; } ul.related li { margin:.5rem 0; }
+q.found { display:block; font-style:italic; margin:.2rem 0; }
+.also { display:block; color:var(--muted); font-size:.85rem; }
+@media (max-width:640px) { th.barcell, td.barcell { display:none; } tr.detail > td { padding-left:.8rem; }
+  .overview td:first-child { min-width:9rem; } }
+</style>
+</head>
+<body>
+<main class="detail-page">
+<nav class="crumb"><a href="../index.html#area-c08-roots-of-trust-tees">← Roots of trust, secure boot, firmware, TEEs and memory attestation</a></nav>
+<header><h1><span class="pid">P056</span> Secure boot and firmware integrity</h1>
+<p class="question">Can an untrusting verifier confirm an accelerator runs only signed, non-rolled-back, auditable firmware, and has secure boot been bypassed in published work?</p>
+<p class="statement">Secure boot, anti-rollback and auditability of accelerator firmware.</p>
+</header>
+<div class="status-block"><h4>Status</h4><p class="scope"><span class="tag s-Analyzed">Analyzed</span> Design options only: jointly created firmware reference measurements, and listed ways to attest that verification firmware stays present (secure boot made impossible to disable, a secure counter, randomly timed low-latency attestation); Shavit 2023 proposes signed-firmware enforcement, anti-rollback and early remote attestation of updates. Nothing built or tested. Bypass clause at a lower stage: no held document reports a secure-boot bypass of a data-centre GPU; flexHEG Part 2 describes voltage-glitch attacks on secure boot in general from a source not held; Skorobogatov &amp; Woods 2012 broke an FPGA's protections, not an accelerator's. H100 secure boot and anti-rollback features are reported second-hand (Petrie 2024; Scher &amp; Thiergart) from NVIDIA documents not held.</p><blockquote class="evidence">To obtain reliable reference measurements when the hardware designer’s measurements are untrusted, without gaining access to private information such as the Prover’s code, one option may be for the Verifier and Prover to jointly create reference measurements by emulating a compliant bootup on a confidentiality-preserving technology (e.g., Confidential Computing).<footer>Baker, Kulp, Marks, Brundage &amp; Heim (2025), Verifying International Agreements on AI: Six Layers of Verification (RAND WR-A4077-1) (2025-07-25), L2403–2407</footer></blockquote></div>
+<h2>Posed by</h2><ul class="posed"><li>Baker, Kulp, Marks, Brundage &amp; Heim (2025), <em>Verifying International Agreements on AI: Six Layers of Verification for Rules on Large-Scale AI Development and Deployment</em> (RAND WR-A4077-1): <q>In secure boot, firmware attests to itself, so malicious firmware might hide its own malicious properties</q> (App. A.1 fn 86, p. 38, L2320)</li></ul><p class="others"><strong>Also raised in:</strong> Harack et al. (2025), <em>Verification for International AI Governance</em> (Oxford AIGI); Scher &amp; Thiergart (2024), <em>Mechanisms to Verify International Agreements About AI Development</em> (MIRI); Petrie &amp; Aarne (2025), <em>Technical Options for Flexible Hardware-Enabled Guarantees</em> (flexHEG Part 2); Aarne, Fist &amp; Withers (2024), <em>Secure, Governable Chips</em> (CNAS); Shavit (2023), <em>What Does It Take to Catch a Chinchilla? Verifying Rules on Large-Scale Neural Network Training via Compute Monitoring</em>; Hausenloy &amp; Li (2026), <em>The Compute Verification Post</em>; Proofworks, <em>Living Verification Documents</em>.</p>
+<h2>Sub-questions</h2><div class="scroll"><table class="subq"><thead><tr><th>ID</th><th>Sub-question</th><th>What the sources report</th></tr></thead><tbody><tr id="sq-P056.1"><td class="sqid">P056.1</td><td>Has secure boot on a current data-centre GPU been bypassed (e.g. voltage glitching, boot-ROM vulnerability) in published work, at what access level and equipment cost?</td><td class="report">partly answered</td></tr><tr id="sq-P056.2"><td class="sqid">P056.2</td><td>Can an operator downgrade signed GPU firmware past the anti-rollback counter, and does any accelerator give an attestable, timestamped firmware-version history?</td><td class="report">open</td></tr><tr id="sq-P056.3"><td class="sqid">P056.3</td><td>Of published accelerator security vulnerabilities, what fraction were fixable by firmware update?</td><td class="report">open</td></tr><tr id="sq-P056.4"><td class="sqid">P056.4</td><td>Can an untrusting Verifier audit accelerator firmware (source + reproducible build matching the signed binary), so chipmaker–Prover collusion on backdoored firmware is excluded?</td><td class="report">partly answered</td></tr><tr id="sq-P056.5"><td class="sqid">P056.5</td><td>Has scanning of boot-ROM / first-stage bootloader storage detected a planted firmware trojan that remote attestation missed?</td><td class="report">open</td></tr><tr id="sq-P056.6"><td class="sqid">P056.6</td><td>Can reference measurements for firmware attestation be generated jointly (e.g. emulated compliant boot in a confidential environment) without trusting the designer?</td><td class="report">open</td></tr><tr id="sq-P056.7"><td class="sqid">P056.7</td><td>Has a mechanism that keeps verification firmware continuously present (non-disableable secure boot, increment-only counter, random low-latency attestation) been implemented and red-teamed, closing the gap after the attestation moment?</td><td class="report">open</td></tr><tr id="sq-P056.8"><td class="sqid">P056.8</td><td>Can a measured-boot chain on H100 CC be extended to the framework/model layer with a stated overhead?</td><td class="report">open</td></tr></tbody></table></div>
+<h2>Sub-questions not yet stated precisely enough to check</h2><div class="scroll"><table class="subq"><thead><tr><th>ID</th><th>Sub-question</th></tr></thead><tbody><tr id="sq-P056.9"><td class="sqid">P056.9</td><td>Does formal verification of security firmware/hardware hold up given flawed specs, compilers or hardware models (cf. exploitable bugs in formally verified vendor code)?</td></tr><tr id="sq-P056.10"><td class="sqid">P056.10</td><td>Does AI-assisted vulnerability finding shift the offense–defense balance for chip security mechanisms?</td></tr></tbody></table></div>
+<h2>Possibly relevant work found by automated search</h2><p class="label">Found by AI agents searching for this problem's sub-questions, mostly by keyword and citation in the OpenAlex scholarly database and on the web; a second AI pass reviewed each one, and we spot-checked some by hand. They seemed reasonably related, as far as one can tell from outside each paper's field. Some come from neighbouring fields, such as arms control and financial audit, and bear on the problem by analogy. Not reviewed against the status above; a paper listed here does not change that status. 926 of 1119 quotes checked word for word against the paper's text.</p><h3 class="for">For P056.1: Has secure boot on a current data-centre GPU been bypassed (e.g. voltage glitching, boot-ROM vulnerability) in published work, at what access level and equipment cost?</h3><ul class="related"><li><a href="https://doi.org/10.1145/3793532">Confidential Computing on Heterogeneous CPU-GPU Systems: Survey and Future Directions</a> — Qifan Wang, David Oswald, ACM Computing Surveys, 2026</li><li><a href="https://doi.org/10.1145/3719027.3744823">MOLE : Breaking GPU TEE with GPU-Embedded MCU</a> — Hongyi Lu, Yunjie Deng, J. Sukarno Mertoguno et al., ACM SIGSAC Conference on Computer and Communications Security (CCS), 2025<q class="found">By injecting malicious firmware into the MCU, an attacker can bypass GPU TEEs' security guarantees.</q></li><li><a href="https://doi.org/10.46586/tches.v2023.i2.1-23">PMFault: Faulting and Bricking Server CPUs through Management Interfaces</a> — Zitai Chen, David Oswald, IACR Transactions on Cryptographic Hardware and Embedded Systems, 2023</li><li><a href="https://arxiv.org/abs/2304.14717">faulTPM: Exposing AMD fTPMs' Deepest Secrets</a> — Hans Niklas Jacob, Christian Werling, Robert Buhren et al., arXiv, 2023<span class="also">also found for P056.2</span></li><li><a href="https://doi.org/10.1109/paine56030.2022.10014927">EM-Fault It Yourself: Building a Replicable EMFI Setup for Desktop and Server Hardware</a> — Niclas Kühnapfel, Robert Buhren, Hans Niklas Jacob et al., IEEE Physical Assurance and Inspection of Electronics (PAINE), 2022<span class="also">also found for P056.2</span></li><li><a href="https://arxiv.org/abs/2108.04575">One Glitch to Rule Them All: Fault Injection Attacks Against AMD's Secure Encrypted Virtualization</a> — Robert Buhren, Hans Niklas Jacob, Thilo Krachenfels et al., arXiv, 2021<q class="found">we can extract endorsement keys of SEV-enabled CPUs ... show how to derive valid VCEKs for arbitrary firmware versions.</q><span class="also">also found for P056.2</span></li><li><a href="https://batteringram.eu/">batteringram.eu</a><q class="found">With Battering RAM, we can capture and replay launch measurements, compromising SEV's attestation.</q></li></ul><h3 class="for">For P056.2: Can an operator downgrade signed GPU firmware past the anti-rollback counter, and does any accelerator give an attestable, timestamped firmware-version history?</h3><ul class="related"><li><a href="https://doi.org/10.4230/lipics.disc.2025.39">TEE Is Not a Healer: Rollback-Resistant Reliable Storage</a> — Keshavarzi, Sadegh, Gregory V. Chockler, Gotsman, Alexey, arXiv (Cornell University), 2025<q class="found">provides the first correct implementation of a distributed state recovery procedure that requires neither durable storage nor specialized hardware, such as trusted monotonic counters.</q></li><li><a href="https://github.com/chipsalliance/Caliptra/blob/main/doc/Caliptra.md">github.com</a><q class="found">Caliptra refuses to boot firmware unless the firmware was dual-signed by the key reported by SoC ROM's fuse registers.</q></li><li><a href="https://www.usenix.org/conference/osdi23/presentation/angel">www.usenix.org</a><q class="found">allows a cloud provider to replace the set of nodes running the trusted state machine whenever it wishes—without affecting safety.</q></li></ul><h3 class="for">For P056.3: Of published accelerator security vulnerabilities, what fraction were fixable by firmware update?</h3><ul class="related"><li><a href="https://www.nvidia.com/en-us/product-security/acknowledgements/">www.nvidia.com</a></li><li><a href="https://www.usenix.org/conference/nsdi23/presentation/kong">www.usenix.org</a><q class="found">Our results are acknowledged and reproduced by one of the largest RDMA NIC vendors.</q></li></ul><h3 class="for">For P056.4: Can an untrusting Verifier audit accelerator firmware (source + reproducible build matching the signed binary), so chipmaker–Prover collusion on backdoored firmware is excluded?</h3><ul class="related"><li><a href="https://doi.org/10.1109/dsn-w70714.2026.00051">Attestable Build Chain: Enabling Trust in Reproducible Builds</a><span class="unreviewed" title="Full text not reviewed; more likely to contain errors.">*</span> — Kenichiro Muto, Kuniyasu Suzaki, 2026<span class="also">also found for P056.6</span></li><li><a href="https://doi.org/10.1109/ms.2021.3073045">Reproducible Builds: Increasing the Integrity of Software Supply Chains</a> — Chris Lamb, Stefano Zacchiroli, IEEE Software, 2021<q class="found">an approach that can determine whether generated binaries correspond to the original source code.</q><span class="also">also found for P056.6</span></li><li><a href="https://www.usenix.org/conference/usenixsecurity17/technical-sessions/presentation/nikitin">www.usenix.org</a><q class="found">Independent witness servers collectively verify conformance of software updates to release policies, build verifiers validate the source-to-binary correspondence, and a tamper-proof release log stores collectively signed updates</q></li></ul><h3 class="for">For P056.6: Can reference measurements for firmware attestation be generated jointly (e.g. emulated compliant boot in a confidential environment) without trusting the designer?</h3><ul class="related"><li><a href="https://arxiv.org/abs/2507.02770">Blueprint, Bootstrap, and Bridge: A Security Look at NVIDIA GPU Confidential Computing</a> — Zhongshu Gu, Enriquillo Valdez, Salman Ahmed et al., arXiv, 2025<q class="found">most RPC metadata items in the staging buffers remain in plaintext</q></li></ul><h3 class="for">For P056.7: Has a mechanism that keeps verification firmware continuously present (non-disableable secure boot, increment-only counter, random low-latency attestation) been implemented and red-teamed, closing the gap after the attestation moment?</h3><ul class="related"><li><a href="https://doi.org/10.1145/3460120.3484532">On the TOCTOU Problem in Remote Attestation</a> — Ivan De Oliveira Nunes, Sashidhar Jakkamsetti, Norrathep Rattanavipanon et al., ACM SIGSAC Conference on Computer and Communications Security (CCS), 2021<q class="found">if transient malware infects a device (by modifying its binary), performs its nefarious tasks, and erases itself before the next attestation, its temporary presence will not be detected.</q></li><li><a href="https://doi.org/10.1109/iccad45719.2019.8942118">PURE: Using Verified Remote Attestation to Obtain Proofs of Update, Reset and Erasure in low-End Embedded Systems</a><span class="unreviewed" title="Full text not reviewed; more likely to contain errors.">*</span> — Ivan De Oliveira Nunes, Karim Eldefrawy, Norrathep Rattanavipanon et al., 2019</li></ul><p class="note"><span class="mark">*</span> Full text not reviewed; more likely to contain errors.</p>
+<section><h2>Data</h2><ul><li><a href="../problems.csv">problems.csv</a> — one row per problem</li><li><a href="../problem_status.csv">problem_status.csv</a> — status, scope and evidence per problem</li><li><a href="../problem_sources.csv">problem_sources.csv</a> — the posed-by quote and other documents per problem</li><li><a href="../leaves.csv">leaves.csv</a> — all sub-questions, including those without a checkable form</li><li><a href="../leaf_sources.csv">leaf_sources.csv</a> — every source row behind each sub-question</li></ul></section><footer class="gen"><p>This is my best understanding as of 2026-10-27. It does not claim that nobody is working on these problems. Corrections are welcome: dan@canaryinstitute.ai.</p></footer><!-- Generated by `analysis/public_problem_list/render.py` from the frozen problem tree with corrections (inputs at commit cb93599 2026-10-27). -->
+</main>
+</body>
+</html>

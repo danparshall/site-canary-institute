@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>P101 Run lineage, splitting and laundering</title>
+<style>
+:root { --bg:#fbfaf7; --fg:#1c1c1a; --muted:#66655f; --rule:#e3e1d9; --panel:#f3f1ea; --link:#7a4f00;
+  --Posed:#e6e4de; --Analyzed:#d5e1fa; --Started:#fbe9ad; --Done:#c9ecd6; --Failed:#f6cfc8; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg:#151513; --fg:#e7e5de; --muted:#9c9a91;
+  --rule:#34332e; --panel:#1f1e1b; --link:#e2a94a; --Posed:#3b3a36; --Analyzed:#22385f; --Started:#4f3f0c;
+  --Done:#174428; --Failed:#5c241c; } }
+:root[data-theme="dark"] { --bg:#151513; --fg:#e7e5de; --muted:#9c9a91; --rule:#34332e; --panel:#1f1e1b; --link:#e2a94a;
+  --Posed:#3b3a36; --Analyzed:#22385f; --Started:#4f3f0c; --Done:#174428; --Failed:#5c241c; }
+* { box-sizing:border-box; }
+html { background:var(--bg); }
+body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
+main { max-width:68rem; margin:0 auto; padding:2rem 16px 5rem; }
+h1 { font-size:1.9rem; line-height:1.2; margin:0 0 1rem; }
+h2 { font-size:1.3rem; margin:2.6rem 0 .8rem; padding-top:1.2rem; border-top:2px solid var(--rule); }
+h2 .count { font-size:.85rem; font-weight:400; color:var(--muted); margin-left:.4rem; }
+h4 { font-size:.8rem; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin:1.1rem 0 .4rem; }
+header p { max-width:46rem; }
+a { color:var(--link); }
+code { font-size:.85em; background:var(--panel); padding:0 .25em; border-radius:3px; }
+.note, .flag, .top, .permalink { color:var(--muted); font-size:.88rem; }
+.scroll { overflow-x:auto; }
+table { border-collapse:collapse; width:100%; }
+th, td { text-align:left; vertical-align:top; padding:.45rem .55rem; border-bottom:1px solid var(--rule); }
+th { font-size:.78rem; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); font-weight:600; }
+td.num, th.num { text-align:right; font-variant-numeric:tabular-nums; }
+td.zero { color:var(--muted); opacity:.55; }
+.tag { display:inline-block; font-size:.78rem; font-weight:650; padding:.15em .6em; border-radius:4px;
+  white-space:nowrap; }
+.s-Posed { background:var(--Posed); } .s-Analyzed { background:var(--Analyzed); }
+.s-Started { background:var(--Started); } .s-Done { background:var(--Done); } .s-Failed { background:var(--Failed); }
+td.st { font-weight:650; font-size:.85rem; white-space:nowrap; }
+.overview th[class^="s-"] { color:var(--fg); text-align:right; }
+.legend { background:var(--panel); border-radius:8px; padding:.9rem 1.1rem; margin:1.4rem 0; }
+.legend ul { list-style:none; padding:0; margin:.6rem 0 0; display:grid; gap:.35rem; }
+.legend .disclaimer { margin:0; font-size:.93rem; }
+.overview td:first-child { min-width:14rem; }
+.overview tfoot td { font-weight:650; border-bottom:none; }
+.barcell { width:22%; min-width:8rem; }
+.bar { display:flex; height:.8rem; border-radius:4px; overflow:hidden; background:var(--rule); }
+.params { margin:1.2rem 0; } .params summary { cursor:pointer; font-weight:600; }
+.controls { display:flex; gap:.5rem; margin:1.5rem 0 0; }
+button { font:inherit; font-size:.85rem; padding:.3rem .8rem; border:1px solid var(--rule); border-radius:6px;
+  background:var(--panel); color:var(--fg); cursor:pointer; }
+table.problems td.pid, td.sqid { white-space:nowrap; font-variant-numeric:tabular-nums; font-weight:600; }
+td.sqid { font-weight:400; font-size:.8rem; color:var(--muted); }
+.ptitle { display:block; font-weight:600; }
+tr.summary { cursor:pointer; }
+tr.summary:hover td, tbody.open tr.summary td { background:var(--panel); }
+tr.summary td.pid::before { content:"▸ "; color:var(--muted); }
+tbody.open tr.summary td.pid::before { content:"▾ "; }
+html.js tr.detail { display:none; }
+html.js tbody.open tr.detail { display:table-row; }
+tr.detail > td { background:var(--panel); padding:.2rem 1rem 1rem 2rem; }
+.detail-body { max-width:52rem; }
+.statement { margin:.8rem 0 .4rem; }
+.scope { margin:.3rem 0; }
+blockquote.evidence { margin:.4rem 0 .6rem; padding:.3rem .9rem; border-left:3px solid var(--rule); font-style:italic; }
+blockquote.evidence footer { font-style:normal; font-size:.85rem; color:var(--muted); margin-top:.25rem; }
+ul.posed { padding-left:1.1rem; margin:.2rem 0; }
+table.subq { font-size:.92rem; background:var(--bg); }
+td.report { color:var(--muted); font-size:.85rem; min-width:9rem; }
+ul.docs li { margin:.2rem 0; }
+footer.gen { margin-top:3rem; color:var(--muted); font-size:.85rem; }
+main.detail-page { max-width:52rem; }
+.crumb { font-size:.9rem; margin-bottom:1rem; }
+h1 .pid { color:var(--muted); font-variant-numeric:tabular-nums; }
+.question { font-size:1.1rem; font-weight:600; }
+main.detail-page h2 { font-size:1.1rem; margin:2rem 0 .6rem; padding-top:.8rem; }
+h3.for { font-size:.95rem; font-weight:600; margin:1.2rem 0 .3rem; }
+.label { background:var(--panel); border-radius:8px; padding:.7rem 1rem; font-size:.9rem; }
+ul.related { padding-left:1.1rem; } ul.related li { margin:.5rem 0; }
+q.found { display:block; font-style:italic; margin:.2rem 0; }
+.also { display:block; color:var(--muted); font-size:.85rem; }
+@media (max-width:640px) { th.barcell, td.barcell { display:none; } tr.detail > td { padding-left:.8rem; }
+  .overview td:first-child { min-width:9rem; } }
+</style>
+</head>
+<body>
+<main class="detail-page">
+<nav class="crumb"><a href="../index.html#area-c13-distributed-training-provenance">← Distributed training versus bandwidth, run lineage and model provenance</a></nav>
+<header><h1><span class="pid">P101</span> Run lineage, splitting and laundering</h1>
+<p class="question">Can split, resumed or laundered training runs be linked to one model, at a stated false-link rate?</p>
+<p class="statement">Linking split, resumed or laundered runs to one model.</p>
+</header>
+<div class="status-block"><h4>Status</h4><p class="scope"><span class="tag s-Started">Started</span> Experiments on GPT-2 (124M parameters, OpenWebText) and published Pythia checkpoints: a glued transcript (two training runs reported as one continuous run, i.e. a run resumed from another run's checkpoint) is caught by a weight-norm jump and a memorization cut-off at the join; the verifier holds data, weights, code and checkpoints. The opposite direction (one long run reported as many 'fresh' short runs) rests on the certified-random initialisation design, argued hard to spoof but not tested; no false-link rate at frontier scale; laundering of a checkpoint through declared 'training data' not covered.</p><blockquote class="evidence">Below, we show that our methods address existing attacks from the literature (Glue-ing and Interpolation), and also demonstrate our method’s response to two new attacks (Data Addition and Subtraction).<footer>Choi, Shavit &amp; Duvenaud (2023), Tools for Verifying Neural Models' Training Data, arXiv 2307.00682 (2023-07-02), L724</footer></blockquote></div>
+<h2>Posed by</h2><ul class="posed"><li>Harack et al. (2025), <em>Verification for International AI Governance</em> (Oxford AIGI): <q>whether trainings being completed within different data centers at different times are for the same model or for unrelated models</q> (§1.1.1, p.20, L1044–1045) <span class="flag">(source states the problem but not the quantity the question asks for)</span></li></ul><p class="others"><strong>Also raised in:</strong> Scher &amp; Thiergart (2024), <em>Mechanisms to Verify International Agreements About AI Development</em> (MIRI); Petrie, Aarne, Ammann &amp; Dalrymple (2025), <em>Overview of Flexible Hardware-Enabled Guarantees</em> (flexHEG Part 1); Petrie &amp; Aarne (2025), <em>Technical Options for Flexible Hardware-Enabled Guarantees</em> (flexHEG Part 2); Shavit (2023), <em>What Does It Take to Catch a Chinchilla? Verifying Rules on Large-Scale Neural Network Training via Compute Monitoring</em>; Ansari (2026), <em>Hardware-Level Governance of AI Compute: A Feasibility Taxonomy for Regulatory Compliance and Treaty Verification</em>; Moon, Vedula, Geneson &amp; Bar-on (2025), <em>Strategies and Detection Gaps in a Game-Theoretic Model of Compute Governance</em> (RAND RRA3686-1); Rahman &amp; Tajdari (2026), <em>Detecting Hidden ML Training With Zero-Overhead Telemetry</em> (MIRI); Amodo (2026), <em>Example Schemes for Verifying High-Stakes AI Agreements</em>.</p>
+<h2>Sub-questions</h2><div class="scroll"><table class="subq"><thead><tr><th>ID</th><th>Sub-question</th><th>What the sources report</th></tr></thead><tbody><tr id="sq-P101.1"><td class="sqid">P101.1</td><td>Does seed-verified initialisation (or weight-statistics tests) detect a run resumed from a pretrained or stolen checkpoint disguised as fresh, when legitimate fine-tuning is allowed?</td><td class="report">a source suggests an answer (not checked)</td></tr><tr id="sq-P101.2"><td class="sqid">P101.2</td><td>Can checkpoint-lineage tracking link training segments on different clusters/times or sequential 'unrelated' runs to one model, with a false-link rate?</td><td class="report">open</td></tr><tr id="sq-P101.3"><td class="sqid">P101.3</td><td>Can receipt-based FLOP accounting detect a checkpoint or prior results laundered in as 'training data' / external data, without double counting?</td><td class="report">partly answered</td></tr><tr id="sq-P101.4"><td class="sqid">P101.4</td><td>Can cross-provider correlation or sampled testing detect a run split into several sub-threshold segments across accounts/providers, and how many accounts does an evader need?</td><td class="report">a source suggests an answer (not checked)</td></tr></tbody></table></div>
+<h2>Possibly relevant work found by automated search</h2><p class="label">Found by AI agents searching for this problem's sub-questions, mostly by keyword and citation in the OpenAlex scholarly database and on the web; a second AI pass reviewed each one, and we spot-checked some by hand. They seemed reasonably related, as far as one can tell from outside each paper's field. Some come from neighbouring fields, such as arms control and financial audit, and bear on the problem by analogy. Not reviewed against the status above; a paper listed here does not change that status. 926 of 1119 quotes checked word for word against the paper's text.</p><h3 class="for">For P101.1: Does seed-verified initialisation (or weight-statistics tests) detect a run resumed from a pretrained or stolen checkpoint disguised as fresh, when legitimate fine-tuning is allowed?</h3><ul class="related"><li><a href="https://arxiv.org/abs/2502.12292">Independence Tests for Language Models</a> — Sally Zhu, Ahmed Ahmed, Rohith Kuditipudi et al., arXiv, 2025<span class="also">also found for P101.2</span></li></ul><h3 class="for">For P101.2: Can checkpoint-lineage tracking link training segments on different clusters/times or sequential 'unrelated' runs to one model, with a false-link rate?</h3><ul class="related"><li><a href="https://doi.org/10.52202/085713-1146">Model Provenance Testing for Large Language Models</a> — Ivica Nikolić, Teodora Baluta, Prateek Saxena, neural information processing systems, 2025<q class="found">our tester achieves 90-95% precision and 80-90% recall in identifying derived models.</q></li></ul><h3 class="for">For P101.4: Can cross-provider correlation or sampled testing detect a run split into several sub-threshold segments across accounts/providers, and how many accounts does an evader need?</h3><ul class="related"><li><a href="https://arxiv.org/abs/2506.04292">GARG-AML against Smurfing: A Scalable and Interpretable Graph-Based Framework for Anti-Money Laundering</a> — Bruno Deprez, Bart Baesens, Tim Verdonck et al., arXiv, 2025</li><li><a href="https://doi.org/10.1007/s10940-025-09617-7">Searching for Smurfs: Testing if Money Launderers Know Alert Thresholds</a> — Rasmus Ingemann Tuffveson Jensen, Joras Ferwerda, Christian Remi Wewer, Journal of Quantitative Criminology, 2025<q class="found">Our simulation experiments suggest that the approach can detect smurfing when as little as 0.1-0.5% of all transactions are subject to smurfing.</q></li></ul>
+<section><h2>Data</h2><ul><li><a href="../problems.csv">problems.csv</a> — one row per problem</li><li><a href="../problem_status.csv">problem_status.csv</a> — status, scope and evidence per problem</li><li><a href="../problem_sources.csv">problem_sources.csv</a> — the posed-by quote and other documents per problem</li><li><a href="../leaves.csv">leaves.csv</a> — all sub-questions, including those without a checkable form</li><li><a href="../leaf_sources.csv">leaf_sources.csv</a> — every source row behind each sub-question</li></ul></section><footer class="gen"><p>This is my best understanding as of 2026-10-27. It does not claim that nobody is working on these problems. Corrections are welcome: dan@canaryinstitute.ai.</p></footer><!-- Generated by `analysis/public_problem_list/render.py` from the frozen problem tree with corrections (inputs at commit cb93599 2026-10-27). -->
+</main>
+</body>
+</html>

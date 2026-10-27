@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>P111 Escalation and attribution of findings</title>
+<style>
+:root { --bg:#fbfaf7; --fg:#1c1c1a; --muted:#66655f; --rule:#e3e1d9; --panel:#f3f1ea; --link:#7a4f00;
+  --Posed:#e6e4de; --Analyzed:#d5e1fa; --Started:#fbe9ad; --Done:#c9ecd6; --Failed:#f6cfc8; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg:#151513; --fg:#e7e5de; --muted:#9c9a91;
+  --rule:#34332e; --panel:#1f1e1b; --link:#e2a94a; --Posed:#3b3a36; --Analyzed:#22385f; --Started:#4f3f0c;
+  --Done:#174428; --Failed:#5c241c; } }
+:root[data-theme="dark"] { --bg:#151513; --fg:#e7e5de; --muted:#9c9a91; --rule:#34332e; --panel:#1f1e1b; --link:#e2a94a;
+  --Posed:#3b3a36; --Analyzed:#22385f; --Started:#4f3f0c; --Done:#174428; --Failed:#5c241c; }
+* { box-sizing:border-box; }
+html { background:var(--bg); }
+body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
+main { max-width:68rem; margin:0 auto; padding:2rem 16px 5rem; }
+h1 { font-size:1.9rem; line-height:1.2; margin:0 0 1rem; }
+h2 { font-size:1.3rem; margin:2.6rem 0 .8rem; padding-top:1.2rem; border-top:2px solid var(--rule); }
+h2 .count { font-size:.85rem; font-weight:400; color:var(--muted); margin-left:.4rem; }
+h4 { font-size:.8rem; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin:1.1rem 0 .4rem; }
+header p { max-width:46rem; }
+a { color:var(--link); }
+code { font-size:.85em; background:var(--panel); padding:0 .25em; border-radius:3px; }
+.note, .flag, .top, .permalink { color:var(--muted); font-size:.88rem; }
+.scroll { overflow-x:auto; }
+table { border-collapse:collapse; width:100%; }
+th, td { text-align:left; vertical-align:top; padding:.45rem .55rem; border-bottom:1px solid var(--rule); }
+th { font-size:.78rem; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); font-weight:600; }
+td.num, th.num { text-align:right; font-variant-numeric:tabular-nums; }
+td.zero { color:var(--muted); opacity:.55; }
+.tag { display:inline-block; font-size:.78rem; font-weight:650; padding:.15em .6em; border-radius:4px;
+  white-space:nowrap; }
+.s-Posed { background:var(--Posed); } .s-Analyzed { background:var(--Analyzed); }
+.s-Started { background:var(--Started); } .s-Done { background:var(--Done); } .s-Failed { background:var(--Failed); }
+td.st { font-weight:650; font-size:.85rem; white-space:nowrap; }
+.overview th[class^="s-"] { color:var(--fg); text-align:right; }
+.legend { background:var(--panel); border-radius:8px; padding:.9rem 1.1rem; margin:1.4rem 0; }
+.legend ul { list-style:none; padding:0; margin:.6rem 0 0; display:grid; gap:.35rem; }
+.legend .disclaimer { margin:0; font-size:.93rem; }
+.overview td:first-child { min-width:14rem; }
+.overview tfoot td { font-weight:650; border-bottom:none; }
+.barcell { width:22%; min-width:8rem; }
+.bar { display:flex; height:.8rem; border-radius:4px; overflow:hidden; background:var(--rule); }
+.params { margin:1.2rem 0; } .params summary { cursor:pointer; font-weight:600; }
+.controls { display:flex; gap:.5rem; margin:1.5rem 0 0; }
+button { font:inherit; font-size:.85rem; padding:.3rem .8rem; border:1px solid var(--rule); border-radius:6px;
+  background:var(--panel); color:var(--fg); cursor:pointer; }
+table.problems td.pid, td.sqid { white-space:nowrap; font-variant-numeric:tabular-nums; font-weight:600; }
+td.sqid { font-weight:400; font-size:.8rem; color:var(--muted); }
+.ptitle { display:block; font-weight:600; }
+tr.summary { cursor:pointer; }
+tr.summary:hover td, tbody.open tr.summary td { background:var(--panel); }
+tr.summary td.pid::before { content:"▸ "; color:var(--muted); }
+tbody.open tr.summary td.pid::before { content:"▾ "; }
+html.js tr.detail { display:none; }
+html.js tbody.open tr.detail { display:table-row; }
+tr.detail > td { background:var(--panel); padding:.2rem 1rem 1rem 2rem; }
+.detail-body { max-width:52rem; }
+.statement { margin:.8rem 0 .4rem; }
+.scope { margin:.3rem 0; }
+blockquote.evidence { margin:.4rem 0 .6rem; padding:.3rem .9rem; border-left:3px solid var(--rule); font-style:italic; }
+blockquote.evidence footer { font-style:normal; font-size:.85rem; color:var(--muted); margin-top:.25rem; }
+ul.posed { padding-left:1.1rem; margin:.2rem 0; }
+table.subq { font-size:.92rem; background:var(--bg); }
+td.report { color:var(--muted); font-size:.85rem; min-width:9rem; }
+ul.docs li { margin:.2rem 0; }
+footer.gen { margin-top:3rem; color:var(--muted); font-size:.85rem; }
+main.detail-page { max-width:52rem; }
+.crumb { font-size:.9rem; margin-bottom:1rem; }
+h1 .pid { color:var(--muted); font-variant-numeric:tabular-nums; }
+.question { font-size:1.1rem; font-weight:600; }
+main.detail-page h2 { font-size:1.1rem; margin:2rem 0 .6rem; padding-top:.8rem; }
+h3.for { font-size:.95rem; font-weight:600; margin:1.2rem 0 .3rem; }
+.label { background:var(--panel); border-radius:8px; padding:.7rem 1rem; font-size:.9rem; }
+ul.related { padding-left:1.1rem; } ul.related li { margin:.5rem 0; }
+q.found { display:block; font-style:italic; margin:.2rem 0; }
+.also { display:block; color:var(--muted); font-size:.85rem; }
+@media (max-width:640px) { th.barcell, td.barcell { display:none; } tr.detail > td { padding-left:.8rem; }
+  .overview td:first-child { min-width:9rem; } }
+</style>
+</head>
+<body>
+<main class="detail-page">
+<nav class="crumb"><a href="../index.html#area-c14-inspection-practice">← Inspection practice and verification institutions with a technical core</a></nav>
+<header><h1><span class="pid">P111</span> Escalation and attribution of findings</h1>
+<p class="question">What escalation ladder, graded-evidence aggregation and attribution procedure resolve ambiguous findings and assign a violation to the responsible party?</p>
+<p class="statement">Escalation ladders for ambiguous findings, aggregation of graded evidence, and attribution of a violation to the responsible party.</p>
+</header>
+<div class="status-block"><h4>Status</h4><p class="scope"><span class="tag s-Analyzed">Analyzed</span> A draft treaty article (Article XI, modelled on Articles IX, XII and XIV of the Chemical Weapons Convention): notification, 36-hour acknowledgement and 5-day clarification, Executive Council adjudication with a challenge inspection, then graded measures (added monitoring, hardware relinquishment, sanctions, protective actions); a proposal, untested. Aggregating graded evidence (many sub-threshold acts) and attributing a violation to the responsible actor (cloud provider versus customer, runs split across providers) have no design; Moon et al.'s call for an agency able to unmask evaders is framing.</p><blockquote class="evidence">The Concerned Party notifies the Requested Party of their concern, while also sharing their concern with the Director-General and Executive Council. The Requested Party will acknowledge this notification within 36 hours, and provide clarification within 5 days.<footer>Scher, Abecassis, Barnett &amp; Abeyta (2025), An International Agreement to Prevent the Premature Creation of Artificial Superintelligence (MIRI), arXiv 2511.10783 v3 (2026-05-08), L2140–2143</footer></blockquote></div>
+<p class="others"><strong>Raised in:</strong> Baker, Kulp, Marks, Brundage &amp; Heim (2025), <em>Verifying International Agreements on AI: Six Layers of Verification for Rules on Large-Scale AI Development and Deployment</em> (RAND WR-A4077-1); Scher &amp; Thiergart (2024), <em>Mechanisms to Verify International Agreements About AI Development</em> (MIRI); Aarne &amp; Petrie (2025), <em>International Security Applications of Flexible Hardware-Enabled Guarantees</em> (flexHEG Part 3); Cankaya (2026), <em>Compute Verification FAQs</em>; Ansari (2026), <em>Hardware-Level Governance of AI Compute: A Feasibility Taxonomy for Regulatory Compliance and Treaty Verification</em>; Daley (2026), <em>Proving the Negative: Three Warnings from Arms Control for the Age of AI</em> (War on the Rocks); Moon, Vedula, Geneson &amp; Bar-on (2025), <em>Strategies and Detection Gaps in a Game-Theoretic Model of Compute Governance</em> (RAND RRA3686-1).</p>
+<h2>Sub-questions</h2><div class="scroll"><table class="subq"><thead><tr><th>ID</th><th>Sub-question</th><th>What the sources report</th></tr></thead><tbody><tr id="sq-P111.1"><td class="sqid">P111.1</td><td>With a stated number of providers sharing flagged-account records, what is the detection probability for a run split across providers/jurisdictions, and how is it accounted for?</td><td class="report">open</td></tr></tbody></table></div>
+<h2>Sub-questions not yet stated precisely enough to check</h2><div class="scroll"><table class="subq"><thead><tr><th>ID</th><th>Sub-question</th></tr></thead><tbody><tr id="sq-P111.2"><td class="sqid">P111.2</td><td>What pre-agreed escalation ladder / incremental-disclosure procedure resolves ambiguous findings (clarification, focused investigation, intrusive measures, pauses), including access rights when a classifier flags a violation?</td></tr><tr id="sq-P111.3"><td class="sqid">P111.3</td><td>How should graded evidence (many small sub-threshold violations, a continuum of suspicious acts) be aggregated into a compliance decision?</td></tr><tr id="sq-P111.4"><td class="sqid">P111.4</td><td>How is a violation attributed to the responsible party (cloud provider vs user; corporate vs state-backed; which actor controls which devices)?</td></tr><tr id="sq-P111.5"><td class="sqid">P111.5</td><td>Can know-your-customer rules withstand evaders using shell organizations, and does that require an agency able to unmask the evader and compel disclosure?</td></tr></tbody></table></div>
+<h2>Possibly relevant work found by automated search</h2><p class="label">Found by AI agents searching for this problem's sub-questions, mostly by keyword and citation in the OpenAlex scholarly database and on the web; a second AI pass reviewed each one, and we spot-checked some by hand. They seemed reasonably related, as far as one can tell from outside each paper's field. Some come from neighbouring fields, such as arms control and financial audit, and bear on the problem by analogy. Not reviewed against the status above; a paper listed here does not change that status. 926 of 1119 quotes checked word for word against the paper's text.</p><h3 class="for">For P111.1: With a stated number of providers sharing flagged-account records, what is the detection probability for a run split across providers/jurisdictions, and how is it accounted for?</h3><ul class="related"><li><a href="https://doi.org/10.1257/pandp.20251084">Dodging Trade Sanctions? Evidence from Military Goods</a> — Lisa Scheckenhofer, Feodora Teti, Joschka Wanner, AEA Papers and Proceedings, 2025<q class="found">Russia-friendly countries are 20 pp more likely to export military goods to Russia relative to neutral countries</q><span class="also">also found for P111.5</span></li><li><a href="https://doi.org/10.35188/unu-wider/2023/319-2">The end of Londongrad? The impact of beneficial ownership transparency on offshore investment in UK property</a> — Matthew Collin, Florian M Hollenbach, David Szakonyi, Working Paper Series, 2023<q class="found">£44–76 billion worth of UK real estate is still owned by companies based in tax havens, most of which have yet to comply</q><span class="also">also found for P111.5</span></li><li><a href="https://doi.org/10.1057/s41267-016-0047-7">Anonymous shell companies: A global audit study and field experiment in 176 countries</a><span class="unreviewed" title="Full text not reviewed; more likely to contain errors.">*</span> — Brent B. Allred, Michael G. Findley, Daniel Nielson et al., Journal of International Business Studies, 2017<span class="also">also found for P111.5</span></li><li><a href="https://egap.org/resource/brief-14-the-truth-behind-anonymous-shell-companies/">egap.org</a><q class="found">Half (48%) of all responses to the thousands of emails sent failed to demand proper identification</q><span class="also">also found for P111.5</span></li></ul><h3 class="for">For P111.2: What pre-agreed escalation ladder / incremental-disclosure procedure resolves ambiguous findings (clarification, focused investigation, intrusive measures, pauses), including access rights when a classifier flags a violation?</h3><ul class="related"><li><a href="https://doi.org/10.2139/ssrn.7243422">The Dogs That Never Bark in the Night: The Failure to Exercise Arms Control Treaty Rights For Inspection and Consultation</a><span class="unreviewed" title="Full text not reviewed; more likely to contain errors.">*</span> — David A. Koplow, SSRN Electronic Journal, 2026</li><li><a href="https://doi.org/10.1080/10736700.2017.1380429">Challenge inspections under the Chemical Weapons Convention: between ideal and reality</a><span class="unreviewed" title="Full text not reviewed; more likely to contain errors.">*</span> — Tatsuya Abe, The Nonproliferation Review, 2017</li></ul><h3 class="for">For P111.3: How should graded evidence (many small sub-threshold violations, a continuum of suspicious acts) be aggregated into a compliance decision?</h3><ul class="related"><li><a href="https://doi.org/10.14506/ca34.4.02">Of Broken Seals and Broken Promises: Attributing Intention at the IAEA</a> — Anna Weichselbraun, Cultural Anthropology, 2019<q class="found">seals constitute a semiotic infrastructure of nuclear governance that materializes international law</q><span class="also">also found for P111.4</span></li></ul><p class="note"><span class="mark">*</span> Full text not reviewed; more likely to contain errors.</p>
+<section><h2>Data</h2><ul><li><a href="../problems.csv">problems.csv</a> — one row per problem</li><li><a href="../problem_status.csv">problem_status.csv</a> — status, scope and evidence per problem</li><li><a href="../problem_sources.csv">problem_sources.csv</a> — the posed-by quote and other documents per problem</li><li><a href="../leaves.csv">leaves.csv</a> — all sub-questions, including those without a checkable form</li><li><a href="../leaf_sources.csv">leaf_sources.csv</a> — every source row behind each sub-question</li></ul></section><footer class="gen"><p>This is my best understanding as of 2026-10-27. It does not claim that nobody is working on these problems. Corrections are welcome: dan@canaryinstitute.ai.</p></footer><!-- Generated by `analysis/public_problem_list/render.py` from the frozen problem tree with corrections (inputs at commit cb93599 2026-10-27). -->
+</main>
+</body>
+</html>

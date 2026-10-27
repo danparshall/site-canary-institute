@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>P080 Bit-exact training replay</title>
+<style>
+:root { --bg:#fbfaf7; --fg:#1c1c1a; --muted:#66655f; --rule:#e3e1d9; --panel:#f3f1ea; --link:#7a4f00;
+  --Posed:#e6e4de; --Analyzed:#d5e1fa; --Started:#fbe9ad; --Done:#c9ecd6; --Failed:#f6cfc8; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg:#151513; --fg:#e7e5de; --muted:#9c9a91;
+  --rule:#34332e; --panel:#1f1e1b; --link:#e2a94a; --Posed:#3b3a36; --Analyzed:#22385f; --Started:#4f3f0c;
+  --Done:#174428; --Failed:#5c241c; } }
+:root[data-theme="dark"] { --bg:#151513; --fg:#e7e5de; --muted:#9c9a91; --rule:#34332e; --panel:#1f1e1b; --link:#e2a94a;
+  --Posed:#3b3a36; --Analyzed:#22385f; --Started:#4f3f0c; --Done:#174428; --Failed:#5c241c; }
+* { box-sizing:border-box; }
+html { background:var(--bg); }
+body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
+main { max-width:68rem; margin:0 auto; padding:2rem 16px 5rem; }
+h1 { font-size:1.9rem; line-height:1.2; margin:0 0 1rem; }
+h2 { font-size:1.3rem; margin:2.6rem 0 .8rem; padding-top:1.2rem; border-top:2px solid var(--rule); }
+h2 .count { font-size:.85rem; font-weight:400; color:var(--muted); margin-left:.4rem; }
+h4 { font-size:.8rem; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin:1.1rem 0 .4rem; }
+header p { max-width:46rem; }
+a { color:var(--link); }
+code { font-size:.85em; background:var(--panel); padding:0 .25em; border-radius:3px; }
+.note, .flag, .top, .permalink { color:var(--muted); font-size:.88rem; }
+.scroll { overflow-x:auto; }
+table { border-collapse:collapse; width:100%; }
+th, td { text-align:left; vertical-align:top; padding:.45rem .55rem; border-bottom:1px solid var(--rule); }
+th { font-size:.78rem; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); font-weight:600; }
+td.num, th.num { text-align:right; font-variant-numeric:tabular-nums; }
+td.zero { color:var(--muted); opacity:.55; }
+.tag { display:inline-block; font-size:.78rem; font-weight:650; padding:.15em .6em; border-radius:4px;
+  white-space:nowrap; }
+.s-Posed { background:var(--Posed); } .s-Analyzed { background:var(--Analyzed); }
+.s-Started { background:var(--Started); } .s-Done { background:var(--Done); } .s-Failed { background:var(--Failed); }
+td.st { font-weight:650; font-size:.85rem; white-space:nowrap; }
+.overview th[class^="s-"] { color:var(--fg); text-align:right; }
+.legend { background:var(--panel); border-radius:8px; padding:.9rem 1.1rem; margin:1.4rem 0; }
+.legend ul { list-style:none; padding:0; margin:.6rem 0 0; display:grid; gap:.35rem; }
+.legend .disclaimer { margin:0; font-size:.93rem; }
+.overview td:first-child { min-width:14rem; }
+.overview tfoot td { font-weight:650; border-bottom:none; }
+.barcell { width:22%; min-width:8rem; }
+.bar { display:flex; height:.8rem; border-radius:4px; overflow:hidden; background:var(--rule); }
+.params { margin:1.2rem 0; } .params summary { cursor:pointer; font-weight:600; }
+.controls { display:flex; gap:.5rem; margin:1.5rem 0 0; }
+button { font:inherit; font-size:.85rem; padding:.3rem .8rem; border:1px solid var(--rule); border-radius:6px;
+  background:var(--panel); color:var(--fg); cursor:pointer; }
+table.problems td.pid, td.sqid { white-space:nowrap; font-variant-numeric:tabular-nums; font-weight:600; }
+td.sqid { font-weight:400; font-size:.8rem; color:var(--muted); }
+.ptitle { display:block; font-weight:600; }
+tr.summary { cursor:pointer; }
+tr.summary:hover td, tbody.open tr.summary td { background:var(--panel); }
+tr.summary td.pid::before { content:"▸ "; color:var(--muted); }
+tbody.open tr.summary td.pid::before { content:"▾ "; }
+html.js tr.detail { display:none; }
+html.js tbody.open tr.detail { display:table-row; }
+tr.detail > td { background:var(--panel); padding:.2rem 1rem 1rem 2rem; }
+.detail-body { max-width:52rem; }
+.statement { margin:.8rem 0 .4rem; }
+.scope { margin:.3rem 0; }
+blockquote.evidence { margin:.4rem 0 .6rem; padding:.3rem .9rem; border-left:3px solid var(--rule); font-style:italic; }
+blockquote.evidence footer { font-style:normal; font-size:.85rem; color:var(--muted); margin-top:.25rem; }
+ul.posed { padding-left:1.1rem; margin:.2rem 0; }
+table.subq { font-size:.92rem; background:var(--bg); }
+td.report { color:var(--muted); font-size:.85rem; min-width:9rem; }
+ul.docs li { margin:.2rem 0; }
+footer.gen { margin-top:3rem; color:var(--muted); font-size:.85rem; }
+main.detail-page { max-width:52rem; }
+.crumb { font-size:.9rem; margin-bottom:1rem; }
+h1 .pid { color:var(--muted); font-variant-numeric:tabular-nums; }
+.question { font-size:1.1rem; font-weight:600; }
+main.detail-page h2 { font-size:1.1rem; margin:2rem 0 .6rem; padding-top:.8rem; }
+h3.for { font-size:.95rem; font-weight:600; margin:1.2rem 0 .3rem; }
+.label { background:var(--panel); border-radius:8px; padding:.7rem 1rem; font-size:.9rem; }
+ul.related { padding-left:1.1rem; } ul.related li { margin:.5rem 0; }
+q.found { display:block; font-style:italic; margin:.2rem 0; }
+.also { display:block; color:var(--muted); font-size:.85rem; }
+@media (max-width:640px) { th.barcell, td.barcell { display:none; } tr.detail > td { padding-left:.8rem; }
+  .overview td:first-child { min-width:9rem; } }
+</style>
+</head>
+<body>
+<main class="detail-page">
+<nav class="crumb"><a href="../index.html#area-c10-replay-determinism-fp">← Replay, determinism, floating-point reproducibility and compute accounting</a></nav>
+<header><h1><span class="pid">P080</span> Bit-exact training replay</h1>
+<p class="question">What fraction of training steps replay bitwise on a verifier's hardware, and what throughput penalty does deterministic training impose?</p>
+<p class="statement">Bit-exact replay of training steps.</p>
+<p class="terms"><em>Terms:</em> NCCL: Nvidia's library for exchanging data between GPUs during training. ZeRO-3: a technique that splits a model's parameters across many GPUs to save memory.</p>
+</header>
+<div class="status-block"><h4>Status</h4><p class="scope"><span class="tag s-Started">Started</span> Built and measured: single-GPU training of small models (ResNet-50, 23M parameters, from scratch; GPT-2, 117M, fine-tune) replayed bit-identically across three NVIDIA consumer and workstation GPUs (A40, Titan XP, RTX 2080 Ti), FP64 with logged rounding decisions, at about 1.2-1.4x trainer and 1.3-1.7x auditor time and 18-20 MB of logs per GPT-2 step. Not multi-GPU or distributed (all-reduce ordering unhandled), not low precision, not frontier scale. Throughput-penalty clause: one measured figure elsewhere, Peigné-Lefebvre et al. 2026 report full determinism on a 7B model on 8 H100s costing 1.6-8.2% per step and cite 23-82% overhead for deterministic FlashAttention backward. Fraction-of-steps clause at frontier scale: no work.</p><blockquote class="evidence">A method for two parties, training the same model on different GPU types, to achieve identical training results by logging and sharing rounding decisions<footer>Srivastava, Arora &amp; Boneh (2024), Optimistic Verifiable Training by Controlling Hardware Nondeterminism, arXiv 2403.09603v3 (NeurIPS 2024) (2024-11-25 (v3)), L203–204</footer></blockquote></div>
+<h2>Posed by</h2><ul class="posed"><li>Reuel, Bucknall et al. (2025), <em>Open Problems in Technical AI Governance</em>, compute sections: <q>difficulties in accounting for randomness in training procedures</q> (§5.2.2, p.29, L1552) <span class="flag">(source states the problem but not the quantity the question asks for)</span></li></ul><p class="others"><strong>Also raised in:</strong> Harack et al. (2025), <em>Verification for International AI Governance</em> (Oxford AIGI); Baker, Kulp, Marks, Brundage &amp; Heim (2025), <em>Verifying International Agreements on AI: Six Layers of Verification for Rules on Large-Scale AI Development and Deployment</em> (RAND WR-A4077-1); Shavit (2023), <em>What Does It Take to Catch a Chinchilla? Verifying Rules on Large-Scale Neural Network Training via Compute Monitoring</em>; Cankaya (2026), <em>Bit-Exact AI Inference Verification Without Performance Tradeoffs</em>, arXiv 2606.00279v2; Canary Institute research; Jin et al. (2026), <em>Trusting What You Cannot See: Auditable Fine-Tuning and Inference for Proprietary AI</em>, arXiv 2603.07466; Peigné-Lefebvre, Nguyen &amp; Wang (2026), <em>Zero Knowledge Verification for Frontier AI Training Is Possible</em>, arXiv 2606.05433; AI Security Forum, <em>Requests for Discussion</em>; Amodo (2026), <em>Example Schemes for Verifying High-Stakes AI Agreements</em>; Dean, <em>Verification Plan</em> (AI 2040); Proofworks, <em>Living Verification Documents</em>.</p>
+<h2>Sub-questions</h2><div class="scroll"><table class="subq"><thead><tr><th>ID</th><th>Sub-question</th><th>What the sources report</th></tr></thead><tbody><tr id="sq-P080.1"><td class="sqid">P080.1</td><td>Is same-hardware, same-topology training replay on TPU/XLA bit-exact in production, and does that extend to a verifier replaying on its own hardware?</td><td class="report">partly answered</td></tr><tr id="sq-P080.2"><td class="sqid">P080.2</td><td>With deterministic kernels and fixed NCCL reduction trees, what fraction of training steps (fwd+bwd+all-reduce) replay bitwise on GPU stacks at small-multi-GPU and frontier scale (chip counts a target to be agreed), and what divergence remains?</td><td class="report">partly answered</td></tr><tr id="sq-P080.3"><td class="sqid">P080.3</td><td>What throughput penalty does deterministic training mode impose (incl. deterministic attention backward, 23-82%)?</td><td class="report">open</td></tr><tr id="sq-P080.4"><td class="sqid">P080.4</td><td>Is a training step bit-identical when replayed under a different sharding layout on fewer chips (incl. a shadow node under ZeRO-3)?</td><td class="report">open</td></tr><tr id="sq-P080.5"><td class="sqid">P080.5</td><td>Can one DiLoCo island's inner steps between two checkpoints be replayed bit-exactly on verifier hardware?</td><td class="report">partly answered</td></tr><tr id="sq-P080.6"><td class="sqid">P080.6</td><td>Can RLHF/GAN-style co-training segments be replayed on non-identical hardware within supervised-pretraining tolerance?</td><td class="report">open</td></tr><tr id="sq-P080.7"><td class="sqid">P080.7</td><td>How many honest mismatches per shadowed step occur, and can natural silent data corruption be separated from structured injection at a stated false-positive rate?</td><td class="report">open</td></tr><tr id="sq-P080.8"><td class="sqid">P080.8</td><td>Is honest replay divergence (BF16/FP8) smaller than the divergence produced by the cheapest known spoof or poisoning, at frontier scale (a stated parameter count)?</td><td class="report">a source suggests an answer (not checked)</td></tr><tr id="sq-P080.9"><td class="sqid">P080.9</td><td>Under tolerance-based (non-bit-exact) comparison, what minimum fake/corrupted fraction escapes detection yet changes model behaviour?</td><td class="report">open</td></tr></tbody></table></div>
+<h2>Possibly relevant work found by automated search</h2><p class="label">Found by AI agents searching for this problem's sub-questions, mostly by keyword and citation in the OpenAlex scholarly database and on the web; a second AI pass reviewed each one, and we spot-checked some by hand. They seemed reasonably related, as far as one can tell from outside each paper's field. Some come from neighbouring fields, such as arms control and financial audit, and bear on the problem by analogy. Not reviewed against the status above; a paper listed here does not change that status. 926 of 1119 quotes checked word for word against the paper's text.</p><h3 class="for">For P080.1: Is same-hardware, same-topology training replay on TPU/XLA bit-exact in production, and does that extend to a verifier replaying on its own hardware?</h3><ul class="related"><li><a href="https://arxiv.org/abs/2502.12340">Understanding Silent Data Corruption in LLM Training</a> — Jeffrey Ma, Hengzhi Pei, Leonard Lausen et al., arXiv, 2025<q class="found">Using deterministic execution via XLA compiler and our proposed synchronization mechanisms, we isolate and analyze the impact of SDC errors on these nodes at three levels</q><span class="also">also found for P080.7</span></li></ul><h3 class="for">For P080.2: With deterministic kernels and fixed NCCL reduction trees, what fraction of training steps (fwd+bwd+all-reduce) replay bitwise on GPU stacks at small-multi-GPU and frontier scale (chip counts a target to be agreed), and what divergence remains?</h3><ul class="related"><li><a href="https://doi.org/10.1145/3389360">Algorithms for Efficient Reproducible Floating Point Summation</a> — Willow Ahrens, James Weldon Demmel, Hong Diep Nguyen, ACM Transactions on Mathematical Software, 2020<q class="found">We describe a “reproducible accumulator” data structure (the “binned number”) and associated algorithms to reproducibly sum binary floating point numbers, independent of summation order.</q><span class="also">also found for P080.4</span></li><li><a href="https://arxiv.org/html/2408.05148v3">arxiv.org</a><q class="found">analyze performance and productivity impacts of replacing atomic operations with deterministic alternatives on GPUs.</q><span class="also">also found for P080.3</span></li></ul><h3 class="for">For P080.3: What throughput penalty does deterministic training mode impose (incl. deterministic attention backward, 23-82%)?</h3><ul class="related"><li><a href="https://arxiv.org/abs/2601.21824">DASH: Deterministic Attention Scheduling for High-throughput Reproducible LLM Training</a> — Xinwei Qiang, Hongmin Chen, Shixuan Sun et al., arXiv, 2026<q class="found">the deterministic backward pass can incur up to a 37.9% throughput reduction relative to its non-deterministic counterpart</q></li></ul><h3 class="for">For P080.4: Is a training step bit-identical when replayed under a different sharding layout on fewer chips (incl. a shadow node under ZeRO-3)?</h3><ul class="related"><li><a href="https://arxiv.org/abs/2511.17826">Deterministic Inference across Tensor Parallel Sizes That Eliminates Training-Inference Mismatch</a> — Ziyang Zhang, Xinheng Ding, Jiayi Yuan et al., arXiv, 2025<q class="found">Experiments confirm zero probability divergence and bit-wise reproducibility for deterministic inference across different TP sizes.</q></li><li><a href="https://doi.org/10.1145/3581784.3607054">EasyScale: Elastic Training with Consistent Accuracy and Improved Utilization on GPUs</a> — Mingzhen Li, Wencong Xiao, Hailong Yang et al., 2012 International Conference for High Performance Computing, Networking, Storage and Analysis, 2023<q class="found">We propose EasyScale, an elastic training system that achieves consistent model accuracy under resource elasticity for both homogeneous and heterogeneous GPUs.</q></li></ul><h3 class="for">For P080.5: Can one DiLoCo island's inner steps between two checkpoints be replayed bit-exactly on verifier hardware?</h3><ul class="related"><li><a href="https://doi.org/10.1109/tdsc.2026.3677485">Towards Efficient and Reliable Training Assurance of Untrusted Federated Learning Participants Under Hardware Non-Determinism</a> — Cheng Lyu, Xiaoli Zhang, Jiaqing Cheng et al., IEEE Transactions on Dependable and Secure Computing, 2026<q class="found">TrustFL+ builds on deterministic training by recording rounding directions of intermediate operations during GPU-side model training and reusing them in TEE-based verification … all models trained with TrustFL+ on different GPU architectures successfully pass verification within SGX, resulting in 0 false positives.</q></li></ul><h3 class="for">For P080.7: How many honest mismatches per shadowed step occur, and can natural silent data corruption be separated from structured injection at a stated false-positive rate?</h3><ul class="related"><li><a href="https://arxiv.org/abs/2604.00726">Exploring Silent Data Corruption as a Reliability Challenge in LLM Training</a> — Anton Altenbernd, Philipp Wiesner, Odej Kao, arXiv, 2026<q class="found">we propose a lightweight detection method that identifies potentially harmful parameter updates.</q></li><li><a href="https://doi.org/10.1145/3577193.3593715">Anatomy of High-Performance GEMM with Online Fault Tolerance on GPUs</a> — Shixun Wu, Yujia Zhai, Jinyang Liu et al., International Conference on Supercomputing, 2023<q class="found">our fault-tolerant GEMM incurs only a minimal overhead (8.89% on average) compared to cuBLAS even with hundreds of errors injected per minute.</q></li><li><a href="https://zenodo.org/records/22054179">zenodo.org</a><q class="found">Against this threshold the detector catches 304 of 400 single exponent-bit flips (76%), failing a bar of 90% that was registered before any data was collected, and catches 0 of 600 low-mantissa flips.</q><span class="also">also found for P080.9</span></li></ul><h3 class="for">For P080.9: Under tolerance-based (non-bit-exact) comparison, what minimum fake/corrupted fraction escapes detection yet changes model behaviour?</h3><ul class="related"><li><a href="https://doi.org/10.1007/978-3-032-25336-1_8">Sum-Check Protocol for Approximate Computations</a> — Dor Bitan, Zachary DeStefano, Shafi Goldwasser et al., Lecture notes in computer science, 2026<q class="found">our protocols treat approximation as a first-class citizen: the verifier’s checks are relaxed to accept prover messages that are only approximately consistent with the claimed result.</q></li></ul>
+<section><h2>Data</h2><ul><li><a href="../problems.csv">problems.csv</a> — one row per problem</li><li><a href="../problem_status.csv">problem_status.csv</a> — status, scope and evidence per problem</li><li><a href="../problem_sources.csv">problem_sources.csv</a> — the posed-by quote and other documents per problem</li><li><a href="../leaves.csv">leaves.csv</a> — all sub-questions, including those without a checkable form</li><li><a href="../leaf_sources.csv">leaf_sources.csv</a> — every source row behind each sub-question</li></ul></section><footer class="gen"><p>This is my best understanding as of 2026-10-27. It does not claim that nobody is working on these problems. Corrections are welcome: dan@canaryinstitute.ai.</p></footer><!-- Generated by `analysis/public_problem_list/render.py` from the frozen problem tree with corrections (inputs at commit cb93599 2026-10-27). -->
+</main>
+</body>
+</html>

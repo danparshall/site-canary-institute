@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>P105 Model identity across evaluation and deployment</title>
+<style>
+:root { --bg:#fbfaf7; --fg:#1c1c1a; --muted:#66655f; --rule:#e3e1d9; --panel:#f3f1ea; --link:#7a4f00;
+  --Posed:#e6e4de; --Analyzed:#d5e1fa; --Started:#fbe9ad; --Done:#c9ecd6; --Failed:#f6cfc8; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg:#151513; --fg:#e7e5de; --muted:#9c9a91;
+  --rule:#34332e; --panel:#1f1e1b; --link:#e2a94a; --Posed:#3b3a36; --Analyzed:#22385f; --Started:#4f3f0c;
+  --Done:#174428; --Failed:#5c241c; } }
+:root[data-theme="dark"] { --bg:#151513; --fg:#e7e5de; --muted:#9c9a91; --rule:#34332e; --panel:#1f1e1b; --link:#e2a94a;
+  --Posed:#3b3a36; --Analyzed:#22385f; --Started:#4f3f0c; --Done:#174428; --Failed:#5c241c; }
+* { box-sizing:border-box; }
+html { background:var(--bg); }
+body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
+main { max-width:68rem; margin:0 auto; padding:2rem 16px 5rem; }
+h1 { font-size:1.9rem; line-height:1.2; margin:0 0 1rem; }
+h2 { font-size:1.3rem; margin:2.6rem 0 .8rem; padding-top:1.2rem; border-top:2px solid var(--rule); }
+h2 .count { font-size:.85rem; font-weight:400; color:var(--muted); margin-left:.4rem; }
+h4 { font-size:.8rem; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin:1.1rem 0 .4rem; }
+header p { max-width:46rem; }
+a { color:var(--link); }
+code { font-size:.85em; background:var(--panel); padding:0 .25em; border-radius:3px; }
+.note, .flag, .top, .permalink { color:var(--muted); font-size:.88rem; }
+.scroll { overflow-x:auto; }
+table { border-collapse:collapse; width:100%; }
+th, td { text-align:left; vertical-align:top; padding:.45rem .55rem; border-bottom:1px solid var(--rule); }
+th { font-size:.78rem; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); font-weight:600; }
+td.num, th.num { text-align:right; font-variant-numeric:tabular-nums; }
+td.zero { color:var(--muted); opacity:.55; }
+.tag { display:inline-block; font-size:.78rem; font-weight:650; padding:.15em .6em; border-radius:4px;
+  white-space:nowrap; }
+.s-Posed { background:var(--Posed); } .s-Analyzed { background:var(--Analyzed); }
+.s-Started { background:var(--Started); } .s-Done { background:var(--Done); } .s-Failed { background:var(--Failed); }
+td.st { font-weight:650; font-size:.85rem; white-space:nowrap; }
+.overview th[class^="s-"] { color:var(--fg); text-align:right; }
+.legend { background:var(--panel); border-radius:8px; padding:.9rem 1.1rem; margin:1.4rem 0; }
+.legend ul { list-style:none; padding:0; margin:.6rem 0 0; display:grid; gap:.35rem; }
+.legend .disclaimer { margin:0; font-size:.93rem; }
+.overview td:first-child { min-width:14rem; }
+.overview tfoot td { font-weight:650; border-bottom:none; }
+.barcell { width:22%; min-width:8rem; }
+.bar { display:flex; height:.8rem; border-radius:4px; overflow:hidden; background:var(--rule); }
+.params { margin:1.2rem 0; } .params summary { cursor:pointer; font-weight:600; }
+.controls { display:flex; gap:.5rem; margin:1.5rem 0 0; }
+button { font:inherit; font-size:.85rem; padding:.3rem .8rem; border:1px solid var(--rule); border-radius:6px;
+  background:var(--panel); color:var(--fg); cursor:pointer; }
+table.problems td.pid, td.sqid { white-space:nowrap; font-variant-numeric:tabular-nums; font-weight:600; }
+td.sqid { font-weight:400; font-size:.8rem; color:var(--muted); }
+.ptitle { display:block; font-weight:600; }
+tr.summary { cursor:pointer; }
+tr.summary:hover td, tbody.open tr.summary td { background:var(--panel); }
+tr.summary td.pid::before { content:"▸ "; color:var(--muted); }
+tbody.open tr.summary td.pid::before { content:"▾ "; }
+html.js tr.detail { display:none; }
+html.js tbody.open tr.detail { display:table-row; }
+tr.detail > td { background:var(--panel); padding:.2rem 1rem 1rem 2rem; }
+.detail-body { max-width:52rem; }
+.statement { margin:.8rem 0 .4rem; }
+.scope { margin:.3rem 0; }
+blockquote.evidence { margin:.4rem 0 .6rem; padding:.3rem .9rem; border-left:3px solid var(--rule); font-style:italic; }
+blockquote.evidence footer { font-style:normal; font-size:.85rem; color:var(--muted); margin-top:.25rem; }
+ul.posed { padding-left:1.1rem; margin:.2rem 0; }
+table.subq { font-size:.92rem; background:var(--bg); }
+td.report { color:var(--muted); font-size:.85rem; min-width:9rem; }
+ul.docs li { margin:.2rem 0; }
+footer.gen { margin-top:3rem; color:var(--muted); font-size:.85rem; }
+main.detail-page { max-width:52rem; }
+.crumb { font-size:.9rem; margin-bottom:1rem; }
+h1 .pid { color:var(--muted); font-variant-numeric:tabular-nums; }
+.question { font-size:1.1rem; font-weight:600; }
+main.detail-page h2 { font-size:1.1rem; margin:2rem 0 .6rem; padding-top:.8rem; }
+h3.for { font-size:.95rem; font-weight:600; margin:1.2rem 0 .3rem; }
+.label { background:var(--panel); border-radius:8px; padding:.7rem 1rem; font-size:.9rem; }
+ul.related { padding-left:1.1rem; } ul.related li { margin:.5rem 0; }
+q.found { display:block; font-style:italic; margin:.2rem 0; }
+.also { display:block; color:var(--muted); font-size:.85rem; }
+@media (max-width:640px) { th.barcell, td.barcell { display:none; } tr.detail > td { padding-left:.8rem; }
+  .overview td:first-child { min-width:9rem; } }
+</style>
+</head>
+<body>
+<main class="detail-page">
+<nav class="crumb"><a href="../index.html#area-c13-distributed-training-provenance">← Distributed training versus bandwidth, run lineage and model provenance</a></nav>
+<header><h1><span class="pid">P105</span> Model identity across evaluation and deployment</h1>
+<p class="question">Can a verifier confirm the evaluated, deployed and served models are the same (e.g. via attested weight/code hash) in a real pilot?</p>
+<p class="statement">Showing evaluated, deployed and served models are the same.</p>
+</header>
+<div class="status-block"><h4>Status</h4><p class="scope"><span class="tag s-Started">Started</span> Served-model identity by recomputation on one 8xH100 server with prover and verifier on the same box; open-weight 7B-120B models; developer-run attacks (model substitution, LoRA append, append-on-trigger); 37,500 prompt runs; a fixed threshold gave honest-prover failures and short-output false negatives. The evaluated-versus-deployed clause (a TEE-signed hash of weights and code) is a design only, which Scher &amp; Thiergart call 'mostly solved in principle'; no real pilot, which the headline asks for; handling of legitimate model versions: no work.</p><blockquote class="evidence">Our results add further evidence that Token DiFR can identify different incorrect-model attacks reliably across a small range of prompts.<footer>Amodo (2026), An Inference Verification Prototype — Stage 1 (Amodo Design note) (2026-06-29), L235</footer></blockquote></div>
+<h2>Posed by</h2><ul class="posed"><li>Scher &amp; Thiergart (2024), <em>Mechanisms to Verify International Agreements About AI Development</em> (MIRI): <q>however, it may be difficult to ensure that the model being evaluated is the correct model.</q> (Evaluations › Verification Approach, p. 39, L1818–1819)</li></ul><p class="others"><strong>Also raised in:</strong> Harack et al. (2025), <em>Verification for International AI Governance</em> (Oxford AIGI); Aarne &amp; Petrie (2025), <em>International Security Applications of Flexible Hardware-Enabled Guarantees</em> (flexHEG Part 3); Shavit (2023), <em>What Does It Take to Catch a Chinchilla? Verifying Rules on Large-Scale Neural Network Training via Compute Monitoring</em>; Harack (2026), <em>AI Verification: Infrastructure for Prosperity, Governance, and Peace</em> (Lawfare); Hausenloy &amp; Li (2026), <em>The Compute Verification Post</em>; AI Security Forum, <em>Requests for Discussion</em>; Proofworks, <em>Living Verification Documents</em>.</p>
+<h2>Sub-questions</h2><div class="scroll"><table class="subq"><thead><tr><th>ID</th><th>Sub-question</th><th>What the sources report</th></tr></thead><tbody><tr id="sq-P105.1"><td class="sqid">P105.1</td><td>Has a TEE-signed weight-and-code hash shown that an evaluated model and a deployed model are identical in a real pilot?</td><td class="report">partly answered</td></tr><tr id="sq-P105.2"><td class="sqid">P105.2</td><td>Can a client or verifier confirm, from API outputs or per-response attestation, that served weights match a committed hash (to a stated detection AUC) or a reported run?</td><td class="report">open</td></tr><tr id="sq-P105.3"><td class="sqid">P105.3</td><td>Has retroactive verification of inference-time weight snapshots against a declared hash been shown on a production stack?</td><td class="report">a source suggests an answer (not checked)</td></tr></tbody></table></div>
+<h2>Sub-questions not yet stated precisely enough to check</h2><div class="scroll"><table class="subq"><thead><tr><th>ID</th><th>Sub-question</th></tr></thead><tbody><tr id="sq-P105.4"><td class="sqid">P105.4</td><td>How should legitimate model updates and versions be handled under identity checks?</td></tr></tbody></table></div>
+<h2>Possibly relevant work found by automated search</h2><p class="label">Found by AI agents searching for this problem's sub-questions, mostly by keyword and citation in the OpenAlex scholarly database and on the web; a second AI pass reviewed each one, and we spot-checked some by hand. They seemed reasonably related, as far as one can tell from outside each paper's field. Some come from neighbouring fields, such as arms control and financial audit, and bear on the problem by analogy. Not reviewed against the status above; a paper listed here does not change that status. 926 of 1119 quotes checked word for word against the paper's text.</p><h3 class="for">For P105.1: Has a TEE-signed weight-and-code hash shown that an evaluated model and a deployed model are identical in a real pilot?</h3><ul class="related"><li><a href="https://doi.org/10.1145/3714393.3726492">Laminator: Verifiable ML Property Cards using Hardware-assisted Attestations</a> — Vasisht Duddu, Oskari Järvinen, Lachlan J. Gunn et al., 2024<q class="found">we introduce the notion of inference cards to describe the properties of a given inference (e.g., binding of the output to the model and its corresponding input)</q></li><li><a href="https://doi.org/10.3929/ethz-b-000590875">SAGE: Software-based Attestation for GPU Execution</a> — Andrei Ivanov, Benjamin Rothenberger, Arnaud Dethise et al., King Abdullah University of Science and Technology Repository (King Abdullah University of Science and Technology), 2022<q class="found">SAGE enables secure code execution on NVIDIA GPUs of the Ampere architecture (A100), providing properties of code integrity and secrecy, computation integrity, as well as data integrity and secrecy</q></li></ul><h3 class="for">For P105.2: Can a client or verifier confirm, from API outputs or per-response attestation, that served weights match a committed hash (to a stated detection AUC) or a reported run?</h3><ul class="related"><li><a href="https://arxiv.org/abs/2609.25624">Accelerating the Mitigation of LLM Inference Nondeterminism Across GPU Architectures</a> — Liam Cooper, Shinnung Jeong, Hyeran Jeon et al., arXiv, 2026<q class="found">We confirm our solution's linear-layer outputs are bitwise identical across NVIDIA Ampere, Ada, and Hopper GPUs, while running 1.17 to 3.1× faster end-to-end than the state-of-the-art solution</q></li><li><a href="https://arxiv.org/abs/2506.06975">Auditing Black-Box LLM APIs with a Rank-Based Uniformity Test</a> — Xiaoyuan Zhu, Yaowen Ye, Tianyi Qiu et al., arXiv, 2025<q class="found">avoids detectable query patterns, making it robust to adversarial providers that reroute or mix responses upon the detection of testing attempts</q></li><li><a href="https://arxiv.org/abs/2512.03816">Log Probability Tracking of LLM APIs</a> — Timothée Chauvin, Erwan Le Merrer, François Taïani et al., arXiv, 2025<q class="found">This is enough to detect changes as small as one step of fine-tuning, making this approach more sensitive than existing methods while being 1,000x cheaper.</q><span class="also">also found for P105.4</span></li><li><a href="https://arxiv.org/abs/2410.20247">Model Equality Testing: Which Model Is This API Serving?</a> — Irena Gao, Percy Liang, Carlos Guestrin, arXiv, 2024<q class="found">a test built on a simple string kernel achieves a median of 77.4% power against a range of distortions, using an average of just 10 samples per prompt ... 11 out of 31 endpoints serve different distributions than reference weights released by Meta.</q></li></ul><h3 class="for">For P105.3: Has retroactive verification of inference-time weight snapshots against a declared hash been shown on a production stack?</h3><ul class="related"><li><a href="https://doi.org/10.1145/3736731.3746141">Reproducibility for HPC and Distributed Environments: Committees, Nondeterminism, Performance and Workflows</a> — Raül Sirvent, Rocío Carratalá-Sáez, Amal Gueroudji et al., 2025<q class="found">detail several existing techniques for addressing different aspects of reproducibility: enabling the verification of results for nondeterministic applications, ensuring performance reproducibility in HPC experiments, and using workflow provenance capture</q></li></ul>
+<section><h2>Data</h2><ul><li><a href="../problems.csv">problems.csv</a> — one row per problem</li><li><a href="../problem_status.csv">problem_status.csv</a> — status, scope and evidence per problem</li><li><a href="../problem_sources.csv">problem_sources.csv</a> — the posed-by quote and other documents per problem</li><li><a href="../leaves.csv">leaves.csv</a> — all sub-questions, including those without a checkable form</li><li><a href="../leaf_sources.csv">leaf_sources.csv</a> — every source row behind each sub-question</li></ul></section><footer class="gen"><p>This is my best understanding as of 2026-10-27. It does not claim that nobody is working on these problems. Corrections are welcome: dan@canaryinstitute.ai.</p></footer><!-- Generated by `analysis/public_problem_list/render.py` from the frozen problem tree with corrections (inputs at commit cb93599 2026-10-27). -->
+</main>
+</body>
+</html>

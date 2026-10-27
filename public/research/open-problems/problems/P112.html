@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>P112 Replay mismatches and dispute settlement</title>
+<style>
+:root { --bg:#fbfaf7; --fg:#1c1c1a; --muted:#66655f; --rule:#e3e1d9; --panel:#f3f1ea; --link:#7a4f00;
+  --Posed:#e6e4de; --Analyzed:#d5e1fa; --Started:#fbe9ad; --Done:#c9ecd6; --Failed:#f6cfc8; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg:#151513; --fg:#e7e5de; --muted:#9c9a91;
+  --rule:#34332e; --panel:#1f1e1b; --link:#e2a94a; --Posed:#3b3a36; --Analyzed:#22385f; --Started:#4f3f0c;
+  --Done:#174428; --Failed:#5c241c; } }
+:root[data-theme="dark"] { --bg:#151513; --fg:#e7e5de; --muted:#9c9a91; --rule:#34332e; --panel:#1f1e1b; --link:#e2a94a;
+  --Posed:#3b3a36; --Analyzed:#22385f; --Started:#4f3f0c; --Done:#174428; --Failed:#5c241c; }
+* { box-sizing:border-box; }
+html { background:var(--bg); }
+body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
+main { max-width:68rem; margin:0 auto; padding:2rem 16px 5rem; }
+h1 { font-size:1.9rem; line-height:1.2; margin:0 0 1rem; }
+h2 { font-size:1.3rem; margin:2.6rem 0 .8rem; padding-top:1.2rem; border-top:2px solid var(--rule); }
+h2 .count { font-size:.85rem; font-weight:400; color:var(--muted); margin-left:.4rem; }
+h4 { font-size:.8rem; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin:1.1rem 0 .4rem; }
+header p { max-width:46rem; }
+a { color:var(--link); }
+code { font-size:.85em; background:var(--panel); padding:0 .25em; border-radius:3px; }
+.note, .flag, .top, .permalink { color:var(--muted); font-size:.88rem; }
+.scroll { overflow-x:auto; }
+table { border-collapse:collapse; width:100%; }
+th, td { text-align:left; vertical-align:top; padding:.45rem .55rem; border-bottom:1px solid var(--rule); }
+th { font-size:.78rem; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); font-weight:600; }
+td.num, th.num { text-align:right; font-variant-numeric:tabular-nums; }
+td.zero { color:var(--muted); opacity:.55; }
+.tag { display:inline-block; font-size:.78rem; font-weight:650; padding:.15em .6em; border-radius:4px;
+  white-space:nowrap; }
+.s-Posed { background:var(--Posed); } .s-Analyzed { background:var(--Analyzed); }
+.s-Started { background:var(--Started); } .s-Done { background:var(--Done); } .s-Failed { background:var(--Failed); }
+td.st { font-weight:650; font-size:.85rem; white-space:nowrap; }
+.overview th[class^="s-"] { color:var(--fg); text-align:right; }
+.legend { background:var(--panel); border-radius:8px; padding:.9rem 1.1rem; margin:1.4rem 0; }
+.legend ul { list-style:none; padding:0; margin:.6rem 0 0; display:grid; gap:.35rem; }
+.legend .disclaimer { margin:0; font-size:.93rem; }
+.overview td:first-child { min-width:14rem; }
+.overview tfoot td { font-weight:650; border-bottom:none; }
+.barcell { width:22%; min-width:8rem; }
+.bar { display:flex; height:.8rem; border-radius:4px; overflow:hidden; background:var(--rule); }
+.params { margin:1.2rem 0; } .params summary { cursor:pointer; font-weight:600; }
+.controls { display:flex; gap:.5rem; margin:1.5rem 0 0; }
+button { font:inherit; font-size:.85rem; padding:.3rem .8rem; border:1px solid var(--rule); border-radius:6px;
+  background:var(--panel); color:var(--fg); cursor:pointer; }
+table.problems td.pid, td.sqid { white-space:nowrap; font-variant-numeric:tabular-nums; font-weight:600; }
+td.sqid { font-weight:400; font-size:.8rem; color:var(--muted); }
+.ptitle { display:block; font-weight:600; }
+tr.summary { cursor:pointer; }
+tr.summary:hover td, tbody.open tr.summary td { background:var(--panel); }
+tr.summary td.pid::before { content:"▸ "; color:var(--muted); }
+tbody.open tr.summary td.pid::before { content:"▾ "; }
+html.js tr.detail { display:none; }
+html.js tbody.open tr.detail { display:table-row; }
+tr.detail > td { background:var(--panel); padding:.2rem 1rem 1rem 2rem; }
+.detail-body { max-width:52rem; }
+.statement { margin:.8rem 0 .4rem; }
+.scope { margin:.3rem 0; }
+blockquote.evidence { margin:.4rem 0 .6rem; padding:.3rem .9rem; border-left:3px solid var(--rule); font-style:italic; }
+blockquote.evidence footer { font-style:normal; font-size:.85rem; color:var(--muted); margin-top:.25rem; }
+ul.posed { padding-left:1.1rem; margin:.2rem 0; }
+table.subq { font-size:.92rem; background:var(--bg); }
+td.report { color:var(--muted); font-size:.85rem; min-width:9rem; }
+ul.docs li { margin:.2rem 0; }
+footer.gen { margin-top:3rem; color:var(--muted); font-size:.85rem; }
+main.detail-page { max-width:52rem; }
+.crumb { font-size:.9rem; margin-bottom:1rem; }
+h1 .pid { color:var(--muted); font-variant-numeric:tabular-nums; }
+.question { font-size:1.1rem; font-weight:600; }
+main.detail-page h2 { font-size:1.1rem; margin:2rem 0 .6rem; padding-top:.8rem; }
+h3.for { font-size:.95rem; font-weight:600; margin:1.2rem 0 .3rem; }
+.label { background:var(--panel); border-radius:8px; padding:.7rem 1rem; font-size:.9rem; }
+ul.related { padding-left:1.1rem; } ul.related li { margin:.5rem 0; }
+q.found { display:block; font-style:italic; margin:.2rem 0; }
+.also { display:block; color:var(--muted); font-size:.85rem; }
+@media (max-width:640px) { th.barcell, td.barcell { display:none; } tr.detail > td { padding-left:.8rem; }
+  .overview td:first-child { min-width:9rem; } }
+</style>
+</head>
+<body>
+<main class="detail-page">
+<nav class="crumb"><a href="../index.html#area-c14-inspection-practice">← Inspection practice and verification institutions with a technical core</a></nav>
+<header><h1><span class="pid">P112</span> Replay mismatches and dispute settlement</h1>
+<p class="question">What is the baseline rate of benign replay mismatches, and can a dispute procedure attribute a mismatch to hardware fault versus cheating?</p>
+<p class="statement">The rate of benign mismatches in replay checks, and whether a dispute procedure can tell a hardware fault from cheating.</p>
+</header>
+<div class="status-block"><h4>Status</h4><p class="scope"><span class="tag s-Started">Started</span> Delegation setting: when two executions of the same ML program disagree, a referee bisects by checkpoint hashes to one training step and one operator, re-executes it and rules; benign floating-point mismatches are removed by bitwise-reproducible operators, implemented and benchmarked on DistilBERT and Llama-3.1 1B and 8B in FP32. It finds which party is wrong, not whether the cause was a hardware fault or cheating; no baseline rate of benign replay mismatches is measured; Cankaya (2026) claims his own bitwise replay settles statistical false alarms, a self-report at the same stage; GPU-stack training replay at frontier scale not shown.</p><blockquote class="evidence">we design Verde, a dispute arbitration protocol that efficiently handles the large scale and graph-based computational model of modern ML programs. For (2), we build RepOps (Reproducible Operators), a library that eliminates hardware “nondeterminism” by controlling the order of floating point operations performed on all hardware. Our implementation shows that refereed delegation achieves both strong guarantees for clients and practical overheads for compute providers.<footer>Arun et al. (2025), Verde: Verification via Refereed Delegation for Machine Learning Programs, arXiv 2502.19405 (2025-02-26), L47–53</footer></blockquote></div>
+<p class="others"><strong>Raised in:</strong> Cankaya (2026), <em>A System Overview for Near-Term, Low-Trust AI Compute Verification</em> (v0.2); Cankaya (2026), <em>Catching Misreporting About ML Hardware Use by Turning Noise into Signal, Part II</em>; Cankaya (2026), <em>Compute Verification FAQs</em>; Canary Institute research.</p>
+<h2>Sub-questions</h2><div class="scroll"><table class="subq"><thead><tr><th>ID</th><th>Sub-question</th><th>What the sources report</th></tr></thead><tbody><tr id="sq-P112.1"><td class="sqid">P112.1</td><td>What is the baseline rate of benign replay mismatches (bit flips, software faults) per record?</td><td class="report">open</td></tr><tr id="sq-P112.2"><td class="sqid">P112.2</td><td>What is the false-alarm rate of statistical replay per record, and can bitwise replay settle such disputes?</td><td class="report">partly answered</td></tr><tr id="sq-P112.3"><td class="sqid">P112.3</td><td>What is each verification mechanism's measured false-positive rate before deployment?</td><td class="report">open</td></tr><tr id="sq-P112.4"><td class="sqid">P112.4</td><td>Can a written dispute procedure attribute a replay mismatch to hardware fault vs cheating without the prover reproducing it (e.g. on GPU stacks)?</td><td class="report">open</td></tr></tbody></table></div>
+<h2>Possibly relevant work found by automated search</h2><p class="label">Found by AI agents searching for this problem's sub-questions, mostly by keyword and citation in the OpenAlex scholarly database and on the web; a second AI pass reviewed each one, and we spot-checked some by hand. They seemed reasonably related, as far as one can tell from outside each paper's field. Some come from neighbouring fields, such as arms control and financial audit, and bear on the problem by analogy. Not reviewed against the status above; a paper listed here does not change that status. 926 of 1119 quotes checked word for word against the paper's text.</p><h3 class="for">For P112.1: What is the baseline rate of benign replay mismatches (bit flips, software faults) per record?</h3><ul class="related"><li><a href="https://doi.org/10.1109/hpca61900.2025.00012">Veritas – Demystifying Silent Data Corruptions: μArch-Level Modeling and Fleet Data of Modern x86 CPUs</a> — Odysseas Chatzopoulos, Nikos Karystinos, George N. Papadimitriou et al., Proceedings - International Symposium on High-Performance Computer Architecture/Proceedings, 2025<q class="found">Hyperscalers have reported unexpectedly high numbers of defective CPU chips, with a defect rate of 1 in a 1000, leading to Silent Data Corruptions (SDCs)" ... "there is no public data on the rate of SDC incidents (corrupted program executions) in large fleets</q><span class="also">also found for P112.4</span></li><li><a href="https://doi.org/10.1145/3650200.3656615">Understanding GPU Memory Corruption at Extreme Scale: The Summit Case Study</a> — Vladyslav Oles, Anna Schmedding, George Ostrouchov A et al., ACM International Conference on Supercomputing (ICS), 2024<q class="found">GPU memory corruption and in particular double-bit errors (DBEs) remain one of the least understood aspects of HPC system reliability. Albeit rare, their occurrences always lead to job termination</q><span class="also">also found for P112.3</span></li><li><a href="https://doi.org/10.1109/ets56758.2023.10173972">Understanding Permanent Hardware Failures in Deep Learning Training Accelerator Systems</a> — Yi He, Yanjing Li, Proceedings/Proceedings - European Test Workshop, 2023<q class="found">we developed efficient software-based detection and recovery techniques ... they require 15−25 lines of code change, and introduce 0.004%−0.025% performance/energy overhead</q><span class="also">also found for P112.4</span></li><li><a href="https://doi.org/10.1145/3458336.3465297">Cores that don't count</a> — Peter Hochschild, Paul A. Turner, Jeffrey C. Mogul et al., Workshop on Hot Topics in Operating Systems, 2021<q class="found">we observe on the order of a few mercurial cores per several thousand machines – similar to the rate reported by Facebook</q><span class="also">also found for P112.4</span></li><li><a href="https://arxiv.org/abs/2102.11245">Silent Data Corruptions at Scale</a> — Harish Dattatraya Dixit, Sneha Pendharkar, Matt Beadon et al., arXiv, 2021<q class="found">we have run a vast library of silent error test scenarios across hundreds of thousands of machines in our fleet. This has resulted in hundreds of CPUs detected for these errors, showing that SDCs are a systemic issue across generations.</q></li><li><a href="https://doi.org/10.1109/hpca.2015.7056044">Understanding GPU errors on large-scale HPC systems and the implications for system design and operation</a> — Devesh Tiwari, Saurabh Gupta, James Rogers et al., Proceedings - International Symposium on High-Performance Computer Architecture/Proceedings, 2015<q class="found">We present a detailed study to provide a thorough understanding of GPU errors on a large-scale GPU-enabled system.</q></li></ul><h3 class="for">For P112.2: What is the false-alarm rate of statistical replay per record, and can bitwise replay settle such disputes?</h3><ul class="related"><li><a href="https://arxiv.org/abs/2603.20421">Hawkeye: Reproducing GPU-Level Non-Determinism</a> — Erez Badash, Dan Boneh, Ilan Komargodski et al., arXiv, 2026<q class="found">In all test cases, Hawkeye enables perfect reproduction of matrix multiplication on a CPU, paving the way for efficient and trustworthy third-party auditing of ML model training and inference.</q><span class="also">also found for P112.4</span></li><li><a href="https://doi.org/10.1109/scw63240.2024.00028">Impacts of floating-point non-associativity on reproducibility for HPC and deep learning applications</a> — Sanjif Shanmugavelu, Mathieu Taillefumier, Christopher Culver et al., 2024<q class="found">the sensitivity of deep learning training and inference pipelines to floating-point non-associativity has been found to sometimes be extreme</q><span class="also">also found for P112.4</span></li></ul>
+<section><h2>Data</h2><ul><li><a href="../problems.csv">problems.csv</a> — one row per problem</li><li><a href="../problem_status.csv">problem_status.csv</a> — status, scope and evidence per problem</li><li><a href="../problem_sources.csv">problem_sources.csv</a> — the posed-by quote and other documents per problem</li><li><a href="../leaves.csv">leaves.csv</a> — all sub-questions, including those without a checkable form</li><li><a href="../leaf_sources.csv">leaf_sources.csv</a> — every source row behind each sub-question</li></ul></section><footer class="gen"><p>This is my best understanding as of 2026-10-27. It does not claim that nobody is working on these problems. Corrections are welcome: dan@canaryinstitute.ai.</p></footer><!-- Generated by `analysis/public_problem_list/render.py` from the frozen problem tree with corrections (inputs at commit cb93599 2026-10-27). -->
+</main>
+</body>
+</html>

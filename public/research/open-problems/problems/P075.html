@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>P075 Network interlock performance</title>
+<style>
+:root { --bg:#fbfaf7; --fg:#1c1c1a; --muted:#66655f; --rule:#e3e1d9; --panel:#f3f1ea; --link:#7a4f00;
+  --Posed:#e6e4de; --Analyzed:#d5e1fa; --Started:#fbe9ad; --Done:#c9ecd6; --Failed:#f6cfc8; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg:#151513; --fg:#e7e5de; --muted:#9c9a91;
+  --rule:#34332e; --panel:#1f1e1b; --link:#e2a94a; --Posed:#3b3a36; --Analyzed:#22385f; --Started:#4f3f0c;
+  --Done:#174428; --Failed:#5c241c; } }
+:root[data-theme="dark"] { --bg:#151513; --fg:#e7e5de; --muted:#9c9a91; --rule:#34332e; --panel:#1f1e1b; --link:#e2a94a;
+  --Posed:#3b3a36; --Analyzed:#22385f; --Started:#4f3f0c; --Done:#174428; --Failed:#5c241c; }
+* { box-sizing:border-box; }
+html { background:var(--bg); }
+body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
+main { max-width:68rem; margin:0 auto; padding:2rem 16px 5rem; }
+h1 { font-size:1.9rem; line-height:1.2; margin:0 0 1rem; }
+h2 { font-size:1.3rem; margin:2.6rem 0 .8rem; padding-top:1.2rem; border-top:2px solid var(--rule); }
+h2 .count { font-size:.85rem; font-weight:400; color:var(--muted); margin-left:.4rem; }
+h4 { font-size:.8rem; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin:1.1rem 0 .4rem; }
+header p { max-width:46rem; }
+a { color:var(--link); }
+code { font-size:.85em; background:var(--panel); padding:0 .25em; border-radius:3px; }
+.note, .flag, .top, .permalink { color:var(--muted); font-size:.88rem; }
+.scroll { overflow-x:auto; }
+table { border-collapse:collapse; width:100%; }
+th, td { text-align:left; vertical-align:top; padding:.45rem .55rem; border-bottom:1px solid var(--rule); }
+th { font-size:.78rem; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); font-weight:600; }
+td.num, th.num { text-align:right; font-variant-numeric:tabular-nums; }
+td.zero { color:var(--muted); opacity:.55; }
+.tag { display:inline-block; font-size:.78rem; font-weight:650; padding:.15em .6em; border-radius:4px;
+  white-space:nowrap; }
+.s-Posed { background:var(--Posed); } .s-Analyzed { background:var(--Analyzed); }
+.s-Started { background:var(--Started); } .s-Done { background:var(--Done); } .s-Failed { background:var(--Failed); }
+td.st { font-weight:650; font-size:.85rem; white-space:nowrap; }
+.overview th[class^="s-"] { color:var(--fg); text-align:right; }
+.legend { background:var(--panel); border-radius:8px; padding:.9rem 1.1rem; margin:1.4rem 0; }
+.legend ul { list-style:none; padding:0; margin:.6rem 0 0; display:grid; gap:.35rem; }
+.legend .disclaimer { margin:0; font-size:.93rem; }
+.overview td:first-child { min-width:14rem; }
+.overview tfoot td { font-weight:650; border-bottom:none; }
+.barcell { width:22%; min-width:8rem; }
+.bar { display:flex; height:.8rem; border-radius:4px; overflow:hidden; background:var(--rule); }
+.params { margin:1.2rem 0; } .params summary { cursor:pointer; font-weight:600; }
+.controls { display:flex; gap:.5rem; margin:1.5rem 0 0; }
+button { font:inherit; font-size:.85rem; padding:.3rem .8rem; border:1px solid var(--rule); border-radius:6px;
+  background:var(--panel); color:var(--fg); cursor:pointer; }
+table.problems td.pid, td.sqid { white-space:nowrap; font-variant-numeric:tabular-nums; font-weight:600; }
+td.sqid { font-weight:400; font-size:.8rem; color:var(--muted); }
+.ptitle { display:block; font-weight:600; }
+tr.summary { cursor:pointer; }
+tr.summary:hover td, tbody.open tr.summary td { background:var(--panel); }
+tr.summary td.pid::before { content:"▸ "; color:var(--muted); }
+tbody.open tr.summary td.pid::before { content:"▾ "; }
+html.js tr.detail { display:none; }
+html.js tbody.open tr.detail { display:table-row; }
+tr.detail > td { background:var(--panel); padding:.2rem 1rem 1rem 2rem; }
+.detail-body { max-width:52rem; }
+.statement { margin:.8rem 0 .4rem; }
+.scope { margin:.3rem 0; }
+blockquote.evidence { margin:.4rem 0 .6rem; padding:.3rem .9rem; border-left:3px solid var(--rule); font-style:italic; }
+blockquote.evidence footer { font-style:normal; font-size:.85rem; color:var(--muted); margin-top:.25rem; }
+ul.posed { padding-left:1.1rem; margin:.2rem 0; }
+table.subq { font-size:.92rem; background:var(--bg); }
+td.report { color:var(--muted); font-size:.85rem; min-width:9rem; }
+ul.docs li { margin:.2rem 0; }
+footer.gen { margin-top:3rem; color:var(--muted); font-size:.85rem; }
+main.detail-page { max-width:52rem; }
+.crumb { font-size:.9rem; margin-bottom:1rem; }
+h1 .pid { color:var(--muted); font-variant-numeric:tabular-nums; }
+.question { font-size:1.1rem; font-weight:600; }
+main.detail-page h2 { font-size:1.1rem; margin:2rem 0 .6rem; padding-top:.8rem; }
+h3.for { font-size:.95rem; font-weight:600; margin:1.2rem 0 .3rem; }
+.label { background:var(--panel); border-radius:8px; padding:.7rem 1rem; font-size:.9rem; }
+ul.related { padding-left:1.1rem; } ul.related li { margin:.5rem 0; }
+q.found { display:block; font-style:italic; margin:.2rem 0; }
+.also { display:block; color:var(--muted); font-size:.85rem; }
+@media (max-width:640px) { th.barcell, td.barcell { display:none; } tr.detail > td { padding-left:.8rem; }
+  .overview td:first-child { min-width:9rem; } }
+</style>
+</head>
+<body>
+<main class="detail-page">
+<nav class="crumb"><a href="../index.html#area-c09-on-chip-enforcement-metering">← On-chip enforcement, licences, metering, trusted time and on-device logging</a></nav>
+<header><h1><span class="pid">P075</span> Network interlock performance</h1>
+<p class="question">Can an inline network interlock enforce a signed list of allowed peers at full line rate (800 Gb/s to 1.6 Tb/s)?</p>
+<p class="statement">Whether an inline network interlock can enforce a signed peer allow-list at full line rate: latency, firmware updates, key setup, in-network-compute switches, NVLink traffic and DMA spoofing.</p>
+</header>
+<div class="status-block"><h4>Status</h4><p class="scope"><span class="tag s-Started">Started</span> Built, not measured: Amodo report a working prototype in which a central controller leases traffic quotas to NVIDIA BlueField network cards that enforce them, and hardware-accelerated encryption between nodes, with keys the controller can revoke. Membership by key is a form of the allowed-pairs list the problem asks about, but no peer allow-list has been built as such, and no line-rate or latency figures are published. The full interlock design is in flexHEG Part 2 (Petrie &amp; Aarne 2025), with the network card as the retrofit location; encrypting all NVLink traffic is estimated at about 3% of H100 compute (a desk estimate).</p><blockquote class="evidence">Got hardware-accelerated encryption working<footer>AI Security Forum (2025), Requests for Discussion, RFD 029 NIC-Based Bandwidth Limiting &amp; Interconnect Verification (Amodo) (2024-11-27 (RFD created; implementation status as saved)), L1768</footer></blockquote></div>
+<h2>Posed by</h2><ul class="posed"><li>AI Security Forum, <em>Requests for Discussion</em>: <q>Can the Interlock keep up with future bandwidth increases (1600Gb/s NICs)?</q> (RFD 021 Interlock Architecture (FlexHEG), Open Questions; line 1199)</li></ul><p class="others"><strong>Also raised in:</strong> Petrie &amp; Aarne (2025), <em>Technical Options for Flexible Hardware-Enabled Guarantees</em> (flexHEG Part 2).</p>
+<h2>Sub-questions</h2><div class="scroll"><table class="subq"><thead><tr><th>ID</th><th>Sub-question</th><th>What the sources report</th></tr></thead><tbody><tr id="sq-P075.1"><td class="sqid">P075.1</td><td>Can an inline network interlock sustain 800 Gb/s to 1.6 Tb/s with added latency below a stated bound (a target to be agreed)?</td><td class="report">open</td></tr><tr id="sq-P075.2"><td class="sqid">P075.2</td><td>Can ConnectX-class NICs be firmware-updated to enforce a signed peer allow-list without hardware change (versus costly NIC replacement)?</td><td class="report">open</td></tr><tr id="sq-P075.3"><td class="sqid">P075.3</td><td>What is the key-setup time for all-to-all session establishment across a stated number of nodes (a target to be agreed)?</td><td class="report">open</td></tr></tbody></table></div>
+<h2>Sub-questions not yet stated precisely enough to check</h2><div class="scroll"><table class="subq"><thead><tr><th>ID</th><th>Sub-question</th></tr></thead><tbody><tr id="sq-P075.4"><td class="sqid">P075.4</td><td>How are switches with in-network compute (e.g. SHARP) brought into the scheme as trusted nodes?</td></tr><tr id="sq-P075.5"><td class="sqid">P075.5</td><td>How does a NIC-based interlock handle NVLink traffic that never passes through the NIC?</td></tr><tr id="sq-P075.6"><td class="sqid">P075.6</td><td>If DMA reads can be spoofed, how much does network-only observation reduce security?</td></tr></tbody></table></div>
+<h2>Possibly relevant work found by automated search</h2><p class="label">Found by AI agents searching for this problem's sub-questions, mostly by keyword and citation in the OpenAlex scholarly database and on the web; a second AI pass reviewed each one, and we spot-checked some by hand. They seemed reasonably related, as far as one can tell from outside each paper's field. Some come from neighbouring fields, such as arms control and financial audit, and bear on the problem by analogy. Not reviewed against the status above; a paper listed here does not change that status. 926 of 1119 quotes checked word for word against the paper's text.</p><h3 class="for">For P075.1: Can an inline network interlock sustain 800 Gb/s to 1.6 Tb/s with added latency below a stated bound (a target to be agreed)?</h3><ul class="related"><li><a href="https://doi.org/10.14722/ndss.2026.240074">Looma: A Low-Latency PQTLS Authentication Architecture for Cloud Applications</a> — Xinshu Ma, Michio Honda, Network and Distributed System Security Symposium, 2026<q class="found">Integrated into TLS 1.3, Looma lowers PQTLS handshake latency by up to 44% compared to a Dilithium-2-based baseline.</q><span class="also">also found for P075.3</span></li><li><a href="https://doi.org/10.1109/access.2023.3274487">Open-RAN Fronthaul Transport Security Architecture and Implementation</a> — Daniel Dik, Michael Berger, IEEE Access, 2023<q class="found">This paper introduces MACsec as a potential solution to protect the fronthaul. … proposes three hardware architectures to fully secure the fronthaul using MACsec and evaluates their feasibility in Field-Programmable Gate Array (FPGA) devices</q></li><li><a href="https://1.ieee802.org/security/802-1ae-rev/">1.ieee802.org</a><q class="found">This standard (MACsec) specifies provision of connectionless user data confidentiality, data integrity, and data origin authenticity by media access independent protocols and entities that operate transparently to MAC Clients.</q><span class="also">also found for P075.3</span></li><li><a href="https://1.ieee802.org/security/802-1aedk/">1.ieee802.org</a><q class="found">The transmitter can balance the privacy improvement against the loss of efficiency and delay by controlling the sizes of consolidating frames and when they are transmitted.</q></li><li><a href="https://www.ieee802.org/3/dj/public/adhoc/optics/0423_OPTX/brown_3dj_optx_01b_230413.pdf">www.ieee802.org</a><q class="found">800GE: 3 + 3 + 31 + 25.6 = 62.6 ns … 1.6TE: 3 + 3 + 31 + 12.8 = 49.8 ns</q></li><li><a href="https://www.ndss-symposium.org/ndss-paper/janus-enabling-expressive-and-efficient-acls-in-high-speed-rdma-clouds/">www.ndss-symposium.org</a><q class="found">achieves line-rate throughput in a 200Gbps real-world RDMA testbed with &lt;5µs latency</q></li></ul><h3 class="for">For P075.2: Can ConnectX-class NICs be firmware-updated to enforce a signed peer allow-list without hardware change (versus costly NIC replacement)?</h3><ul class="related"><li><a href="https://arxiv.org/abs/2502.05338">TNIC: A Trusted NIC Architecture</a> — Dimitra Giantsidi, Julian Pritzi, Felix Gust et al., arXiv, 2025<q class="found">TNIC builds a minimal, formally verified, silicon root-of-trust at the network interface level.</q></li></ul><h3 class="for">For P075.4: How are switches with in-network compute (e.g. SHARP) brought into the scheme as trusted nodes?</h3><ul class="related"><li><a href="https://doi.org/10.1145/3581784.3607099">HEAR: Homomorphically Encrypted Allreduce</a> — Marcin Chrapek, Mikhail Khalilov, Torsten Hoefler, 2012 International Conference for High Performance Computing, Networking, Storage and Analysis, 2023<q class="found">Its latency and bandwidth can be improved by offloading the calculations to the network. However, no way exists to conduct such offloading securely; in state-of-the-art solutions, the data is passed unprotected into the network.</q></li></ul>
+<section><h2>Data</h2><ul><li><a href="../problems.csv">problems.csv</a> — one row per problem</li><li><a href="../problem_status.csv">problem_status.csv</a> — status, scope and evidence per problem</li><li><a href="../problem_sources.csv">problem_sources.csv</a> — the posed-by quote and other documents per problem</li><li><a href="../leaves.csv">leaves.csv</a> — all sub-questions, including those without a checkable form</li><li><a href="../leaf_sources.csv">leaf_sources.csv</a> — every source row behind each sub-question</li></ul></section><footer class="gen"><p>This is my best understanding as of 2026-10-27. It does not claim that nobody is working on these problems. Corrections are welcome: dan@canaryinstitute.ai.</p></footer><!-- Generated by `analysis/public_problem_list/render.py` from the frozen problem tree with corrections (inputs at commit cb93599 2026-10-27). -->
+</main>
+</body>
+</html>

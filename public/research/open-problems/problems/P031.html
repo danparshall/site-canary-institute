@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>P031 Line-rate capture and hashing hardware</title>
+<style>
+:root { --bg:#fbfaf7; --fg:#1c1c1a; --muted:#66655f; --rule:#e3e1d9; --panel:#f3f1ea; --link:#7a4f00;
+  --Posed:#e6e4de; --Analyzed:#d5e1fa; --Started:#fbe9ad; --Done:#c9ecd6; --Failed:#f6cfc8; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg:#151513; --fg:#e7e5de; --muted:#9c9a91;
+  --rule:#34332e; --panel:#1f1e1b; --link:#e2a94a; --Posed:#3b3a36; --Analyzed:#22385f; --Started:#4f3f0c;
+  --Done:#174428; --Failed:#5c241c; } }
+:root[data-theme="dark"] { --bg:#151513; --fg:#e7e5de; --muted:#9c9a91; --rule:#34332e; --panel:#1f1e1b; --link:#e2a94a;
+  --Posed:#3b3a36; --Analyzed:#22385f; --Started:#4f3f0c; --Done:#174428; --Failed:#5c241c; }
+* { box-sizing:border-box; }
+html { background:var(--bg); }
+body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
+main { max-width:68rem; margin:0 auto; padding:2rem 16px 5rem; }
+h1 { font-size:1.9rem; line-height:1.2; margin:0 0 1rem; }
+h2 { font-size:1.3rem; margin:2.6rem 0 .8rem; padding-top:1.2rem; border-top:2px solid var(--rule); }
+h2 .count { font-size:.85rem; font-weight:400; color:var(--muted); margin-left:.4rem; }
+h4 { font-size:.8rem; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin:1.1rem 0 .4rem; }
+header p { max-width:46rem; }
+a { color:var(--link); }
+code { font-size:.85em; background:var(--panel); padding:0 .25em; border-radius:3px; }
+.note, .flag, .top, .permalink { color:var(--muted); font-size:.88rem; }
+.scroll { overflow-x:auto; }
+table { border-collapse:collapse; width:100%; }
+th, td { text-align:left; vertical-align:top; padding:.45rem .55rem; border-bottom:1px solid var(--rule); }
+th { font-size:.78rem; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); font-weight:600; }
+td.num, th.num { text-align:right; font-variant-numeric:tabular-nums; }
+td.zero { color:var(--muted); opacity:.55; }
+.tag { display:inline-block; font-size:.78rem; font-weight:650; padding:.15em .6em; border-radius:4px;
+  white-space:nowrap; }
+.s-Posed { background:var(--Posed); } .s-Analyzed { background:var(--Analyzed); }
+.s-Started { background:var(--Started); } .s-Done { background:var(--Done); } .s-Failed { background:var(--Failed); }
+td.st { font-weight:650; font-size:.85rem; white-space:nowrap; }
+.overview th[class^="s-"] { color:var(--fg); text-align:right; }
+.legend { background:var(--panel); border-radius:8px; padding:.9rem 1.1rem; margin:1.4rem 0; }
+.legend ul { list-style:none; padding:0; margin:.6rem 0 0; display:grid; gap:.35rem; }
+.legend .disclaimer { margin:0; font-size:.93rem; }
+.overview td:first-child { min-width:14rem; }
+.overview tfoot td { font-weight:650; border-bottom:none; }
+.barcell { width:22%; min-width:8rem; }
+.bar { display:flex; height:.8rem; border-radius:4px; overflow:hidden; background:var(--rule); }
+.params { margin:1.2rem 0; } .params summary { cursor:pointer; font-weight:600; }
+.controls { display:flex; gap:.5rem; margin:1.5rem 0 0; }
+button { font:inherit; font-size:.85rem; padding:.3rem .8rem; border:1px solid var(--rule); border-radius:6px;
+  background:var(--panel); color:var(--fg); cursor:pointer; }
+table.problems td.pid, td.sqid { white-space:nowrap; font-variant-numeric:tabular-nums; font-weight:600; }
+td.sqid { font-weight:400; font-size:.8rem; color:var(--muted); }
+.ptitle { display:block; font-weight:600; }
+tr.summary { cursor:pointer; }
+tr.summary:hover td, tbody.open tr.summary td { background:var(--panel); }
+tr.summary td.pid::before { content:"▸ "; color:var(--muted); }
+tbody.open tr.summary td.pid::before { content:"▾ "; }
+html.js tr.detail { display:none; }
+html.js tbody.open tr.detail { display:table-row; }
+tr.detail > td { background:var(--panel); padding:.2rem 1rem 1rem 2rem; }
+.detail-body { max-width:52rem; }
+.statement { margin:.8rem 0 .4rem; }
+.scope { margin:.3rem 0; }
+blockquote.evidence { margin:.4rem 0 .6rem; padding:.3rem .9rem; border-left:3px solid var(--rule); font-style:italic; }
+blockquote.evidence footer { font-style:normal; font-size:.85rem; color:var(--muted); margin-top:.25rem; }
+ul.posed { padding-left:1.1rem; margin:.2rem 0; }
+table.subq { font-size:.92rem; background:var(--bg); }
+td.report { color:var(--muted); font-size:.85rem; min-width:9rem; }
+ul.docs li { margin:.2rem 0; }
+footer.gen { margin-top:3rem; color:var(--muted); font-size:.85rem; }
+main.detail-page { max-width:52rem; }
+.crumb { font-size:.9rem; margin-bottom:1rem; }
+h1 .pid { color:var(--muted); font-variant-numeric:tabular-nums; }
+.question { font-size:1.1rem; font-weight:600; }
+main.detail-page h2 { font-size:1.1rem; margin:2rem 0 .6rem; padding-top:.8rem; }
+h3.for { font-size:.95rem; font-weight:600; margin:1.2rem 0 .3rem; }
+.label { background:var(--panel); border-radius:8px; padding:.7rem 1rem; font-size:.9rem; }
+ul.related { padding-left:1.1rem; } ul.related li { margin:.5rem 0; }
+q.found { display:block; font-style:italic; margin:.2rem 0; }
+.also { display:block; color:var(--muted); font-size:.85rem; }
+@media (max-width:640px) { th.barcell, td.barcell { display:none; } tr.detail > td { padding-left:.8rem; }
+  .overview td:first-child { min-width:9rem; } }
+</style>
+</head>
+<body>
+<main class="detail-page">
+<nav class="crumb"><a href="../index.html#area-c05-network-taps-capture">← Optical taps, line-rate capture, network measurement and interconnect attestation</a></nav>
+<header><h1><span class="pid">P031</span> Line-rate capture and hashing hardware</h1>
+<p class="question">Can hardware hash, timestamp and sign every packet at full line rate with zero loss, and at what resource and power cost?</p>
+<p class="statement">Line-rate capture, hashing and signing hardware.</p>
+<p class="terms"><em>Terms:</em> FPGA (field-programmable gate array): a chip whose logic can be reconfigured, often used for line-rate packet processing. DPU / SmartNIC: a network card with its own processor that can inspect and process traffic.</p>
+</header>
+<div class="status-block"><h4>Status</h4><p class="scope"><span class="tag s-Started">Started</span> The authors' own CPU/DPDK benchmark at 400 Gb/s: line-rate hashing for frames of 1500 B and above; at 64 B minimum frames no algorithm reaches line rate within the physical core count; hashing only, with no timestamping or signing, zero loss on real datacenter traffic not shown, and no trusted or simple hardware; not 800G or 1.6T (limited hardware availability); the authors say an FPGA or ASIC is likely needed. Peigne-Lefebvre et al. (2026) still pose formally verified FPGA hashing at 400+ Gbps as open.</p><blockquote class="evidence">For realistic traffic profiles at 1500B and above, AES-128-GMAC and SipHash-1-3-128 are both capable of sustaining line-rate hashing<footer>Reynolds &amp; Foster (2026), Network Traffic Hashing (Amodo Design note), DPDK Summary (2026-07-03), L547</footer></blockquote></div>
+<h2>Posed by</h2><ul class="posed"><li>Peigné-Lefebvre, Nguyen &amp; Wang (2026), <em>Zero Knowledge Verification for Frontier AI Training Is Possible</em>, arXiv 2606.05433: <q>can streaming SHA-256 hashing at 400+ Gbps be implemented in FPGA fabric with formally verified RTL and tamper-evident physical packaging?</q> (OP-6, p.13, L984–985)</li></ul><p class="others"><strong>Also raised in:</strong> Baker, Kulp, Marks, Brundage &amp; Heim (2025), <em>Verifying International Agreements on AI: Six Layers of Verification for Rules on Large-Scale AI Development and Deployment</em> (RAND WR-A4077-1); Cankaya (2026), <em>A System Overview for Near-Term, Low-Trust AI Compute Verification</em> (v0.2); Cankaya (2026), <em>All Hands on Deck to Build the Datacenter Lie Detector</em>; Canary Institute research; AI 2040 (2026), <em>Get Involved in Verification</em>; AI Security Forum, <em>Requests for Discussion</em>; Dean, <em>Verification Plan</em> (AI 2040); Milton &amp; Reynolds (2026), <em>Network Tapping for AI Verification: A Technical Assessment</em>; Proofworks, <em>Living Verification Documents</em>; Reynolds &amp; Foster (2026), <em>Network Traffic Hashing</em>.</p>
+<h2>Sub-questions</h2><div class="scroll"><table class="subq"><thead><tr><th>ID</th><th>Sub-question</th><th>What the sources report</th></tr></thead><tbody><tr id="sq-P031.1"><td class="sqid">P031.1</td><td>Can an FPGA hash (SHA-2/SHA-3), timestamp and sign every packet at 400 Gb/s line rate, including 64 B minimum frames, and at what resource/power cost?</td><td class="report">partly answered</td></tr><tr id="sq-P031.2"><td class="sqid">P031.2</td><td>Has per-packet or per-batch hashing with &gt;=128-bit digests been shown at 800G or 1.6T line rate?</td><td class="report">open</td></tr><tr id="sq-P031.3"><td class="sqid">P031.3</td><td>Can a SmartNIC or DPU (e.g. 32-64 core) hash all traffic at 400G with zero loss, given inline DPU crypto cannot expose the tag and RSS spreading may not be uniform on real traffic?</td><td class="report">open</td></tr><tr id="sq-P031.4"><td class="sqid">P031.4</td><td>At what sampling rate can a commodity 400G switch port-mirror without loss?</td><td class="report">a source suggests an answer (not checked)</td></tr><tr id="sq-P031.5"><td class="sqid">P031.5</td><td>Is a 64-bit digest sufficient for a high-bandwidth hash log?</td><td class="report">a source suggests an answer (not checked)</td></tr><tr id="sq-P031.6"><td class="sqid">P031.6</td><td>Can a COTS FPGA relay and log/hash all I/O of an inference server at line rate with under a stated added latency, and what changes make it trusted?</td><td class="report">open</td></tr><tr id="sq-P031.7"><td class="sqid">P031.7</td><td>Can a tap or logger capture/hash east-west (backend) traffic at 400-800 Gb/s per link or node with under a stated added latency and under a stated training slowdown?</td><td class="report">open</td></tr></tbody></table></div>
+<h2>Sub-questions not yet stated precisely enough to check</h2><div class="scroll"><table class="subq"><thead><tr><th>ID</th><th>Sub-question</th></tr></thead><tbody><tr id="sq-P031.8"><td class="sqid">P031.8</td><td>When will passive taps, SmartNICs and active tap appliances be available and installable at 800GbE and 1.6TbE?</td></tr></tbody></table></div>
+<h2>Possibly relevant work found by automated search</h2><p class="label">Found by AI agents searching for this problem's sub-questions, mostly by keyword and citation in the OpenAlex scholarly database and on the web; a second AI pass reviewed each one, and we spot-checked some by hand. They seemed reasonably related, as far as one can tell from outside each paper's field. Some come from neighbouring fields, such as arms control and financial audit, and bear on the problem by analogy. Not reviewed against the status above; a paper listed here does not change that status. 926 of 1119 quotes checked word for word against the paper's text.</p><h3 class="for">For P031.1: Can an FPGA hash (SHA-2/SHA-3), timestamp and sign every packet at 400 Gb/s line rate, including 64 B minimum frames, and at what resource/power cost?</h3><ul class="related"><li><a href="https://doi.org/10.1007/s13389-023-00334-0">Hardware acceleration design of the SHA-3 for high throughput and low area on FPGA</a> — Argyrios Sideris, Theodora Sanida, Minas Dasygenis, Journal of Cryptographic Engineering, 2023<q class="found">it achieved the highest throughput of 19.515 Gbps, 24.428 Gbps, 33.393 Gbps, and 36.358 Gbps on FPGA devices with the Virtex-5, Artix-7, Virtex-6, and Virtex-7, respectively</q><span class="also">also found for P031.2</span></li><li><a href="https://doi.org/10.1145/3174243.3174250">Configurable FPGA Packet Parser for Terabit Networks with Guaranteed Wire-Speed Throughput</a> — Jakub Cabal, Pavel Benáček, Lukáš Kekely et al., ACM/SIGDA International Symposium on Field-Programmable Gate Arrays (FPGA), 2018<q class="found">our automatically generated parsers are capable of reaching an effective throughput of over 1 Tbps (or more than 2000 Mpps) on the Xilinx UltraScale+ FPGAs and around 800 Gbps (or more than 1200 Mpps) on their previous generation Virtex-7 FPGAs</q><span class="also">also found for P031.7</span></li><li><a href="https://leed.sysnet.ucsd.edu/papers/CorundumPaper.pdf">leed.sysnet.ucsd.edu</a><q class="found">Corundum is an open-source, FPGA-based prototyping platform for network interface development at up to 100 Gbps and beyond … native high-precision IEEE 1588 PTP timestamping … a microsecond-precision time-division multiple access (TDMA) hardware scheduler to enforce a TDMA schedule at 100 Gbps line rate with no CPU overhead.</q><span class="also">also found for P031.6</span></li></ul><h3 class="for">For P031.3: Can a SmartNIC or DPU (e.g. 32-64 core) hash all traffic at 400G with zero loss, given inline DPU crypto cannot expose the tag and RSS spreading may not be uniform on real traffic?</h3><ul class="related"><li><a href="https://doi.org/10.1145/3721145.3725780">Understanding the Idiosyncrasies of Emerging BlueField DPUs</a> — Arjun Kashyap, Yuke Li, Darren Ng et al., ACM International Conference on Supercomputing (ICS), 2025<q class="found">we identify and summarize 14 major idiosyncrasies, along with providing guidelines for optimal system and future hardware design.</q></li></ul>
+<section><h2>Data</h2><ul><li><a href="../problems.csv">problems.csv</a> — one row per problem</li><li><a href="../problem_status.csv">problem_status.csv</a> — status, scope and evidence per problem</li><li><a href="../problem_sources.csv">problem_sources.csv</a> — the posed-by quote and other documents per problem</li><li><a href="../leaves.csv">leaves.csv</a> — all sub-questions, including those without a checkable form</li><li><a href="../leaf_sources.csv">leaf_sources.csv</a> — every source row behind each sub-question</li></ul></section><footer class="gen"><p>This is my best understanding as of 2026-10-27. It does not claim that nobody is working on these problems. Corrections are welcome: dan@canaryinstitute.ai.</p></footer><!-- Generated by `analysis/public_problem_list/render.py` from the frozen problem tree with corrections (inputs at commit cb93599 2026-10-27). -->
+</main>
+</body>
+</html>

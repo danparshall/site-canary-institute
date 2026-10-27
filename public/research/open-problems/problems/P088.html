@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>P088 Proof-of-learning / proof-of-training-transcript</title>
+<style>
+:root { --bg:#fbfaf7; --fg:#1c1c1a; --muted:#66655f; --rule:#e3e1d9; --panel:#f3f1ea; --link:#7a4f00;
+  --Posed:#e6e4de; --Analyzed:#d5e1fa; --Started:#fbe9ad; --Done:#c9ecd6; --Failed:#f6cfc8; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg:#151513; --fg:#e7e5de; --muted:#9c9a91;
+  --rule:#34332e; --panel:#1f1e1b; --link:#e2a94a; --Posed:#3b3a36; --Analyzed:#22385f; --Started:#4f3f0c;
+  --Done:#174428; --Failed:#5c241c; } }
+:root[data-theme="dark"] { --bg:#151513; --fg:#e7e5de; --muted:#9c9a91; --rule:#34332e; --panel:#1f1e1b; --link:#e2a94a;
+  --Posed:#3b3a36; --Analyzed:#22385f; --Started:#4f3f0c; --Done:#174428; --Failed:#5c241c; }
+* { box-sizing:border-box; }
+html { background:var(--bg); }
+body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
+main { max-width:68rem; margin:0 auto; padding:2rem 16px 5rem; }
+h1 { font-size:1.9rem; line-height:1.2; margin:0 0 1rem; }
+h2 { font-size:1.3rem; margin:2.6rem 0 .8rem; padding-top:1.2rem; border-top:2px solid var(--rule); }
+h2 .count { font-size:.85rem; font-weight:400; color:var(--muted); margin-left:.4rem; }
+h4 { font-size:.8rem; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin:1.1rem 0 .4rem; }
+header p { max-width:46rem; }
+a { color:var(--link); }
+code { font-size:.85em; background:var(--panel); padding:0 .25em; border-radius:3px; }
+.note, .flag, .top, .permalink { color:var(--muted); font-size:.88rem; }
+.scroll { overflow-x:auto; }
+table { border-collapse:collapse; width:100%; }
+th, td { text-align:left; vertical-align:top; padding:.45rem .55rem; border-bottom:1px solid var(--rule); }
+th { font-size:.78rem; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); font-weight:600; }
+td.num, th.num { text-align:right; font-variant-numeric:tabular-nums; }
+td.zero { color:var(--muted); opacity:.55; }
+.tag { display:inline-block; font-size:.78rem; font-weight:650; padding:.15em .6em; border-radius:4px;
+  white-space:nowrap; }
+.s-Posed { background:var(--Posed); } .s-Analyzed { background:var(--Analyzed); }
+.s-Started { background:var(--Started); } .s-Done { background:var(--Done); } .s-Failed { background:var(--Failed); }
+td.st { font-weight:650; font-size:.85rem; white-space:nowrap; }
+.overview th[class^="s-"] { color:var(--fg); text-align:right; }
+.legend { background:var(--panel); border-radius:8px; padding:.9rem 1.1rem; margin:1.4rem 0; }
+.legend ul { list-style:none; padding:0; margin:.6rem 0 0; display:grid; gap:.35rem; }
+.legend .disclaimer { margin:0; font-size:.93rem; }
+.overview td:first-child { min-width:14rem; }
+.overview tfoot td { font-weight:650; border-bottom:none; }
+.barcell { width:22%; min-width:8rem; }
+.bar { display:flex; height:.8rem; border-radius:4px; overflow:hidden; background:var(--rule); }
+.params { margin:1.2rem 0; } .params summary { cursor:pointer; font-weight:600; }
+.controls { display:flex; gap:.5rem; margin:1.5rem 0 0; }
+button { font:inherit; font-size:.85rem; padding:.3rem .8rem; border:1px solid var(--rule); border-radius:6px;
+  background:var(--panel); color:var(--fg); cursor:pointer; }
+table.problems td.pid, td.sqid { white-space:nowrap; font-variant-numeric:tabular-nums; font-weight:600; }
+td.sqid { font-weight:400; font-size:.8rem; color:var(--muted); }
+.ptitle { display:block; font-weight:600; }
+tr.summary { cursor:pointer; }
+tr.summary:hover td, tbody.open tr.summary td { background:var(--panel); }
+tr.summary td.pid::before { content:"▸ "; color:var(--muted); }
+tbody.open tr.summary td.pid::before { content:"▾ "; }
+html.js tr.detail { display:none; }
+html.js tbody.open tr.detail { display:table-row; }
+tr.detail > td { background:var(--panel); padding:.2rem 1rem 1rem 2rem; }
+.detail-body { max-width:52rem; }
+.statement { margin:.8rem 0 .4rem; }
+.scope { margin:.3rem 0; }
+blockquote.evidence { margin:.4rem 0 .6rem; padding:.3rem .9rem; border-left:3px solid var(--rule); font-style:italic; }
+blockquote.evidence footer { font-style:normal; font-size:.85rem; color:var(--muted); margin-top:.25rem; }
+ul.posed { padding-left:1.1rem; margin:.2rem 0; }
+table.subq { font-size:.92rem; background:var(--bg); }
+td.report { color:var(--muted); font-size:.85rem; min-width:9rem; }
+ul.docs li { margin:.2rem 0; }
+footer.gen { margin-top:3rem; color:var(--muted); font-size:.85rem; }
+main.detail-page { max-width:52rem; }
+.crumb { font-size:.9rem; margin-bottom:1rem; }
+h1 .pid { color:var(--muted); font-variant-numeric:tabular-nums; }
+.question { font-size:1.1rem; font-weight:600; }
+main.detail-page h2 { font-size:1.1rem; margin:2rem 0 .6rem; padding-top:.8rem; }
+h3.for { font-size:.95rem; font-weight:600; margin:1.2rem 0 .3rem; }
+.label { background:var(--panel); border-radius:8px; padding:.7rem 1rem; font-size:.9rem; }
+ul.related { padding-left:1.1rem; } ul.related li { margin:.5rem 0; }
+q.found { display:block; font-style:italic; margin:.2rem 0; }
+.also { display:block; color:var(--muted); font-size:.85rem; }
+@media (max-width:640px) { th.barcell, td.barcell { display:none; } tr.detail > td { padding-left:.8rem; }
+  .overview td:first-child { min-width:9rem; } }
+</style>
+</head>
+<body>
+<main class="detail-page">
+<nav class="crumb"><a href="../index.html#area-c11-crypto-verifiable-compute">← Verifiable computation, ZK proofs, network commitments and minimal disclosure</a></nav>
+<header><h1><span class="pid">P088</span> Proof-of-learning / proof-of-training-transcript</h1>
+<p class="question">Is there a proof-of-learning/transcript scheme with a formal soundness bound against an adaptive spoofer, and at what verifier cost as a fraction of training?</p>
+<p class="statement">Proof-of-learning / proof-of-training-transcript soundness and cost.</p>
+<p class="terms"><em>Terms:</em> proof-of-learning (PoL) / proof-of-training-transcript (PoTT): schemes that produce evidence a specific training run actually happened as described, checkable by a verifier.</p>
+</header>
+<div class="status-block"><h4>Status</h4><p class="scope"><span class="tag s-Started">Started</span> Heuristic Proof-of-Training-Data defences (certified-randomness seed, local memorization tests) tested on GPT-2-124M and Pythia checkpoints against all attacks then published in the Proof-of-Learning literature, at about 1.3% of training compute for the verifier; language models only, single attacks only, composite and adaptive attacks and online RL untested, and the Verifier sees raw data and weights. No formal soundness bound exists: the earlier Proof-of-Learning family (Jia et al. 2021) was broken by Fang et al. (2023), a tested failure of that mechanism family; Shavit (2023) gives the formal PoTT definition and leaves provably secure methods to future work.</p><blockquote class="evidence">"Our methods can be run cheaply, adding as little as 1.3% of the original training run’s compute. … The verification strategies we describe are not provably robust, but are intended as an opening proposal"<footer>Choi, Shavit &amp; Duvenaud (2023), Tools for Verifying Neural Models' Training Data (Proof-of-Training-Data), sections 1 and 4 (2023-07-02), L71–76</footer></blockquote></div>
+<h2>Posed by</h2><ul class="posed"><li>Reuel, Bucknall et al. (2025), <em>Open Problems in Technical AI Governance</em>, compute sections: <q>finding efficient methods for proving the authenticity of training transcripts that scale to the largest models</q> (§5.2.2, p.29, L1553–1554) <span class="flag">(source states the problem but not the quantity the question asks for)</span></li></ul><p class="others"><strong>Also raised in:</strong> Harack et al. (2025), <em>Verification for International AI Governance</em> (Oxford AIGI); Baker, Kulp, Marks, Brundage &amp; Heim (2025), <em>Verifying International Agreements on AI: Six Layers of Verification for Rules on Large-Scale AI Development and Deployment</em> (RAND WR-A4077-1); Scher &amp; Thiergart (2024), <em>Mechanisms to Verify International Agreements About AI Development</em> (MIRI); Aarne, Fist &amp; Withers (2024), <em>Secure, Governable Chips</em> (CNAS); Shavit (2023), <em>What Does It Take to Catch a Chinchilla? Verifying Rules on Large-Scale Neural Network Training via Compute Monitoring</em>; Abdelghafar &amp; Kulp (2026), <em>Privacy-Preserving AI Verification via Minimal Information Disclosure</em>; Ansari (2026), <em>Hardware-Level Governance of AI Compute: A Feasibility Taxonomy for Regulatory Compliance and Treaty Verification</em>; Kimpson, Baker &amp; Graham (2026), <em>Can Power Draw Constrain Covert Compute? Limits of Analogue Verification for AI Governance</em>, arXiv 2610.07476; Peigné-Lefebvre, Nguyen &amp; Wang (2026), <em>Zero Knowledge Verification for Frontier AI Training Is Possible</em>, arXiv 2606.05433.</p>
+<h2>Sub-questions</h2><div class="scroll"><table class="subq"><thead><tr><th>ID</th><th>Sub-question</th><th>What the sources report</th></tr></thead><tbody><tr id="sq-P088.1"><td class="sqid">P088.1</td><td>Is there a PoL/PoTT scheme with a formal soundness (uniqueness) bound against an adaptive spoofer with compute equal to the honest run?</td><td class="report">open</td></tr><tr id="sq-P088.2"><td class="sqid">P088.2</td><td>For the best known spoofing attacks (incl. shard-containing models, synthetic gradient-inducing data), what is spoof cost as a multiple of honest training?</td><td class="report">partly answered</td></tr><tr id="sq-P088.3"><td class="sqid">P088.3</td><td>What detection rate do code/data validation tests achieve against code or data designed to spoof partial re-execution (e.g. weight-overwrite code)?</td><td class="report">open</td></tr><tr id="sq-P088.4"><td class="sqid">P088.4</td><td>Have PoL defences been tested against composite and adaptive attacks, on large models (a size threshold to be agreed) and non-text modalities?</td><td class="report">partly answered</td></tr><tr id="sq-P088.5"><td class="sqid">P088.5</td><td>Do cheap all-segment tests detect 'glued' transcripts from different runs to a stated detection rate with a stated false-alarm budget?</td><td class="report">partly answered</td></tr><tr id="sq-P088.6"><td class="sqid">P088.6</td><td>Is there a proof-of-training/commitment scheme for online RL / RL post-training where data is generated during training?</td><td class="report">open</td></tr><tr id="sq-P088.7"><td class="sqid">P088.7</td><td>What is verifier cost as a fraction of training for the best PoL / spot-check protocol at a stated training-compute scale?</td><td class="report">open</td></tr><tr id="sq-P088.8"><td class="sqid">P088.8</td><td>Is there a check costing a stated small share of training (a target to be agreed) (no re-execution, e.g. interactive queries) that bounds a run's FLOP from a weight shard?</td><td class="report">open</td></tr><tr id="sq-P088.9"><td class="sqid">P088.9</td><td>Can a proof-of-training run with the verifier seeing only commitments plus sampled segments (no full code/data/weight disclosure)?</td><td class="report">open</td></tr><tr id="sq-P088.10"><td class="sqid">P088.10</td><td>Has weight-snapshot hashing been used to verify a training-compute claim on a real large run?</td><td class="report">partly answered</td></tr><tr id="sq-P088.11"><td class="sqid">P088.11</td><td>Is ZK-SNARK proving of distances between committed snapshots practical (proving time for billion-element vectors)?</td><td class="report">a source suggests an answer (not checked)</td></tr></tbody></table></div>
+<h2>Sub-questions not yet stated precisely enough to check</h2><div class="scroll"><table class="subq"><thead><tr><th>ID</th><th>Sub-question</th></tr></thead><tbody><tr id="sq-P088.12"><td class="sqid">P088.12</td><td>Can training claims be verified without operator cooperation, and how is it confirmed that the declared work actually ran?</td></tr></tbody></table></div>
+<h2>Possibly relevant work found by automated search</h2><p class="label">Found by AI agents searching for this problem's sub-questions, mostly by keyword and citation in the OpenAlex scholarly database and on the web; a second AI pass reviewed each one, and we spot-checked some by hand. They seemed reasonably related, as far as one can tell from outside each paper's field. Some come from neighbouring fields, such as arms control and financial audit, and bear on the problem by analogy. Not reviewed against the status above; a paper listed here does not change that status. 926 of 1119 quotes checked word for word against the paper's text.</p><h3 class="for">For P088.1: Is there a PoL/PoTT scheme with a formal soundness (uniqueness) bound against an adaptive spoofer with compute equal to the honest run?</h3><ul class="related"><li><a href="https://arxiv.org/abs/2404.09005">Proof-of-Learning with Incentive Security</a> — Zishuo Zhao, Zhixuan Fang, Xuechao Wang et al., arXiv, 2024<q class="found">we introduce the concept of incentive-security that incentivizes rational provers to behave honestly for their best interest, bypassing the existing hardness to design a PoL mechanism</q><span class="also">also found for P088.7</span></li></ul><h3 class="for">For P088.2: For the best known spoofing attacks (incl. shard-containing models, synthetic gradient-inducing data), what is spoof cost as a multiple of honest training?</h3><ul class="related"><li><a href="https://doi.org/10.1109/sp46214.2022.9833596">“Adversarial Examples” for Proof-of-Learning</a> — Rui Zhang, Jian Liu, Yuan Ding et al., Proceedings - IEEE Symposium on Security and Privacy/Proceedings of the ... IEEE Symposium on Security and Privacy, 2022<q class="found">We demonstrate, both theoretically and empirically, that we are able to generate a valid proof with significantly less cost than generating a proof by the prover.</q></li></ul><h3 class="for">For P088.4: Have PoL defences been tested against composite and adaptive attacks, on large models (a size threshold to be agreed) and non-text modalities?</h3><ul class="related"><li><a href="https://arxiv.org/abs/2606.21045">OVIG: Optimistic Verification of AI Training Integrity via Gradient Signals</a> — Hongxu Su, Jianzhu Yao, Huan Zhang et al., arXiv, 2026<span class="also">also found for P088.7</span></li><li><a href="https://doi.org/10.1145/3767295.3803612">TAO: Tolerance-Aware Optimistic Verification for Floating-Point Neural Networks</a> — Jianzhu Yao, Hongxu Su, Taobo Liao et al., European Conference on Computer Systems, 2026<q class="found">bound-aware adversarial attacks achieve 0% success under empirical checks … negligible overhead (0.3% additional latency on Qwen3-8B)</q><span class="also">also found for P088.7</span></li><li><a href="https://doi.org/10.1109/fllm67465.2025.11391059">PoTS: Proof-of-Training-Steps for Backdoor Detection in Large Language Models</a> — Issam Seddik, Sami Souihi, Mohamed Tamaazousti et al., 2025<q class="found">Our method enables early detection of the attack (at the step the attack is injected), with verification step being 3× faster than a training step.</q><span class="also">also found for P088.7</span></li></ul><h3 class="for">For P088.7: What is verifier cost as a fraction of training for the best PoL / spot-check protocol at a stated training-compute scale?</h3><ul class="related"><li><a href="https://doi.org/10.1145/3719027.3744862">Founding Zero-Knowledge Proof of Training on Optimum Vicinity</a> — Gefei Tan, Adrià Gascón, Sarah Meiklejohn et al., ACM SIGSAC Conference on Computer and Communications Security (CCS), 2025<q class="found">Existing zkPoT protocols prove the entire training process … This approach inherently requires the prover to perform work linear to the number of iterations.</q><span class="also">also found for P088.9</span></li><li><a href="https://doi.org/10.1145/3658644.3670316">Zero-Knowledge Proofs of Training for Deep Neural Networks</a><span class="unreviewed" title="Full text not reviewed; more likely to contain errors.">*</span> — Kasra Abbaszadeh, Christodoulos Pappas, Jonathan I. Katz et al., 2024</li></ul><h3 class="for">For P088.9: Can a proof-of-training run with the verifier seeing only commitments plus sampled segments (no full code/data/weight disclosure)?</h3><ul class="related"><li><a href="https://arxiv.org/abs/2609.27367">Seal, Then Sample: Sampled Layerwise Proofs for Verifiable LLM Inference from GPT-2 to 70B</a> — Youki Lim, Sam Yong, arXiv, 2026<q class="found">a single Llama-2-70B run complete on a 2 TB CPU host: 163 chunks sealed, five proved, a 4.34 MiB proof in 1,259 s, verified in 46.3 s without the weights.</q></li></ul><h3 class="for">For P088.11: Is ZK-SNARK proving of distances between committed snapshots practical (proving time for billion-element vectors)?</h3><ul class="related"><li><a href="https://eprint.iacr.org/2026/111">eprint.iacr.org</a><q class="found">Existing zkML methods rely on rank-1 constraint systems (R1CS) to hide NN architectures while retaining succinctness.</q></li></ul><p class="note"><span class="mark">*</span> Full text not reviewed; more likely to contain errors.</p>
+<section><h2>Data</h2><ul><li><a href="../problems.csv">problems.csv</a> — one row per problem</li><li><a href="../problem_status.csv">problem_status.csv</a> — status, scope and evidence per problem</li><li><a href="../problem_sources.csv">problem_sources.csv</a> — the posed-by quote and other documents per problem</li><li><a href="../leaves.csv">leaves.csv</a> — all sub-questions, including those without a checkable form</li><li><a href="../leaf_sources.csv">leaf_sources.csv</a> — every source row behind each sub-question</li></ul></section><footer class="gen"><p>This is my best understanding as of 2026-10-27. It does not claim that nobody is working on these problems. Corrections are welcome: dan@canaryinstitute.ai.</p></footer><!-- Generated by `analysis/public_problem_list/render.py` from the frozen problem tree with corrections (inputs at commit cb93599 2026-10-27). -->
+</main>
+</body>
+</html>
