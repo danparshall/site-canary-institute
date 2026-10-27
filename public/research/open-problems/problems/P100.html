@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>P100 Compute-threshold definitions and loopholes</title>
+<style>
+:root { --bg:#fbfaf7; --fg:#1c1c1a; --muted:#66655f; --rule:#e3e1d9; --panel:#f3f1ea; --link:#7a4f00;
+  --Posed:#e6e4de; --Analyzed:#d5e1fa; --Started:#fbe9ad; --Done:#c9ecd6; --Failed:#f6cfc8; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg:#151513; --fg:#e7e5de; --muted:#9c9a91;
+  --rule:#34332e; --panel:#1f1e1b; --link:#e2a94a; --Posed:#3b3a36; --Analyzed:#22385f; --Started:#4f3f0c;
+  --Done:#174428; --Failed:#5c241c; } }
+:root[data-theme="dark"] { --bg:#151513; --fg:#e7e5de; --muted:#9c9a91; --rule:#34332e; --panel:#1f1e1b; --link:#e2a94a;
+  --Posed:#3b3a36; --Analyzed:#22385f; --Started:#4f3f0c; --Done:#174428; --Failed:#5c241c; }
+* { box-sizing:border-box; }
+html { background:var(--bg); }
+body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
+main { max-width:68rem; margin:0 auto; padding:2rem 16px 5rem; }
+h1 { font-size:1.9rem; line-height:1.2; margin:0 0 1rem; }
+h2 { font-size:1.3rem; margin:2.6rem 0 .8rem; padding-top:1.2rem; border-top:2px solid var(--rule); }
+h2 .count { font-size:.85rem; font-weight:400; color:var(--muted); margin-left:.4rem; }
+h4 { font-size:.8rem; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin:1.1rem 0 .4rem; }
+header p { max-width:46rem; }
+a { color:var(--link); }
+code { font-size:.85em; background:var(--panel); padding:0 .25em; border-radius:3px; }
+.note, .flag, .top, .permalink { color:var(--muted); font-size:.88rem; }
+.scroll { overflow-x:auto; }
+table { border-collapse:collapse; width:100%; }
+th, td { text-align:left; vertical-align:top; padding:.45rem .55rem; border-bottom:1px solid var(--rule); }
+th { font-size:.78rem; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); font-weight:600; }
+td.num, th.num { text-align:right; font-variant-numeric:tabular-nums; }
+td.zero { color:var(--muted); opacity:.55; }
+.tag { display:inline-block; font-size:.78rem; font-weight:650; padding:.15em .6em; border-radius:4px;
+  white-space:nowrap; }
+.s-Posed { background:var(--Posed); } .s-Analyzed { background:var(--Analyzed); }
+.s-Started { background:var(--Started); } .s-Done { background:var(--Done); } .s-Failed { background:var(--Failed); }
+td.st { font-weight:650; font-size:.85rem; white-space:nowrap; }
+.overview th[class^="s-"] { color:var(--fg); text-align:right; }
+.legend { background:var(--panel); border-radius:8px; padding:.9rem 1.1rem; margin:1.4rem 0; }
+.legend ul { list-style:none; padding:0; margin:.6rem 0 0; display:grid; gap:.35rem; }
+.legend .disclaimer { margin:0; font-size:.93rem; }
+.overview td:first-child { min-width:14rem; }
+.overview tfoot td { font-weight:650; border-bottom:none; }
+.barcell { width:22%; min-width:8rem; }
+.bar { display:flex; height:.8rem; border-radius:4px; overflow:hidden; background:var(--rule); }
+.params { margin:1.2rem 0; } .params summary { cursor:pointer; font-weight:600; }
+.controls { display:flex; gap:.5rem; margin:1.5rem 0 0; }
+button { font:inherit; font-size:.85rem; padding:.3rem .8rem; border:1px solid var(--rule); border-radius:6px;
+  background:var(--panel); color:var(--fg); cursor:pointer; }
+table.problems td.pid, td.sqid { white-space:nowrap; font-variant-numeric:tabular-nums; font-weight:600; }
+td.sqid { font-weight:400; font-size:.8rem; color:var(--muted); }
+.ptitle { display:block; font-weight:600; }
+tr.summary { cursor:pointer; }
+tr.summary:hover td, tbody.open tr.summary td { background:var(--panel); }
+tr.summary td.pid::before { content:"▸ "; color:var(--muted); }
+tbody.open tr.summary td.pid::before { content:"▾ "; }
+html.js tr.detail { display:none; }
+html.js tbody.open tr.detail { display:table-row; }
+tr.detail > td { background:var(--panel); padding:.2rem 1rem 1rem 2rem; }
+.detail-body { max-width:52rem; }
+.statement { margin:.8rem 0 .4rem; }
+.scope { margin:.3rem 0; }
+blockquote.evidence { margin:.4rem 0 .6rem; padding:.3rem .9rem; border-left:3px solid var(--rule); font-style:italic; }
+blockquote.evidence footer { font-style:normal; font-size:.85rem; color:var(--muted); margin-top:.25rem; }
+ul.posed { padding-left:1.1rem; margin:.2rem 0; }
+table.subq { font-size:.92rem; background:var(--bg); }
+td.report { color:var(--muted); font-size:.85rem; min-width:9rem; }
+ul.docs li { margin:.2rem 0; }
+footer.gen { margin-top:3rem; color:var(--muted); font-size:.85rem; }
+main.detail-page { max-width:52rem; }
+.crumb { font-size:.9rem; margin-bottom:1rem; }
+h1 .pid { color:var(--muted); font-variant-numeric:tabular-nums; }
+.question { font-size:1.1rem; font-weight:600; }
+main.detail-page h2 { font-size:1.1rem; margin:2rem 0 .6rem; padding-top:.8rem; }
+h3.for { font-size:.95rem; font-weight:600; margin:1.2rem 0 .3rem; }
+.label { background:var(--panel); border-radius:8px; padding:.7rem 1rem; font-size:.9rem; }
+ul.related { padding-left:1.1rem; } ul.related li { margin:.5rem 0; }
+q.found { display:block; font-style:italic; margin:.2rem 0; }
+.also { display:block; color:var(--muted); font-size:.85rem; }
+@media (max-width:640px) { th.barcell, td.barcell { display:none; } tr.detail > td { padding-left:.8rem; }
+  .overview td:first-child { min-width:9rem; } }
+</style>
+</head>
+<body>
+<main class="detail-page">
+<nav class="crumb"><a href="../index.html#area-c13-distributed-training-provenance">← Distributed training versus bandwidth, run lineage and model provenance</a></nav>
+<header><h1><span class="pid">P100</span> Compute-threshold definitions and loopholes</h1>
+<p class="question">Which compute counts toward a governance threshold, how are thresholds set and renegotiated, and how can runs be structured to evade them?</p>
+<p class="statement">What compute counts toward thresholds, how thresholds are set, moved and renegotiated (including regional caps and coverage exemptions), and how runs evade them.</p>
+</header>
+<div class="status-block"><h4>Status</h4><p class="scope"><span class="tag s-Analyzed">Analyzed</span> Evasion clause only: a simulated cost of structuring a 10^24, 10^25 or 10^26 FLOP run as clusters below every proposed registration threshold (DiLoCo-family methods over 100 Mbps links; extrapolated 10-300x beyond tested model size). The same paper proposes a 1,280 GB HBM memory threshold as a fix to the threshold definition, also paper only. Which compute counts (fine-tuning, distillation, mixture-of-experts, inference scaling) and how thresholds are renegotiated: no work beyond framing and stated difficulties.</p><blockquote class="evidence">these proposed or existing regulations could be evaded using $1.6M, $31M, and $3.8B, respectively, of hardware arranged in clusters smaller than any proposed registration requirement<footer>Rahman (2026), Does Distributed Training Undermine Compute Governance? (MIRI), arXiv 2605.29359 (2026-05-28), L466–468</footer></blockquote></div>
+<h2>Posed by</h2><ul class="posed"><li>Scher &amp; Thiergart (2024), <em>Mechanisms to Verify International Agreements About AI Development</em> (MIRI): <q>As a result, thresholds for exclusion must be sensitive to rapid advances in efficiency and distributed training capabilities, and conservative thresholds may be necessary.</q> (Known Compute › Analysis, p. 29, L1336–1338; App. What Compute Needs to Be Monitored, p. 141, L6547–6548)</li></ul><p class="others"><strong>Also raised in:</strong> Harack et al. (2025), <em>Verification for International AI Governance</em> (Oxford AIGI); Petrie, Aarne, Ammann &amp; Dalrymple (2025), <em>Overview of Flexible Hardware-Enabled Guarantees</em> (flexHEG Part 1); Petrie &amp; Aarne (2025), <em>Technical Options for Flexible Hardware-Enabled Guarantees</em> (flexHEG Part 2); Aarne &amp; Petrie (2025), <em>International Security Applications of Flexible Hardware-Enabled Guarantees</em> (flexHEG Part 3); Aarne, Fist &amp; Withers (2024), <em>Secure, Governable Chips</em> (CNAS); Shavit (2023), <em>What Does It Take to Catch a Chinchilla? Verifying Rules on Large-Scale Neural Network Training via Compute Monitoring</em>; Ansari (2026), <em>Hardware-Level Governance of AI Compute: A Feasibility Taxonomy for Regulatory Compliance and Treaty Verification</em>; Koopmanschap &amp; Barten (2026), <em>How to Catch a GPU: A Taxonomy of Verification and Enforcement Mechanisms for International AI Agreements</em>; Kulp et al. (2024), <em>Hardware-Enabled Governance Mechanisms</em> (RAND WR-A3056-1).</p>
+<h2>Sub-questions</h2><div class="scroll"><table class="subq"><thead><tr><th>ID</th><th>Sub-question</th><th>What the sources report</th></tr></thead><tbody><tr id="sq-P100.1"><td class="sqid">P100.1</td><td>At thresholds of 10^24, 10^23 and 10^22 FLOP (the lower two set by this survey), how many facilities worldwide would require monitoring?</td><td class="report">open</td></tr><tr id="sq-P100.2"><td class="sqid">P100.2</td><td>Can metadata or authenticated end-user connections detect several concurrent runs that compose one modular/MoE system, and what is a 'distinct model'?</td><td class="report">open</td></tr><tr id="sq-P100.3"><td class="sqid">P100.3</td><td>Can fine-tuning and merging below threshold (often &lt;1% of pre-training compute) be tracked, and how much capability does it add in compute-equivalent terms?</td><td class="report">a source suggests an answer (not checked)</td></tr><tr id="sq-P100.4"><td class="sqid">P100.4</td><td>What fraction of frontier compute goes to non-pre-training workloads (RL, synthetic data incl. discarded samples, inference)?</td><td class="report">open</td></tr></tbody></table></div>
+<h2>Sub-questions not yet stated precisely enough to check</h2><div class="scroll"><table class="subq"><thead><tr><th>ID</th><th>Sub-question</th></tr></thead><tbody><tr id="sq-P100.5"><td class="sqid">P100.5</td><td>How should compute thresholds for exclusion/registration track algorithmic progress and distributed training, and how are they renegotiated?</td></tr><tr id="sq-P100.6"><td class="sqid">P100.6</td><td>How should regions and region-wide worst-case compute caps be defined?</td></tr><tr id="sq-P100.7"><td class="sqid">P100.7</td><td>Must chips be exempted from logging until large-scale training can be distinguished, and what share of guarantees is lost?</td></tr><tr id="sq-P100.8"><td class="sqid">P100.8</td><td>Can 'logical location' (a state taking responsibility for chips in its borders) substitute for physical location tracking?</td></tr><tr id="sq-P100.9"><td class="sqid">P100.9</td><td>What technical requirement tiers / feature sets follow from attacker threat models in each export context?</td></tr><tr id="sq-P100.10"><td class="sqid">P100.10</td><td>Which compute counts toward a threshold (fine-tuning, distillation, MoE experts, inference scaling), and how are threshold quantities set?</td></tr></tbody></table></div>
+<h2>Possibly relevant work found by automated search</h2><p class="label">Found by AI agents searching for this problem's sub-questions, mostly by keyword and citation in the OpenAlex scholarly database and on the web; a second AI pass reviewed each one, and we spot-checked some by hand. They seemed reasonably related, as far as one can tell from outside each paper's field. Some come from neighbouring fields, such as arms control and financial audit, and bear on the problem by analogy. Not reviewed against the status above; a paper listed here does not change that status. 926 of 1119 quotes checked word for word against the paper's text.</p><h3 class="for">For P100.3: Can fine-tuning and merging below threshold (often &lt;1% of pre-training compute) be tracked, and how much capability does it add in compute-equivalent terms?</h3><ul class="related"><li><a href="https://arxiv.org/abs/2502.12292">Independence Tests for Language Models</a> — Sally Zhu, Ahmed Ahmed, Rohith Kuditipudi et al., arXiv, 2025</li><li><a href="https://doi.org/10.52202/085713-1146">Model Provenance Testing for Large Language Models</a> — Ivica Nikolić, Teodora Baluta, Prateek Saxena, neural information processing systems, 2025<q class="found">our tester achieves 90-95% precision and 80-90% recall in identifying derived models.</q></li></ul>
+<section><h2>Data</h2><ul><li><a href="../problems.csv">problems.csv</a> — one row per problem</li><li><a href="../problem_status.csv">problem_status.csv</a> — status, scope and evidence per problem</li><li><a href="../problem_sources.csv">problem_sources.csv</a> — the posed-by quote and other documents per problem</li><li><a href="../leaves.csv">leaves.csv</a> — all sub-questions, including those without a checkable form</li><li><a href="../leaf_sources.csv">leaf_sources.csv</a> — every source row behind each sub-question</li></ul></section><footer class="gen"><p>This is my best understanding as of 2026-10-27. It does not claim that nobody is working on these problems. Corrections are welcome: dan@canaryinstitute.ai.</p></footer><!-- Generated by `analysis/public_problem_list/render.py` from the frozen problem tree with corrections (inputs at commit cb93599 2026-10-27). -->
+</main>
+</body>
+</html>

@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>P004 Package- and board-level tamper detection</title>
+<style>
+:root { --bg:#fbfaf7; --fg:#1c1c1a; --muted:#66655f; --rule:#e3e1d9; --panel:#f3f1ea; --link:#7a4f00;
+  --Posed:#e6e4de; --Analyzed:#d5e1fa; --Started:#fbe9ad; --Done:#c9ecd6; --Failed:#f6cfc8; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg:#151513; --fg:#e7e5de; --muted:#9c9a91;
+  --rule:#34332e; --panel:#1f1e1b; --link:#e2a94a; --Posed:#3b3a36; --Analyzed:#22385f; --Started:#4f3f0c;
+  --Done:#174428; --Failed:#5c241c; } }
+:root[data-theme="dark"] { --bg:#151513; --fg:#e7e5de; --muted:#9c9a91; --rule:#34332e; --panel:#1f1e1b; --link:#e2a94a;
+  --Posed:#3b3a36; --Analyzed:#22385f; --Started:#4f3f0c; --Done:#174428; --Failed:#5c241c; }
+* { box-sizing:border-box; }
+html { background:var(--bg); }
+body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
+main { max-width:68rem; margin:0 auto; padding:2rem 16px 5rem; }
+h1 { font-size:1.9rem; line-height:1.2; margin:0 0 1rem; }
+h2 { font-size:1.3rem; margin:2.6rem 0 .8rem; padding-top:1.2rem; border-top:2px solid var(--rule); }
+h2 .count { font-size:.85rem; font-weight:400; color:var(--muted); margin-left:.4rem; }
+h4 { font-size:.8rem; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin:1.1rem 0 .4rem; }
+header p { max-width:46rem; }
+a { color:var(--link); }
+code { font-size:.85em; background:var(--panel); padding:0 .25em; border-radius:3px; }
+.note, .flag, .top, .permalink { color:var(--muted); font-size:.88rem; }
+.scroll { overflow-x:auto; }
+table { border-collapse:collapse; width:100%; }
+th, td { text-align:left; vertical-align:top; padding:.45rem .55rem; border-bottom:1px solid var(--rule); }
+th { font-size:.78rem; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); font-weight:600; }
+td.num, th.num { text-align:right; font-variant-numeric:tabular-nums; }
+td.zero { color:var(--muted); opacity:.55; }
+.tag { display:inline-block; font-size:.78rem; font-weight:650; padding:.15em .6em; border-radius:4px;
+  white-space:nowrap; }
+.s-Posed { background:var(--Posed); } .s-Analyzed { background:var(--Analyzed); }
+.s-Started { background:var(--Started); } .s-Done { background:var(--Done); } .s-Failed { background:var(--Failed); }
+td.st { font-weight:650; font-size:.85rem; white-space:nowrap; }
+.overview th[class^="s-"] { color:var(--fg); text-align:right; }
+.legend { background:var(--panel); border-radius:8px; padding:.9rem 1.1rem; margin:1.4rem 0; }
+.legend ul { list-style:none; padding:0; margin:.6rem 0 0; display:grid; gap:.35rem; }
+.legend .disclaimer { margin:0; font-size:.93rem; }
+.overview td:first-child { min-width:14rem; }
+.overview tfoot td { font-weight:650; border-bottom:none; }
+.barcell { width:22%; min-width:8rem; }
+.bar { display:flex; height:.8rem; border-radius:4px; overflow:hidden; background:var(--rule); }
+.params { margin:1.2rem 0; } .params summary { cursor:pointer; font-weight:600; }
+.controls { display:flex; gap:.5rem; margin:1.5rem 0 0; }
+button { font:inherit; font-size:.85rem; padding:.3rem .8rem; border:1px solid var(--rule); border-radius:6px;
+  background:var(--panel); color:var(--fg); cursor:pointer; }
+table.problems td.pid, td.sqid { white-space:nowrap; font-variant-numeric:tabular-nums; font-weight:600; }
+td.sqid { font-weight:400; font-size:.8rem; color:var(--muted); }
+.ptitle { display:block; font-weight:600; }
+tr.summary { cursor:pointer; }
+tr.summary:hover td, tbody.open tr.summary td { background:var(--panel); }
+tr.summary td.pid::before { content:"▸ "; color:var(--muted); }
+tbody.open tr.summary td.pid::before { content:"▾ "; }
+html.js tr.detail { display:none; }
+html.js tbody.open tr.detail { display:table-row; }
+tr.detail > td { background:var(--panel); padding:.2rem 1rem 1rem 2rem; }
+.detail-body { max-width:52rem; }
+.statement { margin:.8rem 0 .4rem; }
+.scope { margin:.3rem 0; }
+blockquote.evidence { margin:.4rem 0 .6rem; padding:.3rem .9rem; border-left:3px solid var(--rule); font-style:italic; }
+blockquote.evidence footer { font-style:normal; font-size:.85rem; color:var(--muted); margin-top:.25rem; }
+ul.posed { padding-left:1.1rem; margin:.2rem 0; }
+table.subq { font-size:.92rem; background:var(--bg); }
+td.report { color:var(--muted); font-size:.85rem; min-width:9rem; }
+ul.docs li { margin:.2rem 0; }
+footer.gen { margin-top:3rem; color:var(--muted); font-size:.85rem; }
+main.detail-page { max-width:52rem; }
+.crumb { font-size:.9rem; margin-bottom:1rem; }
+h1 .pid { color:var(--muted); font-variant-numeric:tabular-nums; }
+.question { font-size:1.1rem; font-weight:600; }
+main.detail-page h2 { font-size:1.1rem; margin:2rem 0 .6rem; padding-top:.8rem; }
+h3.for { font-size:.95rem; font-weight:600; margin:1.2rem 0 .3rem; }
+.label { background:var(--panel); border-radius:8px; padding:.7rem 1rem; font-size:.9rem; }
+ul.related { padding-left:1.1rem; } ul.related li { margin:.5rem 0; }
+q.found { display:block; font-style:italic; margin:.2rem 0; }
+.also { display:block; color:var(--muted); font-size:.85rem; }
+@media (max-width:640px) { th.barcell, td.barcell { display:none; } tr.detail > td { padding-left:.8rem; }
+  .overview td:first-child { min-width:9rem; } }
+</style>
+</head>
+<body>
+<main class="detail-page">
+<nav class="crumb"><a href="../index.html#area-c01-tamper-seals-enclosures">← Tamper evidence, seals, enclosures and containment</a></nav>
+<header><h1><span class="pid">P004</span> Package- and board-level tamper detection</h1>
+<p class="question">Can non-destructive inspection detect package- or board-level tampering - circuit edits, re-encapsulation, added components - at a stated detection and false-alarm rate?</p>
+<p class="statement">Non-destructive detection of package- and board-level tampering.</p>
+<p class="terms"><em>Terms:</em> FIB (focused ion beam): a lab tool that can cut and rewire a chip to insert edits. PDN (power distribution network): the network that carries power from the board's voltage regulator to the chip's transistors; a change in its electrical impedance can signal tampering. W D (WD): the Wasserstein distance, the paper's measure of how far a board's measured impedance has moved from its untampered reference.</p>
+</header>
+<div class="status-block"><h4>Status</h4><p class="scope"><span class="tag s-Started">Started</span> Non-destructive, measured on hardware: an on-FPGA network analyser reads the board's power-delivery-network impedance and flags an added shunt resistor, removed decoupling capacitors, a nearby EM probe and a polished package on commercial FPGA development boards, one board per tamper event, with a global threshold that gave no false alarms on the authors' own measurements. Not a detection and false-alarm rate across devices; not a data-centre GPU board; circuit edits inside the package (FIB) and re-encapsulation are not covered. Related held work: BackMon (Mosavirik &amp; Tajik 2024) detects removal of the cooling stack exposing a flip-chip die backside, one board, no error rates; Safa et al. 2023 use VNA impedance signatures to spot aged chips. The headline is not answered within a stated scope.</p><blockquote class="evidence">The magnitude of the WD metric shows that all tamper events performed in this paper can be distinguished if we use the sensor at the right frequency. Moreover, the detection thresholds for different tamper events, and their corresponding frequency bands, can be selected differently. However, we still can define a global threshold at W D = 3 for the tampering experiments presented in this work without causing any false alarms.<footer>Mosavirik, Schaumont &amp; Tajik (2022), ImpedanceVerif: On-Chip Impedance Sensing for System-Level Tampering Detection (IACR TCHES 2023, no. 1) (2022), L829–833</footer></blockquote></div>
+<h2>Posed by</h2><ul class="posed"><li>Cankaya (2025), <em>TSMC Most Definitely Has a Golden Record of All AI Chips It Made</em>: <q>should be detectable even after cleaning, though I have not found published work specifically demonstrating this for tampering detection.</q> (fn 2, p.6; lines 202–203) <span class="flag">(source states the problem but not the quantity the question asks for)</span></li></ul><p class="others"><strong>Also raised in:</strong> Aarne, Fist &amp; Withers (2024), <em>Secure, Governable Chips</em> (CNAS); Ansari (2026), <em>Hardware-Level Governance of AI Compute: A Feasibility Taxonomy for Regulatory Compliance and Treaty Verification</em>; Kulp et al. (2024), <em>Hardware-Enabled Governance Mechanisms</em> (RAND WR-A3056-1).</p>
+<h2>Sub-questions</h2><div class="scroll"><table class="subq"><thead><tr><th>ID</th><th>Sub-question</th><th>What the sources report</th></tr></thead><tbody><tr id="sq-P004.1"><td class="sqid">P004.1</td><td>Does a FIB edit to a security block leave evidence detectable by non-destructive inspection?</td><td class="report">implied by a source, not stated as open</td></tr><tr id="sq-P004.2"><td class="sqid">P004.2</td><td>Can an inspector detect non-destructively that a GPU's heat sink was removed and refitted (exposing the flip-chip backside)?</td><td class="report">implied by a source, not stated as open</td></tr><tr id="sq-P004.3"><td class="sqid">P004.3</td><td>Can lab methods (e.g. ToF-SIMS for acid residue) detect a decapsulated, FIB-edited and re-encapsulated die, at what detection rate?</td><td class="report">a source suggests an answer (not checked)</td></tr><tr id="sq-P004.4"><td class="sqid">P004.4</td><td>Is any commercial backside-tamper detection available for AI accelerators?</td><td class="report">open</td></tr><tr id="sq-P004.5"><td class="sqid">P004.5</td><td>Is PDN-impedance tamper sensing present or retrofittable on any shipping data-centre GPU?</td><td class="report">partly answered</td></tr><tr id="sq-P004.6"><td class="sqid">P004.6</td><td>Does probe-signal injection detect a hardware modification on a populated server board, with detection and false-alarm rates?</td><td class="report">open</td></tr><tr id="sq-P004.7"><td class="sqid">P004.7</td><td>Has a power-manipulation-detect fuse been shown to trip reliably under glitching with a low false-positive rate?</td><td class="report">open</td></tr></tbody></table></div>
+<h2>Possibly relevant work found by automated search</h2><p class="label">Found by AI agents searching for this problem's sub-questions, mostly by keyword and citation in the OpenAlex scholarly database and on the web; a second AI pass reviewed each one, and we spot-checked some by hand. They seemed reasonably related, as far as one can tell from outside each paper's field. Some come from neighbouring fields, such as arms control and financial audit, and bear on the problem by analogy. Not reviewed against the status above; a paper listed here does not change that status. 926 of 1119 quotes checked word for word against the paper's text.</p><h3 class="for">For P004.1: Does a FIB edit to a security block leave evidence detectable by non-destructive inspection?</h3><ul class="related"><li><a href="https://doi.org/10.1109/dft59622.2023.10313553">X ray nanoprobe for fault attacks and circuit edits on 28-nm integrated circuits</a> — Sophie Bouat, Stéphanie Anceau, L. Maingault et al., IEEE International Symposium on Defect and Fault Tolerance in VLSI and Nanotechnology Systems (DFT), 2023<q class="found">Precise X-ray flux control enables targeted perturbation of transistors without invasive attacks, expanding applications to circuit edits and fault attacks.</q></li><li><a href="https://doi.org/10.1109/hst.2013.6581556">Cloning Physically Unclonable Functions</a> — Clemens Helfmeier, Christian Boit, Dmitry Nedospasov et al., IEEE International Symposium on Hardware Oriented Security and Trust (HOST), 2013<q class="found">demonstrate a Focused Ion Beam circuit edit with which we were able to produce a physical clone of our Proof-of-Concept SRAM PUF implementation</q></li></ul><h3 class="for">For P004.2: Can an inspector detect non-destructively that a GPU's heat sink was removed and refitted (exposing the flip-chip backside)?</h3><ul class="related"><li><a href="https://doi.org/10.1109/access.2025.3572694">IC Backside Tamper Detection Using Impedance Sensing</a> — Tahoura Mosavirik, Shahin Tajik, IEEE Access, 2025<q class="found">any attempt to expose the backside silicon substrate, such as the removal of the fan and heatsinks, or polishing it, leads to changes in the equivalent impedance of the package's PDN</q><span class="also">also found for P004.5, P004.6</span></li><li><a href="https://doi.org/10.1109/jssc.2020.3005779">Si-Backside Protection Circuits Against Physical Security Attacks on Flip-Chip Devices</a> — Takuji Miki, Makoto Nagata, Hiroki Sonoda et al., IEEE Journal of Solid-State Circuits, 2020<q class="found">The proposed backside buried metal (BBM) structure forming a meander wire pattern on the Si-backside detects unexpected disconnection of the meander and warns the malicious attempts to expose a vulnerable Si substrate.</q><span class="also">also found for P004.4</span></li></ul><h3 class="for">For P004.3: Can lab methods (e.g. ToF-SIMS for acid residue) detect a decapsulated, FIB-edited and re-encapsulated die, at what detection rate?</h3><ul class="related"><li><a href="https://doi.org/10.4071/001c.164933">Counterfeit Electronic Parts Detection through Packaging Evaluation</a> — K. D. Chatterjee, Diganta Das, IMAPSource Proceedings, 2026<q class="found">Such discrepancies can only be detected through material characterization techniques such as XRF spectroscopy.</q></li></ul><h3 class="for">For P004.5: Is PDN-impedance tamper sensing present or retrofittable on any shipping data-centre GPU?</h3><ul class="related"><li><a href="https://doi.org/10.1109/vlsitechnologyandcir46769.2022.9830157">An FLL-Based Clock Glitch Detector for Security Circuits in a 5nm FINFET Process</a> — Sanquan Song, Stephen G. Tell, Brian Zimmer et al., IEEE Symposium on VLSI Technology and Circuits (VLSI Technology and Circuits), 2022<q class="found">Implemented in a 5nm FINFET process, it can detect the glitches or pulse width variations down to 3.125% of the input 40MHz clock cycle with the supply varying from 0.5 to 1.0V.</q><span class="also">also found for P004.7</span></li></ul><h3 class="for">For P004.6: Does probe-signal injection detect a hardware modification on a populated server board, with detection and false-alarm rates?</h3><ul class="related"><li><a href="https://doi.org/10.1080/08929882.2025.2599015">Differential Fuzz Testing to Detect Tampering in Sensor Systems and Its Application to Arms Control Authentication</a> — Jayson R. Vavrek, Luozhong Zhou, Joshua Boverhof et al., Science and Global Security, 2025<q class="found">We show that physical differential fuzz testing can detect two types of tamper attempts</q></li><li><a href="https://doi.org/10.2172/1922310">Evaluation of the Feasibility of Utilizing a Low-Cost UWB Radar for Hardware Implant &amp; Counterfeit Device Detection</a><span class="unreviewed" title="Full text not reviewed; more likely to contain errors.">*</span> — Corey D. Cooke, Kyle Reed, Tristen Mullins et al., 2023</li><li><a href="https://doi.org/10.1109/tifs.2023.3285490">PDNPulse: Sensing PCB Anomaly With the Intrinsic Power Delivery Network</a> — Huifeng Zhu, Haoqi Shan, Dean Sullivan et al., IEEE Transactions on Information Forensics and Security, 2023<q class="found">we conduct extensive experiments on seven commercial-off-the-shelf PCBs, covering different design scales, different threat models, and seven different anomaly types.</q></li><li><a href="https://doi.org/10.1109/tvlsi.2022.3171174">Detecting Hardware Trojans in PCBs Using Side Channel Loopbacks</a><span class="unreviewed" title="Full text not reviewed; more likely to contain errors.">*</span> — Hammond A. Pearce, Virinchi Roy Surabhi, P. Krishnamurthy et al., IEEE Transactions on Very Large Scale Integration (VLSI) Systems, 2022</li></ul><h3 class="for">For P004.7: Has a power-manipulation-detect fuse been shown to trip reliably under glitching with a low false-positive rate?</h3><ul class="related"><li><a href="https://doi.org/10.46586/tches.v2024.i1.157-179">Who Watches the Watchers: Attacking Glitch Detection Circuits</a> — Amund Askeland, Svetla Nikova⋆, Ventzislav Nikov, IACR Transactions on Cryptographic Hardware and Embedded Systems, 2023<q class="found">We demonstrate four high-speed clock glitching attacks, which successfully inject faults in systems, where detectors have been implemented to protect. The attacks remain unnoticed by the glitch detectors.</q></li></ul><p class="note"><span class="mark">*</span> Full text not reviewed; more likely to contain errors.</p>
+<section><h2>Data</h2><ul><li><a href="../problems.csv">problems.csv</a> — one row per problem</li><li><a href="../problem_status.csv">problem_status.csv</a> — status, scope and evidence per problem</li><li><a href="../problem_sources.csv">problem_sources.csv</a> — the posed-by quote and other documents per problem</li><li><a href="../leaves.csv">leaves.csv</a> — all sub-questions, including those without a checkable form</li><li><a href="../leaf_sources.csv">leaf_sources.csv</a> — every source row behind each sub-question</li></ul></section><footer class="gen"><p>This is my best understanding as of 2026-10-27. It does not claim that nobody is working on these problems. Corrections are welcome: dan@canaryinstitute.ai.</p></footer><!-- Generated by `analysis/public_problem_list/render.py` from the frozen problem tree with corrections (inputs at commit cb93599 2026-10-27). -->
+</main>
+</body>
+</html>

@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>P062 Integrity and attack surface of the verification apparatus</title>
+<style>
+:root { --bg:#fbfaf7; --fg:#1c1c1a; --muted:#66655f; --rule:#e3e1d9; --panel:#f3f1ea; --link:#7a4f00;
+  --Posed:#e6e4de; --Analyzed:#d5e1fa; --Started:#fbe9ad; --Done:#c9ecd6; --Failed:#f6cfc8; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg:#151513; --fg:#e7e5de; --muted:#9c9a91;
+  --rule:#34332e; --panel:#1f1e1b; --link:#e2a94a; --Posed:#3b3a36; --Analyzed:#22385f; --Started:#4f3f0c;
+  --Done:#174428; --Failed:#5c241c; } }
+:root[data-theme="dark"] { --bg:#151513; --fg:#e7e5de; --muted:#9c9a91; --rule:#34332e; --panel:#1f1e1b; --link:#e2a94a;
+  --Posed:#3b3a36; --Analyzed:#22385f; --Started:#4f3f0c; --Done:#174428; --Failed:#5c241c; }
+* { box-sizing:border-box; }
+html { background:var(--bg); }
+body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
+main { max-width:68rem; margin:0 auto; padding:2rem 16px 5rem; }
+h1 { font-size:1.9rem; line-height:1.2; margin:0 0 1rem; }
+h2 { font-size:1.3rem; margin:2.6rem 0 .8rem; padding-top:1.2rem; border-top:2px solid var(--rule); }
+h2 .count { font-size:.85rem; font-weight:400; color:var(--muted); margin-left:.4rem; }
+h4 { font-size:.8rem; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin:1.1rem 0 .4rem; }
+header p { max-width:46rem; }
+a { color:var(--link); }
+code { font-size:.85em; background:var(--panel); padding:0 .25em; border-radius:3px; }
+.note, .flag, .top, .permalink { color:var(--muted); font-size:.88rem; }
+.scroll { overflow-x:auto; }
+table { border-collapse:collapse; width:100%; }
+th, td { text-align:left; vertical-align:top; padding:.45rem .55rem; border-bottom:1px solid var(--rule); }
+th { font-size:.78rem; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); font-weight:600; }
+td.num, th.num { text-align:right; font-variant-numeric:tabular-nums; }
+td.zero { color:var(--muted); opacity:.55; }
+.tag { display:inline-block; font-size:.78rem; font-weight:650; padding:.15em .6em; border-radius:4px;
+  white-space:nowrap; }
+.s-Posed { background:var(--Posed); } .s-Analyzed { background:var(--Analyzed); }
+.s-Started { background:var(--Started); } .s-Done { background:var(--Done); } .s-Failed { background:var(--Failed); }
+td.st { font-weight:650; font-size:.85rem; white-space:nowrap; }
+.overview th[class^="s-"] { color:var(--fg); text-align:right; }
+.legend { background:var(--panel); border-radius:8px; padding:.9rem 1.1rem; margin:1.4rem 0; }
+.legend ul { list-style:none; padding:0; margin:.6rem 0 0; display:grid; gap:.35rem; }
+.legend .disclaimer { margin:0; font-size:.93rem; }
+.overview td:first-child { min-width:14rem; }
+.overview tfoot td { font-weight:650; border-bottom:none; }
+.barcell { width:22%; min-width:8rem; }
+.bar { display:flex; height:.8rem; border-radius:4px; overflow:hidden; background:var(--rule); }
+.params { margin:1.2rem 0; } .params summary { cursor:pointer; font-weight:600; }
+.controls { display:flex; gap:.5rem; margin:1.5rem 0 0; }
+button { font:inherit; font-size:.85rem; padding:.3rem .8rem; border:1px solid var(--rule); border-radius:6px;
+  background:var(--panel); color:var(--fg); cursor:pointer; }
+table.problems td.pid, td.sqid { white-space:nowrap; font-variant-numeric:tabular-nums; font-weight:600; }
+td.sqid { font-weight:400; font-size:.8rem; color:var(--muted); }
+.ptitle { display:block; font-weight:600; }
+tr.summary { cursor:pointer; }
+tr.summary:hover td, tbody.open tr.summary td { background:var(--panel); }
+tr.summary td.pid::before { content:"▸ "; color:var(--muted); }
+tbody.open tr.summary td.pid::before { content:"▾ "; }
+html.js tr.detail { display:none; }
+html.js tbody.open tr.detail { display:table-row; }
+tr.detail > td { background:var(--panel); padding:.2rem 1rem 1rem 2rem; }
+.detail-body { max-width:52rem; }
+.statement { margin:.8rem 0 .4rem; }
+.scope { margin:.3rem 0; }
+blockquote.evidence { margin:.4rem 0 .6rem; padding:.3rem .9rem; border-left:3px solid var(--rule); font-style:italic; }
+blockquote.evidence footer { font-style:normal; font-size:.85rem; color:var(--muted); margin-top:.25rem; }
+ul.posed { padding-left:1.1rem; margin:.2rem 0; }
+table.subq { font-size:.92rem; background:var(--bg); }
+td.report { color:var(--muted); font-size:.85rem; min-width:9rem; }
+ul.docs li { margin:.2rem 0; }
+footer.gen { margin-top:3rem; color:var(--muted); font-size:.85rem; }
+main.detail-page { max-width:52rem; }
+.crumb { font-size:.9rem; margin-bottom:1rem; }
+h1 .pid { color:var(--muted); font-variant-numeric:tabular-nums; }
+.question { font-size:1.1rem; font-weight:600; }
+main.detail-page h2 { font-size:1.1rem; margin:2rem 0 .6rem; padding-top:.8rem; }
+h3.for { font-size:.95rem; font-weight:600; margin:1.2rem 0 .3rem; }
+.label { background:var(--panel); border-radius:8px; padding:.7rem 1rem; font-size:.9rem; }
+ul.related { padding-left:1.1rem; } ul.related li { margin:.5rem 0; }
+q.found { display:block; font-style:italic; margin:.2rem 0; }
+.also { display:block; color:var(--muted); font-size:.85rem; }
+@media (max-width:640px) { th.barcell, td.barcell { display:none; } tr.detail > td { padding-left:.8rem; }
+  .overview td:first-child { min-width:9rem; } }
+</style>
+</head>
+<body>
+<main class="detail-page">
+<nav class="crumb"><a href="../index.html#area-c08-roots-of-trust-tees">← Roots of trust, secure boot, firmware, TEEs and memory attestation</a></nav>
+<header><h1><span class="pid">P062</span> Integrity and attack surface of the verification apparatus</h1>
+<p class="question">Can the verifier-side infrastructure itself (recomputation servers, taps, sensors) be trusted and resist a state attacker, and how much attack surface does it add?</p>
+<p class="statement">Whether verifier-side infrastructure (recomputation servers, taps, sensors, the regime as a whole) can itself be trusted and resist state attackers.</p>
+</header>
+<div class="status-block"><h4>Status</h4><p class="scope"><span class="tag s-Analyzed">Analyzed</span> Design only, from a self-deprecated working draft (June 2026, since rewritten; treat as dated): a verifier-side auditing environment built from three independently sourced trusted computing bases whose outputs are compared before leaving an air-gap, plus an instructor-executor split with formally verified logic for the simple parts. Nothing built; no estimate of added attack surface. Recomputation-server hardening has no work (AI 2040: 'needs significant research'; Amodo: 'has not been explored'). Comer et al. 2026 (RAND) design a secure inference facility against nation-state attackers, but prover-side, so a cross-reference.</p><blockquote class="evidence">At least three distinct TCBs (different supply chains, hardware and software. One trusted by the prover, the verifier and a third-party) make up three small clusters, all inside the prover’s datacenter and inside their own air-gap.<footer>Cankaya (2026), A System Overview for Near-Term, Low-Trust AI Compute Verification, version 0.2 working draft (LessWrong, archived revision 1.4.0) (2026-06-24), L481</footer></blockquote></div>
+<h2>Posed by</h2><ul class="posed"><li>Harack et al. (2025), <em>Verification for International AI Governance</em> (Oxford AIGI): <q>must be relatively continuous—therefore opening up further avenues for attack</q> (§2.5.1, p.58, L3161–3162) <span class="flag">(source states the problem but not the quantity the question asks for)</span></li></ul><p class="others"><strong>Also raised in:</strong> Baker, Kulp, Marks, Brundage &amp; Heim (2025), <em>Verifying International Agreements on AI: Six Layers of Verification for Rules on Large-Scale AI Development and Deployment</em> (RAND WR-A4077-1); Scher &amp; Thiergart (2024), <em>Mechanisms to Verify International Agreements About AI Development</em> (MIRI); Petrie &amp; Aarne (2025), <em>Technical Options for Flexible Hardware-Enabled Guarantees</em> (flexHEG Part 2); Shavit (2023), <em>What Does It Take to Catch a Chinchilla? Verifying Rules on Large-Scale Neural Network Training via Compute Monitoring</em>; Ilhan, Withers, Gietz &amp; Harack (2026), <em>Verifiable Semiconductor Manufacturing</em> (Oxford AIGI); Cankaya (2026), <em>A System Overview for Near-Term, Low-Trust AI Compute Verification</em> (v0.2); Cankaya (2026), <em>All Hands on Deck to Build the Datacenter Lie Detector</em>; AI 2040 (2026), <em>Get Involved in Verification</em>; AI Security Forum, <em>Requests for Discussion</em>; Amodo (2026), <em>AI 2040 Plan A — How You Can Help</em>; Amodo (2026), <em>AI 2040 Plan A — Verification SITREP</em>; Dean, <em>Verification Plan</em> (AI 2040); Proofworks, <em>Living Verification Documents</em>.</p>
+<h2>Sub-questions</h2><div class="scroll"><table class="subq"><thead><tr><th>ID</th><th>Sub-question</th><th>What the sources report</th></tr></thead><tbody><tr id="sq-P062.1"><td class="sqid">P062.1</td><td>Has an open-source tap or sensor design been jointly vetted by two adversarial parties, including physical scanning of production units, for hidden espionage or sabotage functions?</td><td class="report">open</td></tr><tr id="sq-P062.2"><td class="sqid">P062.2</td><td>Does current GPU confidential computing / attestation (e.g. SPDM sessions) use post-quantum key exchange, closing harvest-now-decrypt-later?</td><td class="report">partly answered</td></tr><tr id="sq-P062.3"><td class="sqid">P062.3</td><td>Can a recomputation server inside the prover's facility be hardened so the verifier detects integrity attacks (e.g. GPU firmware substitution) by a prover with physical access?</td><td class="report">open</td></tr><tr id="sq-P062.4"><td class="sqid">P062.4</td><td>What minimum compute (H100-hours/day) does sampled recomputation need to reach a stated detection probability for a stated falsification rate?</td><td class="report">open</td></tr></tbody></table></div>
+<h2>Sub-questions not yet stated precisely enough to check</h2><div class="scroll"><table class="subq"><thead><tr><th>ID</th><th>Sub-question</th></tr></thead><tbody><tr id="sq-P062.5"><td class="sqid">P062.5</td><td>How much exploitable attack surface do verification infrastructure and its continuous data flows add, and can it be bounded?</td></tr><tr id="sq-P062.6"><td class="sqid">P062.6</td><td>How can verification tools, including parts that cannot be shown to the counterparty, themselves be verified ('who watches the watchers')?</td></tr><tr id="sq-P062.7"><td class="sqid">P062.7</td><td>Can the verification regime, at full (e.g. 2034) scale, withstand nation-state hardware, software and supply-chain attacks?</td></tr><tr id="sq-P062.8"><td class="sqid">P062.8</td><td>What does it cost (time, money, IP disclosure) to disclose, authenticate, test and patch designs across the full stack so that stacks become mutually verifiable?</td></tr><tr id="sq-P062.9"><td class="sqid">P062.9</td><td>Is formally verified logic achievable for the trusted components needed for unilateral security against software attacks?</td></tr><tr id="sq-P062.10"><td class="sqid">P062.10</td><td>What residual risk counts as 'secure enough' given high-impact, low-probability attacks such as a single compromised chip?</td></tr><tr id="sq-P062.11"><td class="sqid">P062.11</td><td>How should assurance be tiered by chip criticality in a defence-in-depth design?</td></tr><tr id="sq-P062.12"><td class="sqid">P062.12</td><td>Can mechanisms built for today's threats withstand highly capable AI (new chip-production routes bypassing supply-chain monitoring, broken cryptography)?</td></tr></tbody></table></div>
+<h2>Possibly relevant work found by automated search</h2><p class="label">Found by AI agents searching for this problem's sub-questions, mostly by keyword and citation in the OpenAlex scholarly database and on the web; a second AI pass reviewed each one, and we spot-checked some by hand. They seemed reasonably related, as far as one can tell from outside each paper's field. Some come from neighbouring fields, such as arms control and financial audit, and bear on the problem by analogy. Not reviewed against the status above; a paper listed here does not change that status. 926 of 1119 quotes checked word for word against the paper's text.</p><h3 class="for">For P062.2: Does current GPU confidential computing / attestation (e.g. SPDM sessions) use post-quantum key exchange, closing harvest-now-decrypt-later?</h3><ul class="related"><li><a href="https://arxiv.org/abs/2601.11095">Towards Quantum-Resistant Trusted Computing: Architectures for Post-Quantum Integrity Verification Techniques</a> — Grazia D'Onghia, Antonio Lioy, arXiv, 2026<q class="found">Firmware, being the first layer of trusted software, faces unique risks due to its longevity and difficult update. The transition of firmware protection to Post-Quantum Cryptography (PQC) is urgent, since it reduces the risk derived from exposing all computing and network devices to quantum-based attacks.</q></li><li><a href="https://doi.org/10.1109/trustcom66490.2025.00350">Towards Stateless Post-Quantum Remote Attestation for IoT Using TPM and DICE</a> — Michael Eckel, Janik Gorbracht, Georgios Gkoktsis et al., IEEE International Conference on Trust, Security and Privacy in Computing and Communications (TrustCom), 2025<q class="found">This paper presents a powerful stateless post-quantum remote attestation approach for IoT devices, leveraging authenticated and encrypted (AEAD) challenges within TPM and DICE-based attestation.</q></li><li><a href="https://github.com/chipsalliance/Caliptra/blob/main/doc/Caliptra.md">github.com</a><q class="found">Caliptra refuses to boot firmware unless the firmware was dual-signed by the key reported by SoC ROM's fuse registers.</q></li><li><a href="https://www.dmtf.org/sites/default/files/standards/documents/DSP0274_1.4.0.pdf">www.dmtf.org</a><q class="found">To cope with the potential threats of emergent quantum computers, the SPDM supports both traditional and post-quantum cryptography (PQC) algorithms for the signature and authenticated key exchange protocols.</q></li></ul><h3 class="for">For P062.9: Is formally verified logic achievable for the trusted components needed for unilateral security against software attacks?</h3><ul class="related"><li><a href="https://doi.org/10.1109/msec.2023.3251954">Security Verification of the OpenTitan Hardware Root of Trust</a> — Andres Meza, Francesco Restuccia, Jason K. Oberg et al., IEEE Security &amp; Privacy, 2023<q class="found">The verification uncovered weaknesses and helped produce hardware fixes to eliminate vulnerabilities.</q></li><li><a href="https://doi.org/10.1109/access.2021.3087421">Demystifying Attestation in Intel Trust Domain Extensions via Formal Verification</a> — Muhammad Usama Sardar, Saidgani Musaev, Christof W. Fetzer, IEEE Access, 2021<q class="found">the process of formal specification reveals a number of subtle discrepancies in Intel's specifications that could potentially lead to design and implementation flaws.</q></li><li><a href="https://doi.org/10.1145/3460120.3484532">On the TOCTOU Problem in Remote Attestation</a> — Ivan De Oliveira Nunes, Sashidhar Jakkamsetti, Norrathep Rattanavipanon et al., ACM SIGSAC Conference on Computer and Communications Security (CCS), 2021<q class="found">if transient malware infects a device (by modifying its binary), performs its nefarious tasks, and erases itself before the next attestation, its temporary presence will not be detected.</q></li><li><a href="https://doi.org/10.1109/iccad45719.2019.8942118">PURE: Using Verified Remote Attestation to Obtain Proofs of Update, Reset and Erasure in low-End Embedded Systems</a><span class="unreviewed" title="Full text not reviewed; more likely to contain errors.">*</span> — Ivan De Oliveira Nunes, Karim Eldefrawy, Norrathep Rattanavipanon et al., 2019</li></ul><p class="note"><span class="mark">*</span> Full text not reviewed; more likely to contain errors.</p>
+<section><h2>Data</h2><ul><li><a href="../problems.csv">problems.csv</a> — one row per problem</li><li><a href="../problem_status.csv">problem_status.csv</a> — status, scope and evidence per problem</li><li><a href="../problem_sources.csv">problem_sources.csv</a> — the posed-by quote and other documents per problem</li><li><a href="../leaves.csv">leaves.csv</a> — all sub-questions, including those without a checkable form</li><li><a href="../leaf_sources.csv">leaf_sources.csv</a> — every source row behind each sub-question</li></ul></section><footer class="gen"><p>This is my best understanding as of 2026-10-27. It does not claim that nobody is working on these problems. Corrections are welcome: dan@canaryinstitute.ai.</p></footer><!-- Generated by `analysis/public_problem_list/render.py` from the frozen problem tree with corrections (inputs at commit cb93599 2026-10-27). -->
+</main>
+</body>
+</html>

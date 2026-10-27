@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>P106 On-site physical inspection capacity and practice</title>
+<style>
+:root { --bg:#fbfaf7; --fg:#1c1c1a; --muted:#66655f; --rule:#e3e1d9; --panel:#f3f1ea; --link:#7a4f00;
+  --Posed:#e6e4de; --Analyzed:#d5e1fa; --Started:#fbe9ad; --Done:#c9ecd6; --Failed:#f6cfc8; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg:#151513; --fg:#e7e5de; --muted:#9c9a91;
+  --rule:#34332e; --panel:#1f1e1b; --link:#e2a94a; --Posed:#3b3a36; --Analyzed:#22385f; --Started:#4f3f0c;
+  --Done:#174428; --Failed:#5c241c; } }
+:root[data-theme="dark"] { --bg:#151513; --fg:#e7e5de; --muted:#9c9a91; --rule:#34332e; --panel:#1f1e1b; --link:#e2a94a;
+  --Posed:#3b3a36; --Analyzed:#22385f; --Started:#4f3f0c; --Done:#174428; --Failed:#5c241c; }
+* { box-sizing:border-box; }
+html { background:var(--bg); }
+body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
+main { max-width:68rem; margin:0 auto; padding:2rem 16px 5rem; }
+h1 { font-size:1.9rem; line-height:1.2; margin:0 0 1rem; }
+h2 { font-size:1.3rem; margin:2.6rem 0 .8rem; padding-top:1.2rem; border-top:2px solid var(--rule); }
+h2 .count { font-size:.85rem; font-weight:400; color:var(--muted); margin-left:.4rem; }
+h4 { font-size:.8rem; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin:1.1rem 0 .4rem; }
+header p { max-width:46rem; }
+a { color:var(--link); }
+code { font-size:.85em; background:var(--panel); padding:0 .25em; border-radius:3px; }
+.note, .flag, .top, .permalink { color:var(--muted); font-size:.88rem; }
+.scroll { overflow-x:auto; }
+table { border-collapse:collapse; width:100%; }
+th, td { text-align:left; vertical-align:top; padding:.45rem .55rem; border-bottom:1px solid var(--rule); }
+th { font-size:.78rem; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); font-weight:600; }
+td.num, th.num { text-align:right; font-variant-numeric:tabular-nums; }
+td.zero { color:var(--muted); opacity:.55; }
+.tag { display:inline-block; font-size:.78rem; font-weight:650; padding:.15em .6em; border-radius:4px;
+  white-space:nowrap; }
+.s-Posed { background:var(--Posed); } .s-Analyzed { background:var(--Analyzed); }
+.s-Started { background:var(--Started); } .s-Done { background:var(--Done); } .s-Failed { background:var(--Failed); }
+td.st { font-weight:650; font-size:.85rem; white-space:nowrap; }
+.overview th[class^="s-"] { color:var(--fg); text-align:right; }
+.legend { background:var(--panel); border-radius:8px; padding:.9rem 1.1rem; margin:1.4rem 0; }
+.legend ul { list-style:none; padding:0; margin:.6rem 0 0; display:grid; gap:.35rem; }
+.legend .disclaimer { margin:0; font-size:.93rem; }
+.overview td:first-child { min-width:14rem; }
+.overview tfoot td { font-weight:650; border-bottom:none; }
+.barcell { width:22%; min-width:8rem; }
+.bar { display:flex; height:.8rem; border-radius:4px; overflow:hidden; background:var(--rule); }
+.params { margin:1.2rem 0; } .params summary { cursor:pointer; font-weight:600; }
+.controls { display:flex; gap:.5rem; margin:1.5rem 0 0; }
+button { font:inherit; font-size:.85rem; padding:.3rem .8rem; border:1px solid var(--rule); border-radius:6px;
+  background:var(--panel); color:var(--fg); cursor:pointer; }
+table.problems td.pid, td.sqid { white-space:nowrap; font-variant-numeric:tabular-nums; font-weight:600; }
+td.sqid { font-weight:400; font-size:.8rem; color:var(--muted); }
+.ptitle { display:block; font-weight:600; }
+tr.summary { cursor:pointer; }
+tr.summary:hover td, tbody.open tr.summary td { background:var(--panel); }
+tr.summary td.pid::before { content:"▸ "; color:var(--muted); }
+tbody.open tr.summary td.pid::before { content:"▾ "; }
+html.js tr.detail { display:none; }
+html.js tbody.open tr.detail { display:table-row; }
+tr.detail > td { background:var(--panel); padding:.2rem 1rem 1rem 2rem; }
+.detail-body { max-width:52rem; }
+.statement { margin:.8rem 0 .4rem; }
+.scope { margin:.3rem 0; }
+blockquote.evidence { margin:.4rem 0 .6rem; padding:.3rem .9rem; border-left:3px solid var(--rule); font-style:italic; }
+blockquote.evidence footer { font-style:normal; font-size:.85rem; color:var(--muted); margin-top:.25rem; }
+ul.posed { padding-left:1.1rem; margin:.2rem 0; }
+table.subq { font-size:.92rem; background:var(--bg); }
+td.report { color:var(--muted); font-size:.85rem; min-width:9rem; }
+ul.docs li { margin:.2rem 0; }
+footer.gen { margin-top:3rem; color:var(--muted); font-size:.85rem; }
+main.detail-page { max-width:52rem; }
+.crumb { font-size:.9rem; margin-bottom:1rem; }
+h1 .pid { color:var(--muted); font-variant-numeric:tabular-nums; }
+.question { font-size:1.1rem; font-weight:600; }
+main.detail-page h2 { font-size:1.1rem; margin:2rem 0 .6rem; padding-top:.8rem; }
+h3.for { font-size:.95rem; font-weight:600; margin:1.2rem 0 .3rem; }
+.label { background:var(--panel); border-radius:8px; padding:.7rem 1rem; font-size:.9rem; }
+ul.related { padding-left:1.1rem; } ul.related li { margin:.5rem 0; }
+q.found { display:block; font-style:italic; margin:.2rem 0; }
+.also { display:block; color:var(--muted); font-size:.85rem; }
+@media (max-width:640px) { th.barcell, td.barcell { display:none; } tr.detail > td { padding-left:.8rem; }
+  .overview td:first-child { min-width:9rem; } }
+</style>
+</head>
+<body>
+<main class="detail-page">
+<nav class="crumb"><a href="../index.html#area-c14-inspection-practice">← Inspection practice and verification institutions with a technical core</a></nav>
+<header><h1><span class="pid">P106</span> On-site physical inspection capacity and practice</h1>
+<p class="question">How many inspector-days, at what cost and sample size, are needed to verify a given number of accelerators or data centres at a stated detection probability?</p>
+<p class="statement">Inspector-hours, sample sizes, cost and procedures for physical inspection of chips, racks and data centres.</p>
+<p class="terms"><em>Terms:</em> N: the number in question, of chips in a hidden cluster, or of chips, racks, accelerators or data centres to be inspected.</p>
+</header>
+<div class="status-block"><h4>Status</h4><p class="scope"><span class="tag s-Analyzed">Analyzed</span> A design and estimate from 2023: random sampling of chips' logged weight snapshots, with a formula for the samples needed to catch a rule-breaking run at a given probability. For a 10^25 FLOP run among 10^7 chips, caught within 30 days at 90% probability: about 232,000 samples a year, or about 232 inspectors if each checks 1,000 chips a year (an assumption), against 280 IAEA inspectors in 2021. No cost estimate and nothing run; it assumes chips that log weight snapshots, which still do not exist in 2026, and no later paper has updated the numbers. The installed base has roughly reached his assumption (over 15 million H100-equivalents in January 2026, Epoch AI), and 10^25 FLOP is now an ordinary run rather than a frontier one.</p><blockquote class="evidence">This would require ≈ 232 inspectors, slightly smaller than the 280 active IAEA inspectors as of 2021.<footer>Shavit (2023), What Does It Take to Catch a Chinchilla? Verifying Rules on Large-Scale Neural Network Training via Compute Monitoring (2023-05-30), L618–619</footer></blockquote></div>
+<h2>Posed by</h2><ul class="posed"><li>Harack et al. (2025), <em>Verification for International AI Governance</em> (Oxford AIGI): <q>Fully inspecting all of these chips on a rapid cadence would be infeasible.</q> (§2.1.3, p.41, L2226–2227) <span class="flag">(source states the problem but not the quantity the question asks for)</span></li></ul><p class="others"><strong>Also raised in:</strong> Reuel, Bucknall et al. (2025), <em>Open Problems in Technical AI Governance</em>, compute sections; Petrie, Aarne, Ammann &amp; Dalrymple (2025), <em>Overview of Flexible Hardware-Enabled Guarantees</em> (flexHEG Part 1); Aarne &amp; Petrie (2025), <em>International Security Applications of Flexible Hardware-Enabled Guarantees</em> (flexHEG Part 3); Aarne, Fist &amp; Withers (2024), <em>Secure, Governable Chips</em> (CNAS); Shavit (2023), <em>What Does It Take to Catch a Chinchilla? Verifying Rules on Large-Scale Neural Network Training via Compute Monitoring</em>; Cankaya (2026), <em>Suppressing Side Channels in an Untrusted Data Center via Retrofitted Defenses</em> (MIRI); Canary Institute research; Ansari (2026), <em>Hardware-Level Governance of AI Compute: A Feasibility Taxonomy for Regulatory Compliance and Treaty Verification</em>; Gargiulo &amp; Kulp (2026), <em>Workload Identification with Physical Side Channels for AI Governance</em>; AI 2040 (2026), <em>Get Involved in Verification</em>; AI Security Forum, <em>Requests for Discussion</em>; Amodo (2026), <em>AI 2040 Plan A — Verification SITREP</em>.</p>
+<h2>Sub-questions</h2><div class="scroll"><table class="subq"><thead><tr><th>ID</th><th>Sub-question</th><th>What the sources report</th></tr></thead><tbody><tr id="sq-P106.1"><td class="sqid">P106.1</td><td>Can an inspector detect a bypassed or removed passive network tap (e.g. from monitor-leg optical power), at what false-alarm rate, across 100s to 100,000s of taps?</td><td class="report">open</td></tr><tr id="sq-P106.2"><td class="sqid">P106.2</td><td>What inspection frequency gives &gt;= a stated probability of finding an unregistered cluster of N chips at a declared data centre?</td><td class="report">open</td></tr><tr id="sq-P106.3"><td class="sqid">P106.3</td><td>How many inspector-days (or inspectors) per year are needed to verify N accelerators / N declared data centres at a stated detection probability, and what per-inspector throughput (chips per inspector-year) is achieved in practice?</td><td class="report">partly answered</td></tr><tr id="sq-P106.4"><td class="sqid">P106.4</td><td>What inspection sample size gives a stated confidence of detecting tampering in a stated fraction of a fleet of N chips/racks, and at what hardware cost when inspection is destructive?</td><td class="report">partly answered</td></tr><tr id="sq-P106.5"><td class="sqid">P106.5</td><td>What staffing and downtime does continuous inspector presence impose (supervised maintenance per GPU per month; probe custody person-hours per GPU per month)?</td><td class="report">open</td></tr><tr id="sq-P106.6"><td class="sqid">P106.6</td><td>What annual on-site inspection quota would a compute regime need to match the detection probability of arms-control inspection quotas?</td><td class="report">implied by a source, not stated as open</td></tr><tr id="sq-P106.7"><td class="sqid">P106.7</td><td>How many chips per inspector-day can be verified at a neutral central inspection site, and does transport open a tamper window that seals detect?</td><td class="report">implied by a source, not stated as open</td></tr><tr id="sq-P106.8"><td class="sqid">P106.8</td><td>Has a practice physical inspection of ML chips in an operating datacenter been run, with per-chip cost and time reported?</td><td class="report">open</td></tr><tr id="sq-P106.9"><td class="sqid">P106.9</td><td>What physical-inspection rate is needed to back on-chip mechanisms (and retrofitted enclosures/jammers) whose tamper-resistance is not trusted unsupervised?</td><td class="report">open</td></tr><tr id="sq-P106.10"><td class="sqid">P106.10</td><td>Is destructive teardown inspection defence- or offence-dominant: what fraction of planted covert transmitters do blind teardown teams find, and how deep should inspection go?</td><td class="report">open</td></tr></tbody></table></div>
+<h2>Sub-questions not yet stated precisely enough to check</h2><div class="scroll"><table class="subq"><thead><tr><th>ID</th><th>Sub-question</th></tr></thead><tbody><tr id="sq-P106.11"><td class="sqid">P106.11</td><td>How would two-party SCIF inspection work in practice?</td></tr><tr id="sq-P106.12"><td class="sqid">P106.12</td><td>Can an inspection scheme limited enough to satisfy the prover's cyber and physical security teams still give the required guarantees?</td></tr></tbody></table></div>
+<h2>Possibly relevant work found by automated search</h2><p class="label">Found by AI agents searching for this problem's sub-questions, mostly by keyword and citation in the OpenAlex scholarly database and on the web; a second AI pass reviewed each one, and we spot-checked some by hand. They seemed reasonably related, as far as one can tell from outside each paper's field. Some come from neighbouring fields, such as arms control and financial audit, and bear on the problem by analogy. Not reviewed against the status above; a paper listed here does not change that status. 926 of 1119 quotes checked word for word against the paper's text.</p><h3 class="for">For P106.1: Can an inspector detect a bypassed or removed passive network tap (e.g. from monitor-leg optical power), at what false-alarm rate, across 100s to 100,000s of taps?</h3><ul class="related"><li><a href="https://doi.org/10.1364/jocn.451289">Machine-learning-based anomaly detection in optical fiber monitoring</a> — Khouloud Abdelli, Joo Yeon Cho, Florian Azendorf et al., Journal of Optical Communications and Networking, 2022<q class="found">the autoencoder detects any fiber fault or anomaly with an F1 score of 96.86%" ... "localizes the faults with an average root mean square error of 0.19 m</q></li><li><a href="https://doi.org/10.1109/jlt.2020.2987032">Machine Learning for Optical Network Security Monitoring: A Practical Perspective</a> — Marija Furdek, Carlos Natalino, Fabian Lipp et al., Journal of Lightwave Technology, 2020<q class="found">The influence of false positives and false negatives is addressed by a newly proposed Window-based Attack Detection (WAD) approach.</q></li></ul><h3 class="for">For P106.2: What inspection frequency gives &gt;= a stated probability of finding an unregistered cluster of N chips at a declared data centre?</h3><ul class="related"><li><a href="https://doi.org/10.1002/nav.10096">Efficient distributions of arms‐control inspection effort</a> — Rudolf Avenhaus, D. Marc Kilgour, Naval Research Logistics (NRL), 2003<q class="found">When detection functions are convex, inspection effort should be concentrated on one inspectee chosen at random</q><span class="also">also found for P106.3</span></li><li><a href="https://www.osti.gov/servlets/purl/1392849">www.osti.gov</a><span class="unreviewed" title="Full text not reviewed; more likely to contain errors.">*</span><span class="also">also found for P106.3, P106.4</span></li></ul><h3 class="for">For P106.4: What inspection sample size gives a stated confidence of detecting tampering in a stated fraction of a fleet of N chips/racks, and at what hardware cost when inspection is destructive?</h3><ul class="related"><li><a href="https://doi.org/10.1007/s41635-018-0055-0">Detecting Hardware Trojans Inserted by Untrusted Foundry Using Physical Inspection and Advanced Image Processing</a><span class="unreviewed" title="Full text not reviewed; more likely to contain errors.">*</span> — Nidish Vashistha, Mir Tanjidur Rahman, Haoting Shen et al., Journal of Hardware and Systems Security, 2018<span class="also">also found for P106.10</span></li></ul><h3 class="for">For P106.5: What staffing and downtime does continuous inspector presence impose (supervised maintenance per GPU per month; probe custody person-hours per GPU per month)?</h3><ul class="related"><li><a href="https://doi.org/10.2172/1402552">Developing reliable safeguards seals for application verification and removal by State operators</a> — Robert J. Finch, Heidi A. Smartt, Risa Haddal, 2017<q class="found">requiring safeguards inspectors to perform the application, verification, and removal of every seal would be an onerous burden on International Atomic Energy Agency's (IAEA's) resources</q><span class="also">also found for P106.7</span></li></ul><h3 class="for">For P106.6: What annual on-site inspection quota would a compute regime need to match the detection probability of arms-control inspection quotas?</h3><ul class="related"><li><a href="https://doi.org/10.3011/esarda.ijnsnp.2026.2">doi.org</a><span class="unreviewed" title="Full text not reviewed; more likely to contain errors.">*</span><span class="also">also found for P106.9</span></li></ul><h3 class="for">For P106.7: How many chips per inspector-day can be verified at a neutral central inspection site, and does transport open a tamper window that seals detect?</h3><ul class="related"><li><a href="https://doi.org/10.36227/techrxiv.174198483.30225558/v2">Resealable security bag</a> — В. В. Макаров, 2025<q class="found">I demonstrate a method to backdoor the bag by coating it in advance with a transparent silicone layer under its indicating sealing tape.</q></li></ul><h3 class="for">For P106.10: Is destructive teardown inspection defence- or offence-dominant: what fraction of planted covert transmitters do blind teardown teams find, and how deep should inspection go?</h3><ul class="related"><li><a href="https://doi.org/10.1109/sp46215.2023.10179341">Red Team vs. Blue Team: A Real-World Hardware Trojan Detection Case Study Across Four Modern CMOS Technology Generations</a><span class="unreviewed" title="Full text not reviewed; more likely to contain errors.">*</span> — Endres Puschner, Thorben Moos, Steffen Becker et al., Proceedings - IEEE Symposium on Security and Privacy/Proceedings of the ... IEEE Symposium on Security and Privacy, 2023</li></ul><p class="note"><span class="mark">*</span> Full text not reviewed; more likely to contain errors.</p>
+<section><h2>Data</h2><ul><li><a href="../problems.csv">problems.csv</a> — one row per problem</li><li><a href="../problem_status.csv">problem_status.csv</a> — status, scope and evidence per problem</li><li><a href="../problem_sources.csv">problem_sources.csv</a> — the posed-by quote and other documents per problem</li><li><a href="../leaves.csv">leaves.csv</a> — all sub-questions, including those without a checkable form</li><li><a href="../leaf_sources.csv">leaf_sources.csv</a> — every source row behind each sub-question</li></ul></section><footer class="gen"><p>This is my best understanding as of 2026-10-27. It does not claim that nobody is working on these problems. Corrections are welcome: dan@canaryinstitute.ai.</p></footer><!-- Generated by `analysis/public_problem_list/render.py` from the frozen problem tree with corrections (inputs at commit cb93599 2026-10-27). -->
+</main>
+</body>
+</html>

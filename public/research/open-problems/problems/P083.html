@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>P083 Inference verification overhead</title>
+<style>
+:root { --bg:#fbfaf7; --fg:#1c1c1a; --muted:#66655f; --rule:#e3e1d9; --panel:#f3f1ea; --link:#7a4f00;
+  --Posed:#e6e4de; --Analyzed:#d5e1fa; --Started:#fbe9ad; --Done:#c9ecd6; --Failed:#f6cfc8; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg:#151513; --fg:#e7e5de; --muted:#9c9a91;
+  --rule:#34332e; --panel:#1f1e1b; --link:#e2a94a; --Posed:#3b3a36; --Analyzed:#22385f; --Started:#4f3f0c;
+  --Done:#174428; --Failed:#5c241c; } }
+:root[data-theme="dark"] { --bg:#151513; --fg:#e7e5de; --muted:#9c9a91; --rule:#34332e; --panel:#1f1e1b; --link:#e2a94a;
+  --Posed:#3b3a36; --Analyzed:#22385f; --Started:#4f3f0c; --Done:#174428; --Failed:#5c241c; }
+* { box-sizing:border-box; }
+html { background:var(--bg); }
+body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
+main { max-width:68rem; margin:0 auto; padding:2rem 16px 5rem; }
+h1 { font-size:1.9rem; line-height:1.2; margin:0 0 1rem; }
+h2 { font-size:1.3rem; margin:2.6rem 0 .8rem; padding-top:1.2rem; border-top:2px solid var(--rule); }
+h2 .count { font-size:.85rem; font-weight:400; color:var(--muted); margin-left:.4rem; }
+h4 { font-size:.8rem; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin:1.1rem 0 .4rem; }
+header p { max-width:46rem; }
+a { color:var(--link); }
+code { font-size:.85em; background:var(--panel); padding:0 .25em; border-radius:3px; }
+.note, .flag, .top, .permalink { color:var(--muted); font-size:.88rem; }
+.scroll { overflow-x:auto; }
+table { border-collapse:collapse; width:100%; }
+th, td { text-align:left; vertical-align:top; padding:.45rem .55rem; border-bottom:1px solid var(--rule); }
+th { font-size:.78rem; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); font-weight:600; }
+td.num, th.num { text-align:right; font-variant-numeric:tabular-nums; }
+td.zero { color:var(--muted); opacity:.55; }
+.tag { display:inline-block; font-size:.78rem; font-weight:650; padding:.15em .6em; border-radius:4px;
+  white-space:nowrap; }
+.s-Posed { background:var(--Posed); } .s-Analyzed { background:var(--Analyzed); }
+.s-Started { background:var(--Started); } .s-Done { background:var(--Done); } .s-Failed { background:var(--Failed); }
+td.st { font-weight:650; font-size:.85rem; white-space:nowrap; }
+.overview th[class^="s-"] { color:var(--fg); text-align:right; }
+.legend { background:var(--panel); border-radius:8px; padding:.9rem 1.1rem; margin:1.4rem 0; }
+.legend ul { list-style:none; padding:0; margin:.6rem 0 0; display:grid; gap:.35rem; }
+.legend .disclaimer { margin:0; font-size:.93rem; }
+.overview td:first-child { min-width:14rem; }
+.overview tfoot td { font-weight:650; border-bottom:none; }
+.barcell { width:22%; min-width:8rem; }
+.bar { display:flex; height:.8rem; border-radius:4px; overflow:hidden; background:var(--rule); }
+.params { margin:1.2rem 0; } .params summary { cursor:pointer; font-weight:600; }
+.controls { display:flex; gap:.5rem; margin:1.5rem 0 0; }
+button { font:inherit; font-size:.85rem; padding:.3rem .8rem; border:1px solid var(--rule); border-radius:6px;
+  background:var(--panel); color:var(--fg); cursor:pointer; }
+table.problems td.pid, td.sqid { white-space:nowrap; font-variant-numeric:tabular-nums; font-weight:600; }
+td.sqid { font-weight:400; font-size:.8rem; color:var(--muted); }
+.ptitle { display:block; font-weight:600; }
+tr.summary { cursor:pointer; }
+tr.summary:hover td, tbody.open tr.summary td { background:var(--panel); }
+tr.summary td.pid::before { content:"▸ "; color:var(--muted); }
+tbody.open tr.summary td.pid::before { content:"▾ "; }
+html.js tr.detail { display:none; }
+html.js tbody.open tr.detail { display:table-row; }
+tr.detail > td { background:var(--panel); padding:.2rem 1rem 1rem 2rem; }
+.detail-body { max-width:52rem; }
+.statement { margin:.8rem 0 .4rem; }
+.scope { margin:.3rem 0; }
+blockquote.evidence { margin:.4rem 0 .6rem; padding:.3rem .9rem; border-left:3px solid var(--rule); font-style:italic; }
+blockquote.evidence footer { font-style:normal; font-size:.85rem; color:var(--muted); margin-top:.25rem; }
+ul.posed { padding-left:1.1rem; margin:.2rem 0; }
+table.subq { font-size:.92rem; background:var(--bg); }
+td.report { color:var(--muted); font-size:.85rem; min-width:9rem; }
+ul.docs li { margin:.2rem 0; }
+footer.gen { margin-top:3rem; color:var(--muted); font-size:.85rem; }
+main.detail-page { max-width:52rem; }
+.crumb { font-size:.9rem; margin-bottom:1rem; }
+h1 .pid { color:var(--muted); font-variant-numeric:tabular-nums; }
+.question { font-size:1.1rem; font-weight:600; }
+main.detail-page h2 { font-size:1.1rem; margin:2rem 0 .6rem; padding-top:.8rem; }
+h3.for { font-size:.95rem; font-weight:600; margin:1.2rem 0 .3rem; }
+.label { background:var(--panel); border-radius:8px; padding:.7rem 1rem; font-size:.9rem; }
+ul.related { padding-left:1.1rem; } ul.related li { margin:.5rem 0; }
+q.found { display:block; font-style:italic; margin:.2rem 0; }
+.also { display:block; color:var(--muted); font-size:.85rem; }
+@media (max-width:640px) { th.barcell, td.barcell { display:none; } tr.detail > td { padding-left:.8rem; }
+  .overview td:first-child { min-width:9rem; } }
+</style>
+</head>
+<body>
+<main class="detail-page">
+<nav class="crumb"><a href="../index.html#area-c10-replay-determinism-fp">← Replay, determinism, floating-point reproducibility and compute accounting</a></nav>
+<header><h1><span class="pid">P083</span> Inference verification overhead</h1>
+<p class="question">How much latency does inference verification add, and how much serving throughput does it cost?</p>
+<p class="statement">The latency, serving throughput, verifier compute and record size that deploying inference verification imposes.</p>
+</header>
+<div class="status-block"><h4>Status</h4><p class="scope"><span class="tag s-Started">Started</span> The authors' own measurements on Llama-2-13B (Table 6): committing overhead 0.26 ms per token, validation time 81 ms, 10 KB of provider GPU memory per token; a measured per-token latency cost, not serving throughput at production batch sizes or end-to-end latency on a deployed service. Amodo's Stage-1 prototype measures verifier GPU utilisation (about 2% versus about 53% for the prover on one H100 tray, small open-weight models) and lists latency and throughput as future work; Karvonen et al. (DiFR) measure record size (1.5 to 30 bytes per token), which is in the statement, not the headline.</p><blockquote class="evidence">Time and memory overhead of generating and validating Llama-2-13B inference using established verifiable inference compared to our method.<footer>Ong et al. (2025), TOPLOC: A Locality Sensitive Hashing Scheme for Trustless Verifiable Inference (ICML 2025) (2025-05-30 (arXiv v2)), L1167–1168</footer></blockquote></div>
+<p class="others"><strong>Raised in:</strong> Cankaya (2025), <em>Catching Misreporting About ML Hardware Use by Turning Noise into Signal</em>; Cankaya (2026), <em>Bit-Exact AI Inference Verification Without Performance Tradeoffs</em>, arXiv 2606.00279v2; Cankaya (2026), <em>Compute Verification FAQs</em>; Karvonen et al. (2025), <em>DiFR: Inference Verification Despite Nondeterminism</em>; Amodo (2026), <em>An Inference Verification Prototype — Stage 1</em>; Proofworks, <em>Living Verification Documents</em>.</p>
+<h2>Sub-questions</h2><div class="scroll"><table class="subq"><thead><tr><th>ID</th><th>Sub-question</th><th>What the sources report</th></tr></thead><tbody><tr id="sq-P083.1"><td class="sqid">P083.1</td><td>What added latency and verifier compute does verification impose (at a stated request rate; as a ratio vs inference), and how large a trusted cluster is needed?</td><td class="report">a source suggests an answer (not checked)</td></tr><tr id="sq-P083.2"><td class="sqid">P083.2</td><td>What is the minimum bytes per record that still distinguishes all tested production methods, incl. cross-hardware?</td><td class="report">a source suggests an answer (not checked)</td></tr><tr id="sq-P083.3"><td class="sqid">P083.3</td><td>Can activations be extracted from an unmodified inference process at a stated low overhead and robustly across versions?</td><td class="report">partly answered</td></tr></tbody></table></div>
+<h2>Possibly relevant work found by automated search</h2><p class="note">Searched; nothing found for these sub-questions.</p>
+<section><h2>Data</h2><ul><li><a href="../problems.csv">problems.csv</a> — one row per problem</li><li><a href="../problem_status.csv">problem_status.csv</a> — status, scope and evidence per problem</li><li><a href="../problem_sources.csv">problem_sources.csv</a> — the posed-by quote and other documents per problem</li><li><a href="../leaves.csv">leaves.csv</a> — all sub-questions, including those without a checkable form</li><li><a href="../leaf_sources.csv">leaf_sources.csv</a> — every source row behind each sub-question</li></ul></section><footer class="gen"><p>This is my best understanding as of 2026-10-27. It does not claim that nobody is working on these problems. Corrections are welcome: dan@canaryinstitute.ai.</p></footer><!-- Generated by `analysis/public_problem_list/render.py` from the frozen problem tree with corrections (inputs at commit cb93599 2026-10-27). -->
+</main>
+</body>
+</html>
