@@ -39,37 +39,42 @@ canvas{display:block;width:100%;height:auto;background:var(--bg);border-radius:8
 .sw{width:14px;height:14px;border-radius:3px;display:inline-block;border:1px solid var(--ring)}
 .ln{width:26px;height:0;border-top:2px solid var(--ink);display:inline-block}
 table.pay{border-collapse:collapse;margin:8px 0 6px;font-variant-numeric:tabular-nums;font-size:14px;width:100%}
+.kv.num{grid-template-columns:6.5em 1fr;gap:4px 12px}
+.kv.num dt{font-weight:600;color:var(--ink);text-align:right;font-variant-numeric:tabular-nums}
+.kv.num dd{font-weight:400;white-space:normal;text-align:left;color:var(--ink2)}
+.kv.num dt.ok{color:var(--harmony)}
+.kv.num dt.short{color:var(--pd)}
 table.pay td,table.pay th{border:1px solid var(--grid);padding:5px 8px;text-align:center}
 table.pay th{color:var(--ink2);font-weight:500}
 td.nash{outline:2px solid var(--stag);outline-offset:-2px;font-weight:600}
-.kv{display:grid;grid-template-columns:1fr 11.5em;gap:2px 12px;font-size:14px;margin:6px 0 0}
+.kv{display:grid;grid-template-columns:1fr auto;gap:2px 12px;font-size:14px;margin:8px 0 0}
 .kv dt{color:var(--ink2)}.kv dd{margin:0;font-weight:600;white-space:nowrap;text-align:right}
 .note{color:var(--ink2);font-size:13px;margin:8px 0 0}
 </style>
 </head>
 <body>
 <h1>When should we pause? The AI stampede, with and without verification</h1>
-<p class="sub">Two states can each Build a superintelligence at full speed or Pause. Each thinks a full-speed build has a chance H of causing a catastrophe, and rates that catastrophe at V<sub>c</sub> times the value of winning. The map colours each (H, V<sub>c</sub>) by the game the two states are in; the circle is the state in the panel. Click the map to move it, then tick <b>Verification</b> to see what changes.</p>
+<p class="sub">Two states can each Build a superintelligence or Pause. A builder with no rival can take its time; H is the chance that such a project escapes its control on completion (a hazard per project, not an overall p(doom)). When two projects rush each other, θ is the extra danger that brings. Each state rates the catastrophe at V<sub>c</sub> times the value of finishing first. The map colours each (H, V<sub>c</sub>) by the game the two states are in; the circle is the state in the panel. Click the map to move it, then tick <b>Verification</b> to see what changes.</p>
 
 <div class="layout">
 <div>
   <div class="panel">
     <h2>This state</h2>
-    <div class="ctl"><label>H: hazard that Build causes catastrophe</label><input type="range" id="H" min="0.005" max="0.8" step="0.005" value="0.15"><output for="H"></output></div>
-    <div class="ctl"><label>V<sub>c</sub>: cost of catastrophe, in wins</label><input type="range" id="Vc" min="0" max="2" step="0.005" value="0.7551"><output for="Vc"></output></div>
+    <div class="ctl"><label>H: loss-of-control hazard of an unhurried project, on completion</label><input type="range" id="H" min="0.005" max="0.8" step="0.005" value="0.12"><output for="H"></output></div>
+    <div class="ctl"><label>V<sub>c</sub>: cost of catastrophe, in safe first builds</label><input type="range" id="Vc" min="0" max="2" step="0.005" value="0.8500"><output for="Vc"></output></div>
     <div id="payoffs"></div>
   </div>
   <div class="panel" id="controls">
-    <h2>Values and doom</h2>
-    <div class="ctl"><label>V<sub>l</sub>: cost of a safe loss</label><input type="range" id="Vl" min="-1" max="2" step="0.05" value="1"><output for="Vl"></output></div>
-    <div class="ctl"><label>η: chance the loser's project dooms</label><input type="range" id="eta" min="0" max="1" step="0.01" value="0.15"><output for="eta"></output></div>
+    <h2>Values and the laggard</h2>
+    <div class="ctl"><label>V<sub>l</sub>: cost of the rival safely building first</label><input type="range" id="Vl" min="-1" max="2" step="0.05" value="1"><output for="Vl"></output></div>
+    <div class="ctl"><label>θ: hazard (relative to frontier) that the laggard's project can cause loss of control</label><input type="range" id="theta" min="0" max="3" step="0.01" value="0.25"><output for="theta"></output></div>
     <h2><label><input type="checkbox" id="verify"> Verification: a cheat can be caught</label></h2>
-    <p class="hint">A caught cheat is no longer a free win: the other side races to catch up.</p>
     <div class="ctl v"><label>ε: detection probability</label><input type="range" id="eps" min="0" max="1" step="0.01" value="0.9"><output for="eps"></output></div>
     <div class="ctl v"><label>α: false-alarm probability</label><input type="range" id="alpha" min="0" max="0.5" step="0.005" value="0.05"><output for="alpha"></output></div>
     <div class="ctl v"><label>head start a cheat gets before the other side can respond</label><input type="range" id="lead" min="0" max="0.5" step="0.01" value="0.1"><output for="lead"></output></div>
-    <div class="ctl v"><label>race noise: how little a lead decides the race</label><input type="range" id="rn" min="0" max="0.5" step="0.005" value="0.1"><output for="rn"></output></div>
+    <div class="ctl v"><label>rush noise: how little a head start decides who builds first</label><input type="range" id="rn" min="0" max="0.5" step="0.005" value="0.1"><output for="rn"></output></div>
     <div class="ctl v"><label>defection punishment</label><input type="range" id="punishment" min="0" max="1" step="0.01" value="0.01"><output for="punishment"></output></div>
+    <p class="hint"><button type="button" id="reset">Reset to the starting values</button></p>
   </div>
 </div>
 
@@ -79,6 +84,7 @@ td.nash{outline:2px solid var(--stag);outline-offset:-2px;font-weight:600}
     <span data-type="Stag Hunt"><i class="sw" style="background:color-mix(in srgb,var(--stag) 24%,var(--bg))"></i>Stag Hunt: cooperate if possible</span>
     <span data-type="Harmony"><i class="sw" style="background:color-mix(in srgb,var(--harmony) 24%,var(--bg))"></i>Harmony: unilateral pause</span>
     <span data-type="Deadlock"><i class="sw" style="background:color-mix(in srgb,var(--deadlock) 24%,var(--bg))"></i>Deadlock: nobody wants a pause</span>
+    <span data-type="certain"><i class="sw" style="background:var(--ink)"></i>loss of control certain: θ above 1/H</span>
     <span data-type="Chicken"><i class="sw" style="background:color-mix(in srgb,var(--chicken) 24%,var(--bg))"></i>Chicken: whoever commits first builds</span>
   </div>
   <canvas id="map" width="900" height="620"></canvas>
@@ -89,17 +95,26 @@ td.nash{outline:2px solid var(--stag);outline-offset:-2px;font-weight:600}
       <span><i class="ln" style="border-top-style:dashed"></i>needs nothing (Harmony line)</span>
     </div>
   </div>
+  <div class="panel" id="readout" style="margin-top:12px">
+    <h2>At these values</h2>
+    <dl class="kv num" id="figures"></dl>
+  </div>
 </div>
 </div>
 
 <div class="panel" style="margin-top:4px">
   <h2>Notes</h2>
-  <p class="note"><b>Reading the panel.</b> Payoffs are in wins (a safe win = 1, mutual Pause = 0). Outlined cells are the equilibria. The last line is the confidence a state needs that its rival is pausing before pausing is its own best move: 100% on the Stag line, 50% on the risk-dominance line, 0% at the Harmony line.</p>
-  <p class="note"><b>Model.</b> Two symmetric states choose Build or Pause, after Papenhausen's <a href="https://www.lesswrong.com/posts/hc4DbmhdzZpSLMQ9Y/the-ai-race-is-not-a-prisoner-s-dilemma">The AI Race is Not a Prisoner's Dilemma</a> (LessWrong, 2026), with the loser's-project hazard η from his appendix and the logistic race of Roussel et al., <a href="https://arxiv.org/abs/2605.01297">Are we Doomed to an AI Race? Why Self-Interest Could Drive Countries Towards a Moratorium on Superintelligence</a> (arXiv:2605.01297, 2026). Under verification a cheat is caught with probability ε, after which the other side takes the better of staying paused and racing from its head start behind; a known cheater pays the punishment, in wins. Race noise is Roussel's σ: a lead L wins with probability 1/(1 + e<sup>−L/σ</sup>); <span id="rnHint"></span> The game names are the standard game-theory ones (Prisoner's Dilemma, Stag Hunt, Harmony, Deadlock, Chicken), by which pairs of moves are equilibria; risk dominance follows Harsanyi &amp; Selten.</p>
+  <p class="note"><b>Reading the panel.</b> Payoffs are in safe first builds (a safe first build = 1, mutual Pause = 0). Outlined cells are the equilibria. The "confidence required" figure under the map is the confidence a state needs that its rival is pausing before pausing is its own best move: 100% on the Stag line, 50% on the risk-dominance line, 0% at the Harmony line.</p>
+  <p class="note"><b>V<sub>l</sub>, the rival building first.</b> How much a state would dislike a world in which its rival completed a superintelligence aligned to the rival's values, safely, before it did. 1 means it minds that exactly as much as it would value building its own first; 0 means indifference; −1 means it would welcome the rival's values as its own.</p>
+  <p class="note" id="betrayalNote"><b>The second 50-50 line under Verification.</b> The 50-50 line can appear twice. A caught cheat doesn't automatically build first: the other side hurries to build its own, and that threat is what pulls the Stag line left. But hurrying is only worth it while the catastrophe looks tolerable. Past a certain hazard the betrayed side would rather stay paused than add a second rushed project, so a caught cheater builds first unopposed, cheating pays more again, and the confidence a pause needs jumps back up. The second 50-50 line marks where that jump carries it past 50%. The lesson for a treaty: the sooner a cheat is caught, the smaller the head start, and the further right that switch sits.</p>
+  <p class="note" id="confidenceNote"><b>Impact of verification on confidence.</b> Verification does two jobs, and the "confidence required" figure under the map shows only one of them. First, because a cheat can be caught, the payoffs change and the confidence a pause <i>needs</i> falls (here from certainty to 44%). Second, inspections produce evidence about what the rival is actually doing, so the confidence a state <i>has</i> rises: a clean record is (1 − α)/(1 − ε) to one evidence that the rival is pausing, 9.5 to 1 at the starting sliders, which turns even odds into 90% and a 10% prior into 51%. When the second number clears the first, pausing is the clear move. The second job sits outside the one-move game drawn here: it needs inspections to be running and to keep coming back clean.</p>
+  <p class="note"><b>Frontier and laggard.</b> Whichever project is completed first is the frontier project; it escapes control with probability H. If the frontier project stays under control, the laggard's, completed second, escapes control with probability θ·H. So the overall loss-of-control hazard from both projects is H + (1 − H)·θ·H: 14.6% at the starting values (H 12%, θ 0.25). H is the quieter number, the hazard a project would carry if nobody were hurrying it; the 15% people quote as P(doom) is the two-project total under today's conditions, and this split of it into an unhurried hazard and a rushing penalty is ours. Any extra danger the stampede adds to either project shows up in θ. θ is named for Greek <i>thrasos</i>, reckless overboldness: the laggard is the project most tempted to cut corners to catch up. θ = 0 says the frontier project settles everything (the first system stops the second); then joining a stampede that is already underway adds no danger, only a chance of finishing first, and pausing on your own is never the best move. Harmony, the region where it is, exists only when θ &gt; 0. Anyone who thinks a stampede makes each project more dangerous than careful building is adding to θ: if a lone project carries hazard H and the two-project total is R, then θ = (R − H) / (H(1 − H)). θ above 1 says the laggard's project is the more dangerous one (the one cutting corners to catch up); θ cannot exceed 1/H, where loss of control becomes certain: the slider stops there for the chosen H, and the map paints black the hazards at which the chosen θ would already pass that point.</p>
+  <p class="note"><b>Model.</b> Two symmetric states choose Build or Pause, after Papenhausen's <a href="https://www.lesswrong.com/posts/hc4DbmhdzZpSLMQ9Y/the-ai-race-is-not-a-prisoner-s-dilemma">The AI Race is Not a Prisoner's Dilemma</a> (LessWrong, 2026), with the laggard's hazard θ from his appendix (his α) and the head-start model of Roussel et al., <a href="https://arxiv.org/abs/2605.01297">Are we Doomed to an AI Race? Why Self-Interest Could Drive Countries Towards a Moratorium on Superintelligence</a> (arXiv:2605.01297, 2026). Under verification a cheat is caught with probability ε, after which the other side takes the better of staying paused and hurrying to build its own from behind; a known cheater pays the punishment, in safe first builds. Rush noise is Roussel's σ: a head start L builds first with probability 1/(1 + e<sup>−L/σ</sup>); <span id="rnHint"></span> The game names are the standard game-theory ones (Prisoner's Dilemma, Stag Hunt, Harmony, Deadlock, Chicken), by which pairs of moves are equilibria; risk dominance follows Harsanyi &amp; Selten.</p>
   <!-- Page notes (not reader-facing): the cells come from analysis/race_game/race_model.py in the verification repo; the
        <script id="race-model"> block below is race_model.js verbatim and test_js_matches_python.py checks both. The full
        widget (slow-down world, V_l axis, two-sides map, presets) is docs/results/20261029_race_game_widget.html; this page
-       loads the "Blog: P(doom) 15%" values of 2026-10-30 (docs/results/20261030_blog_verification_figures.md). -->
+       loaded the "Blog: P(doom) 15%" values of 2026-10-30 (docs/results/20261030_blog_verification_figures.md) until 2026-11-01;
+       since then it starts at H 12%, theta 0.25, V_c 7.08 (overall 14.6%), just left of the Stag line (Prisoner's Dilemma; Stag Hunt at 44% with Verification); the figures doc and the full widget's blog preset still use H 15%, theta 0.15. -->
 </div>
 
 <script id="race-model">
@@ -111,7 +126,7 @@ td.nash{outline:2px solid var(--stag);outline-offset:-2px;font-weight:600}
   const B = "B", S = "S", P = "P", INF = Infinity;
 
   function Side(o) {
-    return Object.assign({ V_l: -1.0, V_c: -9.0, H: 0.10, H_S: 0.0, eta: 0.0 }, o || {});
+    return Object.assign({ V_l: -1.0, V_c: -9.0, H: 0.10, H_S: 0.0, theta: 0.0 }, o || {});
   }
   function Race(o) {
     return Object.assign({ race_noise: 0.1, lag_S: 0.15, resume_prob: 0.0, resume_discount: 1.0,
@@ -126,8 +141,8 @@ td.nash{outline:2px solid var(--stag);outline-offset:-2px;font-weight:600}
   }
 
   function race_payoff(p, me, h_me, h_rival) {
-    const doom_if_win = h_me + (1 - h_me) * me.eta * h_rival;
-    const doom_if_lose = h_rival + (1 - h_rival) * me.eta * h_me;
+    const doom_if_win = h_me + (1 - h_me) * me.theta * h_rival;
+    const doom_if_lose = h_rival + (1 - h_rival) * me.theta * h_me;
     const win = (1 - doom_if_win) * 1.0 + doom_if_win * me.V_c;
     const lose = (1 - doom_if_lose) * me.V_l + doom_if_lose * me.V_c;
     return p * win + (1 - p) * lose;
@@ -220,12 +235,14 @@ td.nash{outline:2px solid var(--stag);outline-offset:-2px;font-weight:600}
 (() => {
 const M = window.RaceModel;
 const $ = id => document.getElementById(id);
-const ids = ["H","Vc","Vl","eta","eps","alpha","lead","rn","punishment"];
+const ids = ["H","Vc","Vl","theta","eps","alpha","lead","rn","punishment"];
 const logIds = new Set(["Vc"]);
 const val = id => logIds.has(id) ? Math.pow(10, +$(id).value) : +$(id).value;
 const fmt = (id, v) => logIds.has(id) ? v.toFixed(2) : (id === "H" || id === "eps" || id === "alpha") ? (100*v).toFixed(1) + "%" : v.toFixed(2);
 
-function side(o){ return M.Side(Object.assign({ V_l: -val("Vl"), V_c: -val("Vc"), H: val("H"), eta: val("eta") }, o||{})); }
+// theta above 1/H would put the two-project hazard above 1, so it is capped there (loss of control becomes certain)
+function side(o){ const H = (o && o.H !== undefined) ? o.H : val("H");
+  return M.Side(Object.assign({ V_l: -val("Vl"), V_c: -val("Vc"), H, theta: Math.min(val("theta"), 1 / H) }, o||{})); }
 function race(){ return M.Race({ race_noise: val("rn"), verify: $("verify").checked, eps: val("eps"), alpha: val("alpha"), lead_detected: val("lead"), lead_open: val("lead"), punishment: val("punishment") }); }
 function cellsAt(H, Vc){ return M.symmetric("P", side({ H, V_c: -Vc }), race()); }
 
@@ -276,7 +293,9 @@ function drawMap(){
   mctx.fillStyle = c.bg; mctx.fillRect(0, 0, W, Hh);
   const nx = 220, ny = 150, pw = (W - PAD.l - PAD.r) / nx, ph = (Hh - PAD.t - PAD.b) / ny, present = new Set();
   for (let j = 0; j < ny; j++) { const Vc = Math.pow(10, 2 * (j + .5) / ny);
-    for (let i = 0; i < nx; i++) { const H = HMAX * (i + .5) / nx, t = M.game_type(cellsAt(H, Vc)), x0 = PAD.l + i * pw, y0 = Hh - PAD.b - (j + 1) * ph; present.add(t);
+    for (let i = 0; i < nx; i++) { const H = HMAX * (i + .5) / nx, x0 = PAD.l + i * pw, y0 = Hh - PAD.b - (j + 1) * ph;
+      if (val("theta") * H > 1) { present.add("certain"); mctx.fillStyle = hexa(c.ink, 0.85); mctx.fillRect(x0, y0, pw + .6, ph + .6); continue; }
+      const t = M.game_type(cellsAt(H, Vc)); present.add(t);
       mctx.fillStyle = hexa(c[t], 0.13); mctx.fillRect(x0, y0, pw + .6, ph + .6);
       if (t === "Prisoner's Dilemma") { mctx.strokeStyle = hexa(c[t], 0.6); mctx.lineWidth = 1; mctx.beginPath(); mctx.moveTo(x0, y0 + ph); mctx.lineTo(x0 + pw, y0); mctx.stroke(); } } }
   for (const el of document.querySelectorAll(".legend [data-type]")) el.style.display = present.has(el.dataset.type) ? "" : "none";
@@ -285,8 +304,8 @@ function drawMap(){
   for (let p = 0; p <= HMAX + 0.0001; p += 0.1) { const x = xOf(p); mctx.beginPath(); mctx.moveTo(x, PAD.t); mctx.lineTo(x, Hh - PAD.b); mctx.stroke();
     if (Math.round(p * 100) % Math.round(tick * 100) === 0) { mctx.textAlign = "center"; mctx.fillText(Math.round(p * 100) + "%", x, Hh - PAD.b + 16); } }
   for (const v of [1,2,3,5,10,20,30,50,100]) { const y = yOf(Math.log10(v)); mctx.beginPath(); mctx.moveTo(PAD.l, y); mctx.lineTo(W - PAD.r, y); mctx.stroke(); mctx.textAlign = "right"; mctx.fillText(v, PAD.l - 6, y + 4); }
-  mctx.textAlign = "center"; mctx.fillStyle = c.ink; mctx.fillText("H, hazard that Build causes catastrophe", (PAD.l + W - PAD.r) / 2, Hh - 8);
-  mctx.save(); mctx.translate(14, (PAD.t + Hh - PAD.b) / 2); mctx.rotate(-Math.PI / 2); subText(mctx, "V", "c", ", cost of catastrophe, in wins", 0, 0); mctx.restore();
+  mctx.textAlign = "center"; mctx.fillStyle = c.ink; mctx.fillText("H, loss-of-control hazard of an unhurried project", (PAD.l + W - PAD.r) / 2, Hh - 8);
+  mctx.save(); mctx.translate(14, (PAD.t + Hh - PAD.b) / 2); mctx.rotate(-Math.PI / 2); subText(mctx, "V", "c", ", cost of catastrophe, in safe first builds", 0, 0); mctx.restore();
   const fields = borderFields(360, 200);
   const draw = (f, dash, width, col) => { mctx.strokeStyle = col; mctx.lineWidth = width; mctx.setLineDash(dash); mctx.lineCap = "round"; mctx.beginPath();
     for (const [[h0, u0], [h1, u1]] of contour(fields, f)) { mctx.moveTo(xOf(h0), yOf(u0)); mctx.lineTo(xOf(h1), yOf(u1)); } mctx.stroke(); mctx.setLineDash([]); };
@@ -310,15 +329,49 @@ function drawPanel(){
   $("payoffs").innerHTML = `<table class="pay"><tr><th></th><th>rival Pauses</th><th>rival Builds</th></tr>
   <tr><th>I Pause</th><td class="${coopNash ? "nash" : ""}">${f(U[0])}</td><td>${f(U[2])}</td></tr>
   <tr><th>I Build</th><td>${f(U[1])}</td><td class="${buildNash ? "nash" : ""}">${f(U[3])}</td></tr></table>
-  <dl class="kv"><dt>game</dt><dd>${t}</dd><dt>confidence in the rival pausing that a pause needs</dt><dd>${belief}</dd></dl>`;
+  <dl class="kv"><dt>game</dt><dd>${t}</dd></dl>`;
 }
 
-function syncOutputs(){ for (const id of ids) document.querySelector(`output[for=${id}]`).value = fmt(id, val(id));
+// smallest H (to HMAX) at which pausing beats building even against a builder, at the current V_c
+function harmonyH(){
+  if (val("theta") === 0) return null;
+  for (let i = 1; i <= 800; i++) { const H = i / 1000; if (M.game_type(cellsAt(H, val("Vc"))) === "Harmony") return H; }
+  return null;
+}
+function drawFigures(){
+  const U = cellsAt(val("H"), val("Vc")), q = M.q_star(U), H0 = val("H"), th = Math.min(val("theta"), 1 / H0);
+  const conf = (q >= 0 && q <= 1) ? `${Math.round(100 * q)}%` : U[0] >= U[1] ? "0%" : "none";
+  const confText = (q >= 0 && q <= 1) ? "confidence required in the rival's pause, in order to pause as well" : U[0] >= U[1] ? "confidence required: pausing is the best move whatever the rival does" : "confidence can't help: building is the best move whatever the rival does";
+  const hH = harmonyH();
+  const rows = [
+    [`${(100 * (H0 + (1 - H0) * th * H0)).toFixed(1)}%`, "overall loss-of-control hazard from both projects" + (+$("theta").max < 3 - 1e-9 ? ` (θ cannot exceed 1/H = ${(+$("theta").max).toFixed(2)} here: above it loss of control would be certain)` : "")],
+    [hH === null ? (th === 0 ? "never" : `>${Math.round(100 * HMAX)}%`) : `${(100 * hH).toFixed(1)}%`,
+     th === 0 ? "H required to pause unilaterally: with θ = 0 the frontier project settles everything, so never" : `H required (at this θ and V<sub>c</sub>) to pause unilaterally`],
+    [$("verify").checked ? `${Math.round(100 * M.p_win(val("lead"), val("rn")))}%` : "—",
+     $("verify").checked ? "probability that a caught cheater still completes its Build first, once the other side hurries to build its own" : "without Verification a cheat is never caught, so a lone builder builds first unopposed"]];
+  // a clean inspection record, read as evidence: no alarm has probability 1 - alpha if the rival pauses and
+  // 1 - eps if it is building covertly; from an even prior the posterior that it pauses is (1 - a) / ((1 - a) + (1 - e))
+  // the confidence a pause needs, then (with Verification) the confidence a clean record gives; both
+  // coloured green when the second clears the first, red when it does not
+  if ($("verify").checked) { const e = val("eps"), a = val("alpha"), post = (1 - a) / ((1 - a) + (1 - e));
+    const cls = (q < 0 || (q <= 1 && post >= q)) ? "ok" : "short";
+    rows.push([conf, confText, cls], [`${Math.round(100 * post)}%`, "confidence a clean inspection record gives that the rival is pausing, starting from even odds (see the Notes)", cls]); }
+  else rows.push([conf, confText]);
+  $("figures").innerHTML = rows.map(([n, t, c]) => `<dt class="${c || ""}">${n}</dt><dd>${t}</dd>`).join("");
+}
+const START = { H: 0.12, Vc: 0.8500, Vl: 1, theta: 0.25, eps: 0.9, alpha: 0.05, lead: 0.1, rn: 0.1, punishment: 0.01 };
+// theta cannot exceed 1/H at the chosen point (the two-project hazard would pass 1), so the slider's
+// maximum follows H: the thumb stops there, and rolls back if H is raised past 1/theta
+function clampTheta(){ const t = $("theta"), cap = Math.min(3, 1 / val("H")); t.max = cap.toFixed(3); if (+t.value > cap) t.value = cap.toFixed(3); }
+function syncOutputs(){ clampTheta(); for (const id of ids) document.querySelector(`output[for=${id}]`).value = fmt(id, val(id));
   for (const el of document.querySelectorAll(".ctl.v")) el.classList.toggle("off", !$("verify").checked);
-  $("rnHint").textContent = `at the current sliders a cheater ${val("lead").toFixed(2)} ahead wins the race ${Math.round(100 * M.p_win(val("lead"), val("rn")))}% of the time.`; }
-function redraw(){ syncOutputs(); drawPanel(); drawMap(); }
+  const pFirst = Math.round(100 * M.p_win(val("lead"), val("rn")));
+  $("rnHint").textContent = `at the current sliders a cheater ${val("lead").toFixed(2)} ahead finishes first ${pFirst}% of the time.`;
+  for (const id of ["betrayalNote", "confidenceNote"]) $(id).style.display = $("verify").checked ? "" : "none"; }
+function redraw(){ syncOutputs(); drawPanel(); drawFigures(); drawMap(); }
 for (const id of ids) $(id).addEventListener("input", redraw);
 $("verify").addEventListener("change", redraw);
+$("reset").addEventListener("click", () => { for (const id in START) $(id).value = START[id]; $("verify").checked = false; redraw(); });
 map.addEventListener("click", e => { const rect = map.getBoundingClientRect(); const x = (e.clientX - rect.left) * map.width / rect.width, y = (e.clientY - rect.top) * map.height / rect.height;
   $("H").value = Math.min(HMAX, Math.max(0.005, HofX(x))).toFixed(3); $("Vc").value = Math.min(2, Math.max(0, UofY(y))).toFixed(3); redraw(); });
 let resizeTimer = null; window.addEventListener("resize", () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(drawMap, 150); });
