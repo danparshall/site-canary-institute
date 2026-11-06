@@ -27,8 +27,8 @@ const dataUrl = `${base}data/verification-community.json`;
         <header class="topbar">
           <h2 class="topbar-title">Verification Community &mdash; Member Bonds</h2>
           <p class="subtitle">
-            Every node is a member of the verification community under the
-            <em>loose_2026</em> rule; every edge is co-authorship on a
+            Every node is a member of the verification community (at least one
+            verification-relevant work in 2026, or three across 2023&ndash;25); every edge is co-authorship on a
             verification-relevant work found by an OpenAlex sweep &mdash;
             not the hand-curated corpus of 46 papers. Edge thickness is the
             number of shared works. Node colour is the Leiden community of
@@ -49,7 +49,7 @@ const dataUrl = `${base}data/verification-community.json`;
               <ul id="isolates-list"></ul>
             </details>
             <p class="rail-note">
-              Membership rule (<em>loose_2026</em>): &ge;1 verification-relevant work in 2026,
+              Membership rule: &ge;1 verification-relevant work in 2026,
               OR &ge;3 in 2023&ndash;25, applied to each person's OpenAlex record.
               The isolated members pass that rule on their own publication record
               but never share a verification-relevant work with another member,
@@ -113,7 +113,7 @@ const dataUrl = `${base}data/verification-community.json`;
 
       <h2>Methodology</h2>
       <p>
-        Membership follows the <em>loose_2026</em> rule: a person is included
+        A person is included
         if they have at least one verification-relevant work in 2026, or at
         least three across 2023&ndash;2025. Author records come from an
         OpenAlex sweep, cross-referenced with a hand-curated corpus of 46
