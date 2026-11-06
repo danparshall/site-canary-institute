@@ -8,15 +8,15 @@ const links = [
   { href: `${base}research/`, label: 'Research' },
   { href: `${base}policy/`, label: 'Policy' },
   { href: `${base}blog/`, label: 'Blog' },
+  { href: `${base}blog/most-important-problem/`, label: 'Verification' },
 ];
 
+// The Verification tab is a blog post, so on that page only it lights up, not Blog too.
 function isActive(href: string, current: string): boolean {
   if (href === base) return current === base || current === `${base}/`;
-  return current.startsWith(href);
+  const longer = links.some((l) => l.href !== href && l.href.startsWith(href) && current.startsWith(l.href));
+  return current.startsWith(href) && !longer;
 }
-
-const featureHref = `${base}blog/most-important-problem/`;
-const featureActive = currentPath.startsWith(featureHref);
 ---
 
 <header>
@@ -34,13 +34,6 @@ const featureActive = currentPath.startsWith(featureHref);
           {label}
         </a>
       ))}
-      <a
-        href={featureHref}
-        class:list={['feature', { active: featureActive }]}
-        aria-current={featureActive ? 'page' : undefined}
-      >
-        Compute Verification
-      </a>
     </nav>
   </div>
 </header>
@@ -86,26 +79,6 @@ const featureActive = currentPath.startsWith(featureHref);
   nav a:hover,
   nav a.active {
     color: var(--color-dark);
-  }
-
-  nav {
-    align-items: center;
-  }
-
-  /* Standalone button, not an in-text link, so no underline. */
-  nav a.feature {
-    color: var(--color-white);
-    background: var(--color-accent);
-    border: 1px solid var(--color-accent);
-    border-radius: 2px;
-    padding: 0.4rem 0.8rem;
-    text-decoration: none;
-  }
-
-  nav a.feature:hover,
-  nav a.feature.active {
-    color: var(--color-accent);
-    background: var(--color-white);
   }
 
   @media (max-width: 600px) {
