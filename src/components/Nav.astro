@@ -1,15 +1,10 @@
 ---
+import { navLinks } from '../nav-links.mjs';
+
 const currentPath = Astro.url.pathname;
 const base = import.meta.env.BASE_URL;
 
-const links = [
-  { href: `${base}`, label: 'Home' },
-  { href: `${base}about/`, label: 'About' },
-  { href: `${base}research/`, label: 'Research' },
-  { href: `${base}policy/`, label: 'Policy' },
-  { href: `${base}blog/`, label: 'Blog' },
-  { href: `${base}blog/most-important-problem/`, label: 'Verification' },
-];
+const links = navLinks.map(({ path, label }) => ({ href: `${base}${path}`, label }));
 
 // The Verification tab is a blog post, so on that page only it lights up, not Blog too.
 function isActive(href: string, current: string): boolean {
