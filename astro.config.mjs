@@ -6,4 +6,7 @@ import staticSiteHeader from './src/static-site-header.mjs';
 export default defineConfig({
   site: 'https://canaryinstitute.ai',
   integrations: [staticSiteHeader()],
+  redirects: {
+    '/verification': '/blog/most-important-problem/',
+  },
 });
