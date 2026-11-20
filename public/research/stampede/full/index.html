@@ -1,0 +1,598 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Race game map</title>
+<style>
+:root{--bg:#fcfcfb;--ink:#0b0b0b;--ink2:#52514e;--ink3:#8a8984;--grid:#e1e0d9;--axis:#c3c2b7;--panel:#f3f2ee;--ring:rgba(11,11,11,.10);
+  --stag:#2a78d6;--harmony:#1baf7a;--pd:#c81e2e;--deadlock:#eda100;--chicken:#eb6834;--accent:#2a78d6;--noise:#6f42c1;}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#1a1a19;--ink:#f0efec;--ink2:#c3c2b7;--ink3:#8a8984;--grid:#2c2c2a;--axis:#383835;--panel:#232321;--ring:rgba(255,255,255,.10);
+  --stag:#3987e5;--harmony:#199e70;--pd:#e5484d;--deadlock:#c98500;--chicken:#d95926;--accent:#3987e5;--noise:#a98be6;}}
+:root[data-theme="dark"]{--bg:#1a1a19;--ink:#f0efec;--ink2:#c3c2b7;--ink3:#8a8984;--grid:#2c2c2a;--axis:#383835;--panel:#232321;--ring:rgba(255,255,255,.10);
+  --stag:#3987e5;--harmony:#199e70;--pd:#e5484d;--deadlock:#c98500;--chicken:#d95926;--accent:#3987e5;--noise:#a98be6;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 -apple-system,"Segoe UI",Helvetica,Arial,sans-serif;padding:16px}
+h1{font-size:20px;margin:0 0 4px;font-weight:600}
+.sub{color:var(--ink2);margin:0 0 14px;max-width:70em}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0}
+button,.seg label{border:1px solid var(--ring);background:var(--panel);color:var(--ink);border-radius:6px;padding:6px 10px;font:inherit;font-size:14px;cursor:pointer}
+button:hover{border-color:var(--ink3)}
+.seg{display:inline-flex;border-radius:6px;overflow:hidden;border:1px solid var(--ring)}
+.seg label{border:0;border-radius:0;padding:6px 12px}
+.seg input{display:none}
+.seg input:checked+span{color:var(--bg);}
+.seg label:has(input:checked){background:var(--ink)}
+.layout{display:grid;grid-template-columns:minmax(260px,330px) minmax(0,1fr);gap:18px;align-items:start}
+@media (max-width:820px){.layout{grid-template-columns:1fr}}
+.panel{background:var(--panel);border-radius:10px;padding:12px 14px}
+.panel h2{font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink2);margin:10px 0 6px;font-weight:600}
+.panel h2:first-child{margin-top:0}
+.ctl{display:grid;grid-template-columns:minmax(8em,10.5em) minmax(60px,1fr) 4.2em;gap:8px;align-items:center;margin:4px 0;font-size:14px}
+.ctl label{color:var(--ink2);line-height:1.2}
+.ctl output{text-align:right;font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;min-width:60px;margin:0;accent-color:var(--accent)}
+.ctl.off{opacity:.45}
+.panel h2 label{display:inline-flex;align-items:center;gap:8px;cursor:pointer;text-transform:none;letter-spacing:0;font-size:14px;color:var(--ink)}
+.panel h2 input[type=checkbox]{margin:0;accent-color:var(--accent);width:15px;height:15px}
+.hint{color:var(--ink3);font-size:12.5px;margin:-2px 0 6px}
+.hint.off{opacity:.45}
+canvas.strip{border:0;border-radius:0;background:transparent;margin-top:6px}
+@media (max-width:520px){.presets button{flex:1 1 44%}.presets span{flex:1 1 100%}}
+canvas{display:block;width:100%;height:auto;background:var(--bg);border-radius:8px;border:1px solid var(--ring)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--ink2);margin:8px 0 0}
+.legend.groups{gap:8px 32px;align-items:flex-start}
+.lg{display:flex;flex-direction:column;gap:4px}
+.lg b{font-weight:600;color:var(--ink2);margin-bottom:2px}
+.lg.hidden{display:none}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:14px;height:14px;border-radius:3px;display:inline-block;border:1px solid var(--ring)}
+.ln{width:26px;height:0;border-top:2px solid var(--ink);display:inline-block}
+table.pay{border-collapse:collapse;margin:6px 0;font-variant-numeric:tabular-nums;font-size:14px}
+table.pay td,table.pay th{border:1px solid var(--grid);padding:5px 10px;text-align:center}
+table.pay th{color:var(--ink2);font-weight:500}
+td.nash{outline:2px solid var(--stag);outline-offset:-2px;font-weight:600}
+.kv{display:grid;grid-template-columns:minmax(10em,1fr) minmax(7em,auto);gap:2px 12px;font-size:14px;margin:6px 0}
+.kv dt{color:var(--ink2)}.kv dd{margin:0;font-variant-numeric:tabular-nums;max-width:16em}
+.note{color:var(--ink2);font-size:13px;margin:8px 0 0}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:18px;margin-top:18px}
+@media (max-width:820px){.two{grid-template-columns:1fr}}
+.warn{color:var(--pd);font-weight:600}
+</style>
+</head>
+<body>
+<h1>Build / Slowed / Pause: the race game map</h1>
+<p class="sub">x is the hazard of a Build, H; y is the cost of catastrophe V<sub>c</sub> in safe wins (V<sub>w</sub> = 1; V<sub>c</sub> and V<sub>l</sub> are shown as positive costs). Regions are the game type of the 2×2 game between Build and the treaty's cooperative action; lines are where mutual cooperation becomes an equilibrium (Stag), where cooperating beats building against a builder (Harmony), where cooperation is risk-dominant (q* = ½), and the finite-noise cutoffs of the global game. Click the map to move the point.</p>
+
+<div class="row presets">
+  <span class="seg" id="yaxis" title="what the map's y axis is; the other value comes from its slider">
+    <label><input type="radio" name="yaxis" value="Vc" checked><span>y: V<sub>c</sub></span></label>
+    <label><input type="radio" name="yaxis" value="Vl"><span>y: V<sub>l</sub></span></label>
+  </span>
+  <span style="color:var(--ink2);font-size:14px">Presets:</span>
+  <button data-preset="papMain">Papenhausen main</button>
+  <button data-preset="papApp">Papenhausen appendix (θ = ½)</button>
+  <button data-preset="roussel">Roussel et al. (slow-down)</button>
+  <button data-preset="verif">Stop with verification</button>
+  <button data-preset="blog" title="P(doom) 15% for each side, the win worth a fifth of the catastrophe; verification with no punishment beyond the contest">Blog: P(doom) 15%</button>
+</div>
+
+<div class="layout">
+<div class="panel" id="controls">
+  <h2>Point</h2>
+  <div class="ctl"><label>H: frontier's loss-of-control hazard upon completion</label><input type="range" id="H" min="0.005" max="0.8" step="0.005" value="0.11"><output for="H"></output></div>
+  <div class="ctl"><label>V<sub>c</sub>: cost of catastrophe</label><input type="range" id="Vc" min="0" max="2" step="0.005" value="0.9542"><output for="Vc"></output></div>
+  <h2>Values and the laggard</h2>
+  <div class="ctl"><label>V<sub>l</sub>: cost of a safe loss</label><input type="range" id="Vl" min="-1" max="2" step="0.05" value="1"><output for="Vl"></output></div>
+  <div class="ctl"><label>θ: hazard (relative to frontier) that the laggard's project also causes loss of control</label><input type="range" id="theta" min="0" max="1" step="0.01" value="0"><output for="theta"></output></div>
+  <h2>The race</h2>
+  <div class="ctl" id="rnRow"><label>race noise (Roussel's σ)</label><input type="range" id="rn" min="0" max="0.5" step="0.005" value="0.1"><output for="rn"></output></div>
+  <p class="hint" id="rnHint">Acts only through a lead: Slowed's lag, a cheater's lead under verification, A's lead in the two-sides panel. In the stop world without verification the map ignores it.</p>
+  <div class="ctl" id="resumeRow"><label>share of the resumed (S,S) race a Pause keeps</label><input type="range" id="resume" min="0" max="1" step="0.01" value="0"><output for="resume"></output></div>
+  <h2><label><input type="checkbox" id="slow"> Slow-down: Build vs Slowed</label></h2>
+  <p class="hint">Unchecked: Stop, Build vs Pause. A Slowed project still matters to a Pause that resumes as (S,S).</p>
+  <div class="ctl s"><label>H<sub>S</sub>: hazard of Slowed</label><input type="range" id="HS" min="0" max="0.5" step="0.005" value="0"><output for="HS"></output></div>
+  <div class="ctl s"><label>lag: how far Slowed trails Build</label><input type="range" id="lagS" min="0" max="0.5" step="0.005" value="0.15"><output for="lagS"></output></div>
+  <h2><label><input type="checkbox" id="verify"> Verification: a cheat can be caught</label></h2>
+  <div class="ctl v"><label>ε: detection probability</label><input type="range" id="eps" min="0" max="1" step="0.01" value="0.8"><output for="eps"></output></div>
+  <div class="ctl v"><label>α: false-alarm probability</label><input type="range" id="alpha" min="0" max="0.5" step="0.005" value="0"><output for="alpha"></output></div>
+  <div class="ctl v"><label>cheater's lead when caught</label><input type="range" id="ldet" min="0" max="0.5" step="0.01" value="0.04"><output for="ldet"></output></div>
+  <div class="ctl v"><label>lead on open breakout</label><input type="range" id="lopen" min="0" max="0.5" step="0.01" value="0.1"><output for="lopen"></output></div>
+  <div class="ctl v"><label>defection punishment</label><input type="range" id="punishment" min="0" max="1" step="0.01" value="0"><output for="punishment"></output></div>
+  <h2><label><input type="checkbox" id="noise"> Uncertainty: private estimates of H</label></h2>
+  <p class="hint" id="noiseHint">Draws the finite-noise cutoffs (slow).</p>
+  <div class="ctl n"><label>σ: noise in each side's estimate of H</label><input type="range" id="sigma" min="0.005" max="0.2" step="0.005" value="0.02"><output for="sigma"></output></div>
+</div>
+
+<div>
+  <div class="legend" style="margin:0 0 8px">
+    <span><i class="sw" style="background:repeating-linear-gradient(135deg,color-mix(in srgb,var(--pd) 60%,transparent) 0 1px,transparent 1px 4px),color-mix(in srgb,var(--pd) 24%,var(--bg))"></i>Prisoner's Dilemma (hatched)</span>
+    <span><i class="sw" style="background:color-mix(in srgb,var(--stag) 24%,var(--bg))"></i>Stag Hunt</span>
+    <span><i class="sw" style="background:color-mix(in srgb,var(--harmony) 24%,var(--bg))"></i>Harmony</span>
+    <span><i class="sw" style="background:color-mix(in srgb,var(--deadlock) 24%,var(--bg))"></i>Deadlock (e/acc)</span>
+    <span><i class="sw" style="background:color-mix(in srgb,var(--chicken) 24%,var(--bg))"></i>Chicken</span>
+  </div>
+  <canvas id="map" width="900" height="620"></canvas>
+  <div class="legend groups">
+    <div class="lg"><b>q* borders (belief in rival cooperating)</b>
+      <span><i class="ln"></i>q* = 1: Stag line, needs certainty</span>
+      <span><i class="ln" style="border-top:1.5px solid var(--ink3)"></i>q* = ½: risk-dominance line, needs 50-50</span>
+      <span><i class="ln" style="border-top-style:dashed"></i>q* = 0: Harmony line, needs nothing</span>
+    </div>
+    <div class="lg" id="verifLegend"><b>race when betrayal discovered (verification on)</b>
+      <span><i class="ln" style="border-top:1.5px dotted var(--ink2)"></i>after a covert catch, with the cheater's lead when caught</span>
+      <span><i class="ln" style="border-top:1.5px dotted var(--ink3)"></i>after an open breakout, with the lead on open breakout</span>
+      <span style="color:var(--ink3)">left of the line the victim races back; right of it, it keeps its action</span>
+    </div>
+    <div class="lg" id="noiseLegend"><b>survival lines (finite noise σ in each side's estimate)</b>
+      <span><i class="ln" style="border-top:2px solid var(--noise)"></i>starting from all-cooperate: lowest cutoff that survives</span>
+      <span><i class="ln" style="border-top:2px dashed var(--noise)"></i>starting from all-Build: where Build gives way, if ever</span>
+    </div>
+  </div>
+  <div class="two">
+    <div class="panel" id="payoffs"></div>
+    <div class="panel" id="lines"></div>
+  </div>
+</div>
+</div>
+
+<div class="panel" id="two-sides" style="margin-top:18px">
+  <h2>Two sides with their own estimates</h2>
+  <p class="note" style="margin:0 0 8px">Axes are each side's own hazard estimate. Shading: mutual cooperation is selected where q<sub>A</sub>* + q<sub>B</sub>* &lt; 1 (darker = more margin). Both sides share the sliders above except the four here. Hatched: a side with no region where cooperating is dominant, so selection is not guaranteed there.</p>
+  <div class="layout">
+    <div>
+      <div class="ctl"><label>A's lead (p<sub>w,A</sub>(0) shown)</label><input type="range" id="leadA" min="-0.3" max="0.3" step="0.005" value="0"><output for="leadA"></output></div>
+      <div class="ctl"><label>V<sub>c</sub> for A</label><input type="range" id="VcA" min="0" max="2" step="0.005" value="0.9542"><output for="VcA"></output></div>
+      <div class="ctl"><label>V<sub>c</sub> for B</label><input type="range" id="VcB" min="0" max="2" step="0.005" value="0.9542"><output for="VcB"></output></div>
+      <div class="ctl"><label>V<sub>l</sub> for A</label><input type="range" id="VlA" min="-1" max="2" step="0.05" value="1"><output for="VlA"></output></div>
+      <div class="ctl"><label>V<sub>l</sub> for B</label><input type="range" id="VlB" min="-1" max="2" step="0.05" value="1"><output for="VlB"></output></div>
+      <div id="asymNote" class="note"></div>
+    </div>
+    <canvas id="asym" width="620" height="620"></canvas>
+  </div>
+</div>
+
+<p class="note">Model: <code>analysis/race_game/race_model.py</code> (checked in <code>check_derivations.py</code>; the JS below is tested against it on a grid). Papenhausen's main widget is the stop world with θ = 0, |V<sub>l</sub>| = 1, no verification; his appendix adds θ (his α; θ here for Greek <i>thrasos</i>, reckless building): the frontier project, completed first, escapes control with probability H; if it stays under control, the laggard's does with probability θ·H. Roussel et al. 2026 is the slow-down world with their "pause" as Slowed, hazard 1 − s = 0.15 and lag 0.15; the y axis is then their C. RAND (Abraham, Kavner &amp; Moon 2025) is not a preset: their shared cost c is paid in full whenever anyone accelerates, while here a lone builder's catastrophe cost scales with its win probability, so one cell differs. In the stop world the resumption slider sets U<sub>PP</sub> as a share of the resumed (S,S) race. Under verification a side that discovers a cheat (caught covertly, or an open breakout) chooses the better of keeping its action and racing from behind; a known defector, caught covertly or breaking out openly, pays the defection punishment, in safe wins (whether it would really be applied is folded into ε for now). The deterrence line in the payoff panel is the smallest punishment at which mutual cooperation becomes an equilibrium at the chosen point. Finite-noise cutoffs use uniform noise, a flat prior and a 0.25% grid in H.</p>
+
+<script id="race-model">
+// Port of race_model.py. Same functions, same argument order; the Python file is the source of
+// truth and test_js_matches_python.py checks the two on a grid. Loaded by the widget
+// (docs/results/20261029_race_game_widget.html) and by node for that test.
+(function (root) {
+  "use strict";
+  const B = "B", S = "S", P = "P", INF = Infinity;
+
+  function Side(o) {
+    return Object.assign({ V_l: -1.0, V_c: -9.0, H: 0.10, H_S: 0.0, theta: 0.0 }, o || {});
+  }
+  function Race(o) {
+    return Object.assign({ race_noise: 0.1, lag_S: 0.15, resume_prob: 0.0, resume_discount: 1.0,
+      verify: false, eps: 0.0, alpha: 0.0, lead_detected: 0.0, lead_open: 0.0, punishment: 0.0 }, o || {});
+  }
+
+  function p_win(lead, race_noise) {
+    if (lead === INF) return 1.0;
+    if (lead === -INF) return 0.0;
+    if (race_noise === 0) return lead > 0 ? 1.0 : lead < 0 ? 0.0 : 0.5;
+    return 1.0 / (1.0 + Math.exp(-lead / race_noise));
+  }
+
+  function race_payoff(p, me, h_me, h_rival) {
+    const doom_if_win = h_me + (1 - h_me) * me.theta * h_rival;
+    const doom_if_lose = h_rival + (1 - h_rival) * me.theta * h_me;
+    const win = (1 - doom_if_win) * 1.0 + doom_if_win * me.V_c;
+    const lose = (1 - doom_if_lose) * me.V_l + doom_if_lose * me.V_c;
+    return p * win + (1 - p) * lose;
+  }
+
+  function hazard(action, side) { return { B: side.H, S: side.H_S, P: 0.0 }[action]; }
+  function speed(action, race) { return { B: 0.0, S: -race.lag_S, P: -INF }[action]; }
+
+  function contest(a_me, a_rival, me, rival, race, lead_me) {
+    const lead = lead_me + speed(a_me, race) - speed(a_rival, race);
+    return race_payoff(p_win(lead, race.race_noise), me, hazard(a_me, me), hazard(a_rival, rival));
+  }
+  function resumed_BB(me, rival, race, lead_me) {
+    return race_payoff(p_win(lead_me, race.race_noise), me, me.H, rival.H);
+  }
+
+  // payoffs [to the deviator, to the victim] when dev plays a_dev (B or S) against a_coop (P or S)
+  // under verification: the victim chooses the better of keeping its action and racing from
+  // behind; a known defector (caught or open) pays the punishment; the deviator takes max(covert, open)
+  function deviation(a_dev, a_coop, dev, vic, race, lead_dev) {
+    let dev_un, vic_un;
+    if (a_coop === P) { dev_un = race_payoff(1.0, dev, hazard(a_dev, dev), 0.0); vic_un = race_payoff(0.0, vic, 0.0, hazard(a_dev, dev)); }
+    else { dev_un = contest(a_dev, a_coop, dev, vic, race, lead_dev); vic_un = contest(a_coop, a_dev, vic, dev, race, -lead_dev); }
+    const answered = lead => { const vic_race = resumed_BB(vic, dev, race, -lead);
+      if (vic_race > vic_un) return [resumed_BB(dev, vic, race, lead), vic_race]; return [dev_un, vic_un]; };
+    const [dev_c, vic_c] = answered(lead_dev + race.lead_detected);
+    const covert = [(1 - race.eps) * dev_un + race.eps * (dev_c - race.punishment), (1 - race.eps) * vic_un + race.eps * vic_c];
+    const o = answered(lead_dev + race.lead_open);
+    const open_ = [o[0] - race.punishment, o[1]];
+    return covert[0] >= open_[0] ? covert : open_;
+  }
+
+  function cell(a_me, a_rival, me, rival, race, lead_me) {
+    if (a_me === P && a_rival === P) {
+      const resumed_SS = contest(S, S, me, rival, race, lead_me);
+      const pause_value = race.resume_prob * race.resume_discount * resumed_SS;
+      if (race.verify) return race.alpha * resumed_BB(me, rival, race, lead_me) + (1 - race.alpha) * pause_value;
+      return pause_value;
+    }
+    const cheat = (a_rival === P) || (a_me === B && a_rival === S);
+    const cheated = (a_me === P) || (a_me === S && a_rival === B);
+    if (race.verify && cheat) return deviation(a_me, a_rival, me, rival, race, lead_me)[0];
+    if (race.verify && cheated) return deviation(a_rival, a_me, rival, me, race, -lead_me)[1];
+    if (a_rival === P) return race_payoff(1.0, me, hazard(a_me, me), 0.0);
+    if (a_me === P) return race_payoff(0.0, me, 0.0, hazard(a_rival, rival));
+    return contest(a_me, a_rival, me, rival, race, lead_me);
+  }
+
+  // smallest punishment at which mutual cooperation is an equilibrium for me; null if none up to cap
+  function punishment_to_deter(coop, me, rival, race, lead_me, cap) {
+    cap = cap === undefined ? 200.0 : cap;
+    const gap = sv => { const r = Object.assign({}, race, { verify: true, punishment: sv });
+      return cell(coop, coop, me, rival, r, lead_me) - cell(B, coop, me, rival, r, lead_me); };
+    if (gap(0.0) >= 0) return 0.0;
+    if (gap(cap) < 0) return null;
+    let lo = 0.0, hi = cap;
+    for (let i = 0; i < 60; i++) { const mid = (lo + hi) / 2; if (gap(mid) >= 0) hi = mid; else lo = mid; }
+    return hi;
+  }
+
+  // [U_CC, U_BC, U_CB, U_BB], own action first
+  function two_by_two(coop, me, rival, race, lead_me) {
+    return [cell(coop, coop, me, rival, race, lead_me), cell(B, coop, me, rival, race, lead_me),
+            cell(coop, B, me, rival, race, lead_me), cell(B, B, me, rival, race, lead_me)];
+  }
+  function q_star(U) {
+    const u = U[0] - U[1], v = U[3] - U[2];
+    if (u + v === 0) return NaN;
+    return v / (u + v);
+  }
+  function game_type(U) {
+    const coop_nash = U[0] >= U[1], build_nash = U[3] >= U[2];
+    if (coop_nash && build_nash) return "Stag Hunt";
+    if (coop_nash && !build_nash) return "Harmony";
+    if (build_nash && !coop_nash) return U[0] > U[3] ? "Prisoner's Dilemma" : "Deadlock";
+    return "Chicken";
+  }
+  function symmetric(coop, side, race) { return two_by_two(coop, side, side, race, 0.0); }
+
+  function roussel(C, W, s, sigma) {
+    W = W === undefined ? 1.0 : W; s = s === undefined ? 0.85 : s; sigma = sigma === undefined ? 0.1 : sigma;
+    return [Side({ V_l: 1 - W, V_c: -C, H: 1 - s, H_S: 0.0 }), Race({ race_noise: sigma, lag_S: 1 - s })];
+  }
+
+  const api = { B, S, P, INF, Side, Race, p_win, race_payoff, cell, two_by_two, q_star, game_type, symmetric, punishment_to_deter, roussel };
+  if (typeof module !== "undefined" && module.exports) module.exports = api; else root.RaceModel = api;
+})(typeof globalThis !== "undefined" ? globalThis : this);
+</script>
+<script>
+(() => {
+const M = window.RaceModel;
+const $ = id => document.getElementById(id);
+const ids = ["H","Vc","Vl","theta","HS","lagS","rn","resume","eps","alpha","ldet","lopen","punishment","sigma","leadA","VcA","VcB","VlA","VlB"];
+const logIds = new Set(["Vc","VcA","VcB"]);
+const val = id => logIds.has(id) ? Math.pow(10, +$(id).value) : +$(id).value;
+const fmt = (id, v) => logIds.has(id) ? v.toFixed(2) : id === "H" || id === "HS" || id === "eps" || id === "alpha" ? (100*v).toFixed(1) + "%" : id === "leadA" ? M.p_win(v, val("rn")).toFixed(2) : v.toFixed(2);
+
+function world(){ return $("slow").checked ? "S" : "P"; }
+function side(overrides){ return M.Side(Object.assign({ V_l: -val("Vl"), V_c: -val("Vc"), H: val("H"), H_S: val("HS"), theta: val("theta") }, overrides||{})); }
+function race(){ return M.Race({ race_noise: val("rn"), lag_S: val("lagS"), resume_prob: val("resume"), resume_discount: 1.0,
+  verify: $("verify").checked, eps: val("eps"), alpha: val("alpha"), lead_detected: val("ldet"), lead_open: val("lopen"), punishment: val("punishment") }); }
+
+const colors = () => { const cs = getComputedStyle(document.documentElement); const g = n => cs.getPropertyValue(n).trim();
+  return { "Prisoner's Dilemma": g("--pd"), "Deadlock": g("--deadlock"), "Stag Hunt": g("--stag"), "Harmony": g("--harmony"), "Chicken": g("--chicken"),
+    ink: g("--ink"), ink2: g("--ink2"), ink3: g("--ink3"), noise: g("--noise"), grid: g("--grid"), axis: g("--axis"), bg: g("--bg") }; };
+function hexa(hex, a){ const n = parseInt(hex.slice(1),16); return `rgba(${n>>16&255},${n>>8&255},${n&255},${a})`; }
+
+// ---------------------------------------------------------------- map
+const map = $("map"), mctx = map.getContext("2d");
+const PAD = { l: 58, r: 16, t: 14, b: 44 };
+// draw each canvas at its on-screen width (capped), so text keeps its size on a narrow screen
+function fitCanvas(cv, maxW, aspect){ const w = Math.max(320, Math.min(maxW, Math.round(cv.getBoundingClientRect().width || maxW)));
+  const h = Math.round(w * aspect); if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; } }
+const HMAX = 0.8;   // beyond this the map is only Stag Hunt or Harmony for any V_c >= 1
+const xOf = H => PAD.l + (H / HMAX) * (map.width - PAD.l - PAD.r);
+// the y axis is V_c (log, u = log10 V_c in [0, 2]) or V_l (linear, u = the cost in [-1, 2]); the
+// other value is read from its slider. u is the map's y coordinate everywhere below.
+function yAxis(){ return document.querySelector('input[name=yaxis]:checked').value; }
+function uRange(){ return yAxis() === "Vc" ? [0, 2] : [-1, 2]; }
+function uAt(j, n){ const [lo, hi] = uRange(); return lo + (hi - lo) * j / n; }
+const yOf = u => { const [lo, hi] = uRange(); return map.height - PAD.b - ((u - lo) / (hi - lo)) * (map.height - PAD.t - PAD.b); };
+const HofX = x => HMAX * (x - PAD.l) / (map.width - PAD.l - PAD.r);
+const UofY = y => { const [lo, hi] = uRange(); return lo + (hi - lo) * (map.height - PAD.b - y) / (map.height - PAD.t - PAD.b); };
+function uPoint(){ return yAxis() === "Vc" ? Math.log10(val("Vc")) : val("Vl"); }
+
+let noiseCache = { key: null, rows: [] }, noiseTimer = null;
+
+function sideAt(H, u){ return yAxis() === "Vc" ? side({ H, V_c: -Math.pow(10, u) }) : side({ H, V_l: -u }); }
+function cellsAt(H, u){ return M.symmetric(world(), sideAt(H, u), race()); }
+function cellsHere(H){ return M.symmetric(world(), side({ H }), race()); }   // at the sliders' V_c and V_l
+
+function roots(f, n){ // sign changes of f over H in (0,1)
+  const out = []; let prev = f(0.0005), hp = 0.0005;
+  for (let i = 1; i <= n; i++) { const h = i / n - 0.0005 / 2; const v = f(h);
+    if ((prev < 0) !== (v < 0) && isFinite(prev) && isFinite(v)) out.push(hp + (h - hp) * prev / (prev - v));
+    prev = v; hp = h; }
+  return out;
+}
+
+// the three border fields sampled once on an nx × ny grid (H linear, u the y coordinate)
+function borderFields(nx, ny){
+  const n = (nx + 1) * (ny + 1), stag = new Float64Array(n), harm = new Float64Array(n), rd = new Float64Array(n), Hs = [], Vs = [];
+  for (let i = 0; i <= nx; i++) Hs.push(0.0005 + (i / nx) * (HMAX - 0.001));
+  for (let j = 0; j <= ny; j++) Vs.push(uAt(j, ny));
+  for (let j = 0; j <= ny; j++) for (let i = 0; i <= nx; i++) { const k = j * (nx + 1) + i, U = cellsAt(Hs[i], Vs[j]);
+    stag[k] = U[0] - U[1]; harm[k] = U[2] - U[3]; rd[k] = (U[0] > U[1] && U[3] > U[2]) ? M.q_star(U) - 0.5 : NaN; }
+  return { nx, ny, Hs, Vs, stag, harm, rd };
+}
+// zero-contour segments of one sampled field, as [[H, u], [H, u]] pairs, by marching squares;
+// cells with a NaN corner are skipped
+function contour(g, f){
+  const { nx, ny, Hs, Vs } = g;
+  const segs = [];
+  const cut = (a, b, fa, fb) => [a[0] + (b[0] - a[0]) * fa / (fa - fb), a[1] + (b[1] - a[1]) * fa / (fa - fb)];
+  for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) {
+    const fv = [f[j * (nx + 1) + i], f[j * (nx + 1) + i + 1], f[(j + 1) * (nx + 1) + i + 1], f[(j + 1) * (nx + 1) + i]];
+    if (!fv.every(isFinite)) continue;
+    const pts = [[Hs[i], Vs[j]], [Hs[i + 1], Vs[j]], [Hs[i + 1], Vs[j + 1]], [Hs[i], Vs[j + 1]]];
+    const xs = [];
+    for (let k = 0; k < 4; k++) { const a = fv[k], b = fv[(k + 1) % 4]; if ((a < 0) !== (b < 0)) xs.push(cut(pts[k], pts[(k + 1) % 4], a, b)); }
+    if (xs.length === 2) segs.push([xs[0], xs[1]]);
+    else if (xs.length === 4) { // saddle: pair edges by the sign of the cell's centre
+      const mid = (fv[0] + fv[1] + fv[2] + fv[3]) / 4;
+      if ((mid < 0) === (fv[0] < 0)) segs.push([xs[0], xs[1]], [xs[2], xs[3]]); else segs.push([xs[0], xs[3]], [xs[1], xs[2]]); } }
+  return segs;
+}
+
+// "V" with a subscript, centred like fillText
+function subText(g, a, sub, rest, x, y){ const f = g.font; const wa = g.measureText(a).width, wr = g.measureText(rest).width;
+  g.font = "9px sans-serif"; const ws = g.measureText(sub).width; g.font = f;
+  let x0 = x - (wa + ws + wr) / 2; g.textAlign = "left"; g.fillText(a, x0, y); x0 += wa;
+  g.font = "9px sans-serif"; g.fillText(sub, x0, y + 3); x0 += ws; g.font = f; g.fillText(rest, x0, y); g.textAlign = "center"; }
+
+function drawMap(){
+  fitCanvas(map, 900, (map.getBoundingClientRect().width || 900) < 600 ? 0.85 : 620/900);
+  const c = colors(); const W = map.width, Hh = map.height;
+  mctx.fillStyle = c.bg; mctx.fillRect(0,0,W,Hh);
+  // regions
+  const nx = 220, ny = 150;
+  const pw = (W - PAD.l - PAD.r) / nx, ph = (Hh - PAD.t - PAD.b) / ny;
+  for (let j = 0; j < ny; j++) { const u = uAt(j + .5, ny);
+    for (let i = 0; i < nx; i++) { const H = HMAX * (i + .5) / nx;
+      const t = M.game_type(cellsAt(H, u));
+      const x0 = PAD.l + i * pw, y0 = Hh - PAD.b - (j + 1) * ph;
+      mctx.fillStyle = hexa(c[t], 0.13); mctx.fillRect(x0, y0, pw + .6, ph + .6);
+      if (t === "Prisoner's Dilemma") { mctx.strokeStyle = hexa(c[t], 0.6); mctx.lineWidth = 1; mctx.beginPath(); mctx.moveTo(x0, y0 + ph); mctx.lineTo(x0 + pw, y0); mctx.stroke(); } } }
+  // grid + axes
+  mctx.strokeStyle = c.grid; mctx.lineWidth = 1; mctx.font = "12px sans-serif"; mctx.fillStyle = c.ink2;
+  const tick = W < 600 ? 0.2 : 0.1;
+  for (let p = 0; p <= HMAX + 0.0001; p += 0.1) { const x = xOf(p); mctx.beginPath(); mctx.moveTo(x, PAD.t); mctx.lineTo(x, Hh - PAD.b); mctx.stroke();
+    if (Math.round(p * 100) % Math.round(tick * 100) === 0) { mctx.textAlign = "center"; mctx.fillText(Math.round(p*100) + "%", x, Hh - PAD.b + 16); } }
+  const ticks = yAxis() === "Vc" ? [1,2,3,5,10,20,30,50,100].map(v => [Math.log10(v), String(v)]) : [-1,-0.5,0,0.5,1,1.5,2].map(v => [v, v.toFixed(1)]);
+  for (const [u, lab] of ticks) { const y = yOf(u); const zero = yAxis() === "Vl" && u === 0;   // V_l = 0: a safe loss is level with no ASI
+    mctx.strokeStyle = zero ? c.ink3 : c.grid; mctx.lineWidth = zero ? 1.5 : 1; mctx.beginPath(); mctx.moveTo(PAD.l, y); mctx.lineTo(W - PAD.r, y); mctx.stroke();
+    mctx.textAlign = "right"; mctx.fillText(lab, PAD.l - 6, y + 4); }
+  mctx.strokeStyle = c.grid; mctx.lineWidth = 1;
+  mctx.textAlign = "center"; mctx.fillStyle = c.ink; mctx.fillText("H, frontier's loss-of-control hazard upon completion", (PAD.l + W - PAD.r) / 2, Hh - 8);
+  mctx.save(); mctx.translate(14, (PAD.t + Hh - PAD.b) / 2); mctx.rotate(-Math.PI/2); if (yAxis() === "Vc") subText(mctx, "V", "c", ", cost of catastrophe", 0, 0); else subText(mctx, "V", "l", ", cost of a safe loss", 0, 0); mctx.restore();
+  // lines, per |Vc| row
+  const fields = borderFields(360, 200);
+  // per-row crossings of each field, from the same samples (for the fade and the labels)
+  const rowRoots = f => { const out = []; for (let j = 0; j <= fields.ny; j++) { const hs = [];
+    for (let i = 1; i <= fields.nx; i++) { const a = f[j * (fields.nx + 1) + i - 1], b = f[j * (fields.nx + 1) + i];
+      if (isFinite(a) && isFinite(b) && (a < 0) !== (b < 0)) hs.push(fields.Hs[i - 1] + (fields.Hs[i] - fields.Hs[i - 1]) * a / (a - b)); }
+    out.push([fields.Vs[j], hs]); } return out; };
+  const series = { stag: rowRoots(fields.stag), harm: rowRoots(fields.harm), rd: rowRoots(fields.rd) };
+  // each border is the zero contour of a field over (H, log Vc), traced by marching squares, so
+  // a border that crosses a row more than once (a spike, a loop) keeps its branches apart
+  const drawContour = (field, dash, width, col) => { mctx.strokeStyle = col; mctx.lineWidth = width; mctx.setLineDash(dash); mctx.lineCap = "round";
+    mctx.beginPath(); for (const [[h0, v0], [h1, v1]] of contour(fields, field)) { mctx.moveTo(xOf(h0), yOf(v0)); mctx.lineTo(xOf(h1), yOf(v1)); } mctx.stroke();
+    mctx.setLineDash([]); };
+  drawContour(fields.stag, [], 2, c.ink);
+  drawContour(fields.harm, [8,6], 2, c.ink);
+  drawContour(fields.rd, [], 1.2, c.ink3);
+  if ($("verify").checked) {
+    // the victim's switch: left of the line a side that discovers a cheat L ahead races back from
+    // behind; right of it, it keeps its action and leaves the cheater's project as the only new hazard
+    const r = race(), coop = world();
+    const victimGain = (H, u, L) => { const s = sideAt(H, u); const hz = { B: H, S: s.H_S, P: 0 };
+      const stay = coop === "P" ? M.race_payoff(0, s, 0, H) : M.race_payoff(M.p_win(-r.lag_S, r.race_noise), s, hz.S, H);
+      return M.race_payoff(M.p_win(-L, r.race_noise), s, H, H) - stay; };
+    const sample = fn => { const nx = 240, ny = 140, Hs = [], Vs = [], f = new Float64Array((nx + 1) * (ny + 1));
+      for (let i = 0; i <= nx; i++) Hs.push(0.0005 + (i / nx) * (HMAX - 0.001));
+      for (let j = 0; j <= ny; j++) Vs.push(uAt(j, ny));
+      for (let j = 0; j <= ny; j++) for (let i = 0; i <= nx; i++) f[j * (nx + 1) + i] = fn(Hs[i], Vs[j]);
+      return { nx, ny, Hs, Vs, f }; };
+    const gC = sample((H, u) => victimGain(H, u, r.lead_detected)), gO = sample((H, u) => victimGain(H, u, r.lead_open));
+    mctx.lineCap = "butt";
+    mctx.strokeStyle = c.ink2; mctx.lineWidth = 1.2; mctx.setLineDash([2, 4]); mctx.beginPath();
+    for (const [[h0, v0], [h1, v1]] of contour(gC, gC.f)) { mctx.moveTo(xOf(h0), yOf(v0)); mctx.lineTo(xOf(h1), yOf(v1)); } mctx.stroke();
+    mctx.strokeStyle = c.ink3; mctx.setLineDash([1, 5]); mctx.beginPath();
+    for (const [[h0, v0], [h1, v1]] of contour(gO, gO.f)) { mctx.moveTo(xOf(h0), yOf(v0)); mctx.lineTo(xOf(h1), yOf(v1)); } mctx.stroke();
+    mctx.setLineDash([]); }
+  if ($("noise").checked && noiseCache.key === stateKey()) {
+    // fade the survival lines left of the Stag line: an estimate can rationally sit below it by up to
+    // half the noise width, and beyond that the clipped-at-zero model is not to be trusted
+    const stagAt = u => { let best = null; for (const [v, hs] of series.stag) if (hs.length && (best === null || Math.abs(v - u) < Math.abs(best[0] - u))) best = [v, hs[0]]; return best ? best[1] : 0; };
+    const fade = (h, u) => { const d = stagAt(u) - h; return d <= 0 ? 1 : Math.max(0, 1 - d / (val("sigma") / 2)); };
+    const drawFaded = (rows, dash) => { mctx.lineWidth = 2; mctx.setLineDash(dash); mctx.lineCap = "round";
+      for (let j = 1; j < rows.length; j++) { if (!rows[j][1].length || !rows[j-1][1].length) continue; const h0 = rows[j-1][1][0], h1 = rows[j][1][0];
+        const a = Math.min(fade(h0, rows[j-1][0]), fade(h1, rows[j][0])); if (a <= 0) continue;
+        mctx.strokeStyle = hexa(c.noise, a); mctx.fillStyle = hexa(c.noise, a);
+        if (Math.abs(h1 - h0) > val("sigma")) { mctx.beginPath(); mctx.arc(xOf(h1), yOf(rows[j][0]), 2, 0, 7); mctx.fill(); continue; }  // a jump: dot, don't join
+        mctx.beginPath(); mctx.moveTo(xOf(h0), yOf(rows[j-1][0])); mctx.lineTo(xOf(h1), yOf(rows[j][0])); mctx.stroke(); }
+      mctx.setLineDash([]); };
+    drawFaded(noiseCache.rows.lo, []); drawFaded(noiseCache.rows.hi, [8,6]); }
+  // label each q* border at its lowest point on the map, where the three curves are far apart
+  mctx.font = "12px sans-serif"; mctx.fillStyle = c.ink;
+  for (const [ser, lab] of [[series.stag, "q* = 1"], [series.rd, "q* = ½"], [series.harm, "q* = 0"]]) {
+    for (let j = 0; j < ser.length; j++) if (ser[j][1].length) { const h = ser[j][1][0]; const x = xOf(h), y = yOf(ser[j][0]);
+      const right = h > 0.85 * HMAX; mctx.textAlign = right ? "right" : "left"; mctx.fillText(lab, x + (right ? -6 : 6), Math.max(PAD.t + 12, y - 8)); break; } }
+  // point
+  const x = xOf(val("H")), y = yOf(uPoint());
+  mctx.fillStyle = c.bg; mctx.beginPath(); mctx.arc(x, y, 7, 0, 7); mctx.fill();
+  mctx.strokeStyle = c.ink; mctx.lineWidth = 2; mctx.setLineDash([]); mctx.beginPath(); mctx.arc(x, y, 7, 0, 7); mctx.stroke();
+}
+
+// ---------------------------------------------------------------- global game (finite noise)
+function globalGameRow(uy){
+  const r = race(), sg = val("sigma"), coop = world();
+  const nH = 401, nTheta = 161, grid = []; for (let x = -0.2; x <= 1.2001; x += 0.0025) grid.push(x);
+  const u = new Float64Array(nH), v = new Float64Array(nH);
+  for (let i = 0; i < nH; i++) { const U = M.symmetric(coop, sideAt(i / (nH-1), uy), r); u[i] = U[0]-U[1]; v[i] = U[2]-U[3]; }
+  const interp = (arr, t) => { const f = t * (nH-1), i = Math.min(nH-2, Math.floor(f)); return arr[i] + (arr[i+1]-arr[i]) * (f - i); };
+  const gain = (x, c) => { let s = 0; for (let k = 0; k < nTheta; k++) { const th = Math.min(1, Math.max(0, x + sg * (k/(nTheta-1) - 0.5)));
+    const q = Math.min(1, Math.max(0, (th + sg/2 - c) / sg)); s += q * interp(u, th) + (1-q) * interp(v, th); } return s / nTheta; };
+  const iterate = c0 => { let c = c0; for (let it = 0; it < 200; it++) { let cn = Infinity;
+    for (const x of grid) if (gain(x, c) >= 0) { cn = x; break; } if (cn === c) break; c = cn; } return c; };
+  return [iterate(-Infinity), iterate(Infinity)];   // from all-cooperate, from all-Build
+}
+function globalGameRows(){
+  const rowsN = 72, lo = [], hi = [];
+  for (let j = 0; j <= rowsN; j++) { const u = uAt(j, rowsN); const [a, b] = globalGameRow(u);
+    lo.push([u, (a > 0 && a < 1) ? [a] : []]); hi.push([u, (b > 0 && b < 1) ? [b] : []]); }
+  return { lo, hi };
+}
+function stateKey(){ return ids.filter(i => !["H","leadA","VcA","VcB","VlA","VlB", yAxis()].includes(i)).map(val).join("|") + world() + yAxis() + $("verify").checked; }
+function scheduleNoise(){ clearTimeout(noiseTimer); if (!$("noise").checked) return;
+  noiseTimer = setTimeout(() => { const key = stateKey(); if (noiseCache.key === key) return; noiseCache = { key, rows: globalGameRows() }; drawMap(); drawPanels(); }, 350); }
+
+// ---------------------------------------------------------------- panels
+function pct(h){ return isFinite(h) ? (100*h).toFixed(1) + "%" : "—"; }
+function drawPanels(){
+  const coop = world(), cname = coop === "P" ? "Pause" : "Slowed";
+  const U = cellsHere(val("H")); const q = M.q_star(U); const t = M.game_type(U);
+  const coopNash = U[0] >= U[1], buildNash = U[3] >= U[2];
+  const f = x => x.toFixed(3);
+  $("payoffs").innerHTML = `<h2>Payoff panel — H = ${pct(val("H"))}, V<sub>c</sub> = ${val("Vc").toFixed(2)}, V<sub>l</sub> = ${val("Vl").toFixed(2)}</h2>
+  <table class="pay"><tr><th></th><th>rival ${cname}s</th><th>rival Builds</th></tr>
+  <tr><th>I ${cname === "Pause" ? "Pause" : "Slow"}</th><td class="${coopNash?"nash":""}">${f(U[0])}</td><td>${f(U[2])}</td></tr>
+  <tr><th>I Build</th><td>${f(U[1])}</td><td class="${buildNash?"nash":""}">${f(U[3])}</td></tr></table>
+  <dl class="kv"><dt>game type</dt><dd>${t}</dd>
+  <dt>q*, belief needed that the rival ${cname === "Pause" ? "pauses" : "slows"}</dt><dd>${(q>=0&&q<=1)?q.toFixed(3):(U[0]>=U[1]?"0 (cooperating dominates)":"— (Build dominates)")}</dd>
+  <dt>deviation loss at (${coop},${coop}) / at (B,B)</dt><dd>${f(U[0]-U[1])} / ${f(U[3]-U[2])}</dd>
+  ${$("verify").checked ? (() => { const sd = M.punishment_to_deter(coop, side(), side(), race(), 0.0);
+     // the same punishment in the model's other stakes: a safe loss (sanctions-sized) and a catastrophe (annihilation-sized)
+     const inStakes = x => { const Vl = val("Vl"), Vc = val("Vc"); return `${x.toFixed(3)} safe wins = ${Vl > 0 ? (x / Vl).toFixed(2) + " × a safe loss" : "— (a safe loss costs nothing here)"} = ${(x / Vc).toFixed(3)} × a catastrophe`; };
+     return `<dt>defection punishment set</dt><dd>${inStakes(val("punishment"))}</dd>
+     <dt>punishment that would make (${coop},${coop}) an equilibrium here</dt><dd>${sd === null ? "none works (no detection and no open breakout to punish)" : sd === 0 ? "none needed" : inStakes(sd)}</dd>`; })() : ""}</dl>
+  <p class="note">Own action first. Outlined cells are the symmetric Nash equilibria. Risk dominance favours cooperation when its deviation loss is the larger one, i.e. q* &lt; ½.</p>`;
+  const Vc = val("Vc");
+  const stag = roots(H => { const U = cellsHere(H); return U[0]-U[1]; }, 2000);
+  const harm = roots(H => { const U = cellsHere(H); return U[2]-U[3]; }, 2000);
+  const rd = roots(H => { const U = cellsHere(H); const qq = M.q_star(U); return (U[0]>U[1]&&U[3]>U[2]) ? qq-0.5 : NaN; }, 2000);
+  const Umid = cellsHere(0.5);   // when a border is absent, which side of it the whole axis is on
+  let noise = "switched off";
+  if ($("noise").checked) { const [a, b] = globalGameRow(uPoint()); const show = x => (x > 0 && x < 1) ? pct(x) : x >= 1 ? "above 100% (never)" : "below 0% (always)";
+    noise = `${show(a)} starting from all-${cname === "Pause" ? "Pause" : "Slowed"}; ${show(b)} starting from all-Build`; }
+  $("lines").innerHTML = `<h2>Borders panel — V<sub>c</sub> = ${Vc.toFixed(2)}, V<sub>l</sub> = ${val("Vl").toFixed(2)}</h2><dl class="kv">
+  <dt>Stag: (${coop},${coop}) becomes Nash at H</dt><dd>${stag.length ? stag.map(pct).join(", ") : (Umid[0] >= Umid[1] ? "always" : "never")}</dd>
+  <dt>Harmony: ${cname} beats Build against a builder at H</dt><dd>${harm.length ? harm.map(pct).join(", ") : (Umid[2] >= Umid[3] ? "always" : "never")}</dd>
+  <dt>risk dominance (q* = ½) at H</dt><dd>${rd.length ? rd.map(pct).join(", ") : "—"}</dd>
+  <dt>finite-noise cutoff, σ = ${val("sigma")}</dt><dd>${noise}</dd></dl>
+  <canvas id="strip" class="strip" width="420" height="170"></canvas>
+  <p class="note">q* against H at this V<sub>c</sub> and V<sub>l</sub>: the belief that the rival ${cname === "Pause" ? "pauses" : "slows"} needed to ${cname === "Pause" ? "pause" : "slow"} too. Above 1, Build dominates; below 0, ${cname} dominates. The strip under the axis is the game type.</p>
+  <p class="note">${harm.length ? "" : `<span class="warn">No region where ${cname} is dominant</span>: with private noise, iterating from all-Build never reaches cooperation; selection only works for Build here. `}${coop==="P" && val("theta")===0 ? "With θ = 0 the frontier project settles everything, so a pauser's choice never changes the hazard and a true Pause has no dominant region; θ &gt; 0 supplies it." : ""}</p>`;
+  drawStrip(Vc);
+}
+
+// q* against H at the current V_c, so a step at the victim's switch shows as a step
+function drawStrip(Vc){
+  const cv = $("strip"); fitCanvas(cv, 420, 170/420); const g = cv.getContext("2d"), c = colors();
+  const W = cv.width, Hh = cv.height, L = 34, R = 10, T = 10, Bt = 36, bandH = 8;
+  const lo = -0.25, hi = 1.25;                       // q* axis range; values beyond are clipped
+  const x = H => L + (H / HMAX) * (W - L - R), y = q => T + (hi - Math.min(hi, Math.max(lo, q))) / (hi - lo) * (Hh - T - Bt);
+  g.clearRect(0, 0, W, Hh);
+  const n = 400, qs = [], types = [];
+  for (let i = 0; i < n; i++) { const H = HMAX * (i + .5) / n; const U = cellsHere(H); qs.push(M.q_star(U)); types.push(M.game_type(U)); }
+  for (let i = 0; i < n; i++) { g.fillStyle = hexa(c[types[i]], 0.5); g.fillRect(x(HMAX * i / n), Hh - Bt + 6, (W - L - R) / n + .6, bandH); }
+  g.font = "11px sans-serif"; g.fillStyle = c.ink2; g.strokeStyle = c.grid; g.lineWidth = 1;
+  for (const [q, lab] of [[1, "1"], [0.5, "½"], [0, "0"]]) { g.setLineDash(q === 0.5 ? [4, 4] : []); g.beginPath(); g.moveTo(L, y(q)); g.lineTo(W - R, y(q)); g.stroke();
+    g.textAlign = "right"; g.fillText(lab, L - 5, y(q) + 4); }
+  g.setLineDash([]);
+  for (let p = 0; p <= HMAX + 0.0001; p += 0.2) { g.textAlign = "center"; g.fillText(Math.round(p * 100) + "%", x(p), Hh - 4); }
+  g.textAlign = "left"; g.fillText("q*", 2, T + 4);
+  g.strokeStyle = c.ink; g.lineWidth = 1.8; g.lineJoin = "round"; g.beginPath(); let pen = false;
+  for (let i = 0; i < n; i++) { const q = qs[i], H = HMAX * (i + .5) / n;
+    if (!isFinite(q) || (i > 0 && isFinite(qs[i-1]) && Math.abs(q - qs[i-1]) > 0.6)) { pen = false; if (!isFinite(q)) continue; }
+    if (pen) g.lineTo(x(H), y(q)); else g.moveTo(x(H), y(q)); pen = true; }
+  g.stroke();
+  const xh = x(val("H")); g.strokeStyle = c.ink3; g.lineWidth = 1; g.setLineDash([2, 3]); g.beginPath(); g.moveTo(xh, T); g.lineTo(xh, Hh - Bt + 4); g.stroke(); g.setLineDash([]);
+}
+
+// ---------------------------------------------------------------- asymmetric
+const am = $("asym"), actx = am.getContext("2d");
+function drawAsym(){
+  fitCanvas(am, 620, 1);
+  const c = colors(); const W = am.width, Hh = am.height, P2 = { l: 58, r: 16, t: 14, b: 44 };
+  actx.fillStyle = c.bg; actx.fillRect(0,0,W,Hh);
+  const coop = world(), r = race(), lead = val("leadA");
+  const sA = o => side(Object.assign({ V_c: -val("VcA"), V_l: -val("VlA") }, o)), sB = o => side(Object.assign({ V_c: -val("VcB"), V_l: -val("VlB") }, o));
+  const n = 90, pw = (W - P2.l - P2.r) / n, ph = (Hh - P2.t - P2.b) / n;
+  // does each side have a cooperation-dominant region anywhere in H?
+  const hasDom = (mk, other, ld) => { for (let i = 1; i < 60; i++) { const H = i/60; const U = M.two_by_two(coop, mk({H}), other({H}), r, ld); if (U[2] > U[3]) return true; } return false; };
+  const domA = hasDom(sA, sB, lead), domB = hasDom(sB, sA, -lead);
+  for (let j = 0; j < n; j++) for (let i = 0; i < n; i++) { const HA = (i+.5)/n, HB = (j+.5)/n;
+    // each side judges every project by its own hazard estimate, so A's cells use H_A for B's project too
+    const UA = M.two_by_two(coop, sA({H:HA}), sB({H:HA}), r, lead), UB = M.two_by_two(coop, sB({H:HB}), sA({H:HB}), r, -lead);
+    // a side whose cooperation is dominant needs no belief at all (q* counts as 0); a side for
+    // whom Build is dominant can never be brought along (q* counts as 1)
+    const clip = q => Math.min(1, Math.max(0, isNaN(q) ? 1 : q));
+    const qA = clip(M.q_star(UA)), qB = clip(M.q_star(UB));
+    const coopNashBoth = UA[0]>=UA[1] && UB[0]>=UB[1];
+    const coopDomBoth = coopNashBoth && UA[2]>=UA[3] && UB[2]>=UB[3];
+    let fill = null;
+    if (coopDomBoth) fill = hexa(c["Harmony"], 0.35);
+    else if (coopNashBoth && qA + qB < 1) fill = hexa(c["Stag Hunt"], 0.15 + 0.6 * Math.min(1, (1 - qA - qB)));
+    if (fill) { actx.fillStyle = fill; actx.fillRect(P2.l + i*pw, Hh - P2.b - (j+1)*ph, pw+.6, ph+.6); } }
+  if (!domA || !domB) { actx.save(); actx.strokeStyle = hexa(c.ink3, 0.5); actx.lineWidth = 1; actx.beginPath();
+    for (let d = -Hh; d < W; d += 14) { actx.moveTo(P2.l + d, Hh - P2.b); actx.lineTo(P2.l + d + (Hh-P2.t-P2.b), P2.t); } actx.rect(P2.l, P2.t, W-P2.l-P2.r, Hh-P2.t-P2.b); actx.clip(); actx.stroke(); actx.restore(); }
+  actx.strokeStyle = c.grid; actx.font = "12px sans-serif"; actx.fillStyle = c.ink2;
+  for (let p = 0; p <= 1.0001; p += 0.1) { const x = P2.l + p*(W-P2.l-P2.r), y = Hh - P2.b - p*(Hh-P2.t-P2.b);
+    actx.beginPath(); actx.moveTo(x, P2.t); actx.lineTo(x, Hh-P2.b); actx.stroke(); actx.beginPath(); actx.moveTo(P2.l, y); actx.lineTo(W-P2.r, y); actx.stroke();
+    actx.textAlign = "center"; actx.fillText(Math.round(p*100)+"%", x, Hh-P2.b+16); actx.textAlign = "right"; actx.fillText(Math.round(p*100)+"%", P2.l-6, y+4); }
+  actx.fillStyle = c.ink; actx.textAlign = "center"; actx.fillText("A's estimate of H", (P2.l+W-P2.r)/2, Hh-8);
+  actx.save(); actx.translate(14, (P2.t+Hh-P2.b)/2); actx.rotate(-Math.PI/2); actx.fillText("B's estimate of H", 0, 0); actx.restore();
+  $("asymNote").innerHTML = `p<sub>w,A</sub>(0) = ${M.p_win(lead, val("rn")).toFixed(2)}. ` +
+    (domA && domB ? "Both sides have a region where cooperating is dominant." : `<span class="warn">${!domA && !domB ? "Neither side" : !domA ? "Side A" : "Side B"} has a region where cooperating is dominant</span>, so the shaded selection rule is not backed by the global-games uniqueness argument there (hatched).`);
+}
+
+// ---------------------------------------------------------------- wiring
+function syncOutputs(){ for (const id of ids) document.querySelector(`output[for=${id}]`).value = fmt(id, val(id));
+  const stop = world() === "P"; $("resumeRow").classList.toggle("off", !stop);
+  // Slowed's dials matter in the stop world only through a Pause that resumes as (S,S)
+  const slowedOff = stop && val("resume") === 0;
+  for (const el of document.querySelectorAll(".ctl.s")) el.classList.toggle("off", slowedOff);
+  $("noiseHint").classList.toggle("off", !$("noise").checked);
+  $("rnRow").classList.toggle("off", stop && !$("verify").checked);
+  for (const el of document.querySelectorAll(".ctl.v")) el.classList.toggle("off", !$("verify").checked);
+  for (const el of document.querySelectorAll(".ctl.n")) el.classList.toggle("off", !$("noise").checked);
+  $("noiseLegend").classList.toggle("hidden", !$("noise").checked);
+  $("verifLegend").classList.toggle("hidden", !$("verify").checked); }
+function redraw(){ syncOutputs(); drawMap(); drawPanels(); drawAsym(); scheduleNoise(); }
+for (const id of ids) $(id).addEventListener("input", redraw);
+for (const el of document.querySelectorAll("#slow, #verify, #noise, #yaxis input")) el.addEventListener("change", redraw);
+let resizeTimer = null; window.addEventListener("resize", () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(() => { drawMap(); drawPanels(); drawAsym(); }, 150); });
+map.addEventListener("click", e => { const rect = map.getBoundingClientRect(); const x = (e.clientX-rect.left) * map.width/rect.width, y = (e.clientY-rect.top) * map.height/rect.height;
+  const [lo, hi] = uRange(); const H = Math.min(HMAX, Math.max(0.005, HofX(x))), u = Math.min(hi, Math.max(lo, UofY(y)));
+  $("H").value = H.toFixed(3); $(yAxis()).value = u.toFixed(3); redraw(); });
+const set = (id, v) => { $(id).value = logIds.has(id) ? Math.log10(v) : v; };
+const presets = {
+  papMain: () => { $("slow").checked = false; set("H",0.11); set("Vc",9); set("Vl",1); set("theta",0); set("HS",0); set("lagS",0.15); set("rn",0.1); set("resume",0); $("verify").checked = false; },
+  papApp: () => { presets.papMain(); set("theta",0.5); },
+  roussel: () => { $("slow").checked = true; set("H",0.15); set("Vc",3); set("Vl",0); set("theta",0); set("HS",0); set("lagS",0.15); set("rn",0.1); set("resume",0); $("verify").checked = false; },
+  verif: () => { presets.papMain(); set("theta",0.5); $("verify").checked = true; resetVerif(); },
+  // the 2026-10-30 blog figures: toggle Verification to compare (docs/results/20261030_blog_verification_figures.md)
+  blog: () => { presets.papMain(); set("H",0.15); set("Vc",5.69); set("theta",0.15); set("eps",0.9); set("alpha",0.05); set("ldet",0.1); set("lopen",0.1); set("punishment",0.01); $("noise").checked = false; document.querySelector('input[name=yaxis][value=Vc]').checked = true; },
+};
+const resetVerif = () => { set("eps",0.8); set("alpha",0.02); set("ldet",0.04); set("lopen",0.1); set("punishment",0.5); };
+for (const b of document.querySelectorAll("[data-preset]")) b.addEventListener("click", () => { presets[b.dataset.preset](); redraw(); });
+redraw();
+})();
+</script>
+</body>
+</html>
